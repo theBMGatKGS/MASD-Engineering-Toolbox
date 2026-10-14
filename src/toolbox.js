@@ -61,44 +61,61 @@ function tbEnsureCfg(d){
 }
 
 /* ---------------- Performance Criteria ---------------- */
-function tbPerf(){ const c = tbCarry(); if (!c.performance) c.performance = MLP.perfBlank(); return c.performance; }
+function tbPerf(){ const c = tbCarry(); if (!c.performance) c.performance = MLP.perfBlank(); MLP.perfMigrate(c.performance); return c.performance; }
 function tbPerfClassesUsed(){ const set = new Set(); Object.values(tbCfgStore()).forEach(c => { if (c.perfClass) set.add(c.perfClass); }); tbDevices().forEach(d => { const g = tbClassGuess(d); if (g) set.add(g); }); return MLP.PERF_CLASSES.filter(c => set.has(c)); }
+const TB_TBD = '<span class="tb-tbd">engineer to define</span>';
 function tbPerfLimTable(o, scope){
-  const ul = o.basis === 'UL' || (scope === '' && o.market === 'UL'); const L = ul ? MLP.perfUlLimits() : (o.limits || {});
-  return `<table class="tb-io"><thead><tr><th>Class</th><th>Max hole sensitivity (%obs/ft, &lt;)</th><th>Max transport (s, &lt;)</th><th>Reference</th><th>Confirmed</th></tr></thead><tbody>${MLP.PERF_CLASSES.map(c => { const l = L[c] || {};
-    const at = k => `data-tb-perf-lim="${c}" data-scope="${tbEsc(scope)}" data-k="${k}"`;
-    return ul ? `<tr><td><b>${c === 'SFD' ? 'SFD / OAP' : c}</b></td><td>&lt;${l.sens}</td><td>&lt;${l.tt}</td><td><small>${tbEsc(l.ref)}</small></td><td>✓ UL</td></tr>`
-      : `<tr${l.confirmed ? '' : ' class="err"'}><td><b>${c === 'SFD' ? 'SFD / OAP' : c}</b> ${l.src === 'prefill' ? '<span class="tb-src tb-src-manual" title="Prefilled from a cited source — confirm">cited prefill</span>' : ''}</td><td><input ${at('sens')} inputmode="decimal" value="${tbEsc(l.sens ?? '')}"></td><td><input ${at('tt')} inputmode="decimal" value="${tbEsc(l.tt ?? '')}"></td><td><input ${at('ref')} placeholder="Code/section or document" value="${tbEsc(l.ref || '')}"></td><td><input type="checkbox" ${at('confirmed')}${l.confirmed ? ' checked' : ''}></td></tr>`; }).join('')}</tbody></table>`;
+  const ul = MLP.perfIsUl(o.standard); const L = ul ? MLP.perfUlLimits(o.ulConfirmed) : (o.limits || {}); const pc = (MLP.perfPreset(o.standard) || {}).cls;
+  return `<table class="tb-io"><thead><tr><th>Class</th><th>Max hole sensitivity (%obs/ft, &lt;)</th><th>Max transport (s, ≤)</th><th>Reference</th><th>Confirmed</th></tr></thead><tbody>${MLP.PERF_CLASSES.map(c => { const l = L[c] || {};
+    const at = k => `data-tb-perf-lim="${c}" data-scope="${tbEsc(scope)}" data-k="${k}"`; const nm = `<b>${c === 'SFD' ? 'SFD / OAP' : c}</b>${pc === c ? ' <span class="tb-src tb-src-design">preset class</span>' : ''}`;
+    return ul ? `<tr><td>${nm}</td><td>&lt;${l.sens}</td><td>≤${l.tt}</td><td><small>${tbEsc(l.ref)}</small></td><td>${l.confirmed ? '✓ UL 268 confirmed' : 'confirm UL 268 above'}</td></tr>`
+      : `<tr${l.confirmed ? '' : ' class="err"'}><td>${nm} ${l.src === 'prefill' ? '<span class="tb-src tb-src-manual" title="Prefilled from a cited source — confirm">cited prefill</span>' : (l.sens == null || l.tt == null ? TB_TBD : '')}</td><td><input ${at('sens')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.sens ?? '')}"></td><td><input ${at('tt')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.tt ?? '')}"></td><td><input ${at('ref')} placeholder="Code/section or document" value="${tbEsc(l.ref || '')}"></td><td><input type="checkbox" ${at('confirmed')}${l.confirmed ? ' checked' : ''}></td></tr>`; }).join('')}</tbody></table>`;
 }
-function tbBasisSel(o, scope, withUl){ return `<label class="tb-f"><span class="lb">Basis</span><select data-tb-perf-k="basis" data-scope="${tbEsc(scope)}"><option value=""></option>${MLP.PERF_BASES.filter(b => withUl || b !== 'UL').map(b => `<option${o.basis === b ? ' selected' : ''}>${b}</option>`).join('')}</select></label>${o.basis === 'Other' || o.basis === 'Custom' ? `<label class="tb-f"><span class="lb">Describe basis</span><input data-tb-perf-k="basisOther" data-scope="${tbEsc(scope)}" value="${tbEsc(o.basisOther || '')}"></label>` : ''}`; }
+function tbCodeReqTable(o, scope){
+  const R = o.codeReqs || []; if (!R.length) return '';
+  return `<table class="tb-io tb-codereq"><thead><tr><th>Code prescription</th><th>Requirement</th><th>Reference</th><th>Confirmed</th></tr></thead><tbody>${R.map((r, i) => { const at = k => `data-tb-perf-req="${i}" data-scope="${tbEsc(scope)}" data-k="${k}"`;
+    return `<tr${r.confirmed ? '' : ' class="err"'}><td>${tbEsc(r.item)} ${r.src === 'cited' ? '<span class="tb-src tb-src-manual">cited prefill</span>' : (String(r.value || '').trim() ? '' : TB_TBD)}</td><td><input ${at('value')} placeholder="engineer to define" value="${tbEsc(r.value || '')}"></td><td><input ${at('ref')} placeholder="Code/section" value="${tbEsc(r.ref || '')}"></td><td><input type="checkbox" ${at('confirmed')}${r.confirmed ? ' checked' : ''}></td></tr>`; }).join('')}</tbody></table>`;
+}
+function tbStdSel(o, scope){
+  const fam = { NFPA: 'NFPA (UL 268 thresholds + code)', FM: 'FM Global data sheets (FM only)', BS: 'British Standards', Custom: 'Custom' };
+  const opts = Object.keys(fam).map(f => `<optgroup label="${fam[f]}">${MLP.PERF_PRESETS.filter(p => p.family === f).map(p => `<option value="${tbEsc(p.id)}"${o.standard === p.id ? ' selected' : ''}>${tbEsc(p.id)}</option>`).join('')}</optgroup>`).join('');
+  return `<label class="tb-f"><span class="lb">Referenced standard</span><select data-tb-perf-k="standard" data-scope="${tbEsc(scope)}">${scope ? '<option value=""></option>' : ''}${opts}</select></label>${o.standard === 'Custom' ? `<label class="tb-f"><span class="lb">Custom standard name</span><input data-tb-perf-k="standardOther" data-scope="${tbEsc(scope)}" value="${tbEsc(o.standardOther || '')}"></label>` : ''}`;
+}
+function tbStdNote(o, scope){
+  const p = MLP.perfPreset(o.standard); if (!p) return '';
+  if (p.family === 'NFPA') return `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulConfirmed" data-scope="${tbEsc(scope || '')}"${o.ulConfirmed ? ' checked' : ''}> <b>Engineer confirms: ${MLP.UL_STATEMENT}</b></label> ${o.ulConfirmed ? '<span class="tb-ok">confirmed — printed</span>' : '<span class="tb-msg err">not confirmed — the UL 268 statement will not print</span>'}<br><small>${tbEsc(p.code)} preset: UL 268, 7th Ed. thresholds apply (Install Manual App. A, printed p.113): hole sensitivity strictly less than VEWFD 1.0 (Special Application Range 1) / EWFD 1.5 (Special Application Range 2; 1.5 from NFPA 76) / SFD-OAP 2.18 %obs/ft (Open Area), transport time no more than 60 / 43 / 43 s — plus the code's prescriptions below.</small></div>`;
+  if (p.family === 'FM') return `<p class="tb-note">${tbEsc(p.code)}: FM requirements only — not UL, no UL 268 statement. Hole limits prefilled from FM Class 3230 per the Install Manual App. A p.113; confirm them and define the data-sheet prescriptions.</p>`;
+  if (p.family === 'BS') return `<p class="tb-note">${tbEsc(p.code)} (mirrors the Battery Calculator design basis). No cited ASD hole/transport values are on file — every value is engineer to define, with its reference (e.g. BS 5839-1 / EN 54-20 class).</p>`;
+  return '<p class="tb-note">Custom: name the standard; every value is engineer to define, with its reference.</p>';
+}
 function tbPerfHtml(){
-  const P = tbPerf(), iss = MLP.perfIssues(P), ul = P.market === 'UL';
+  const P = tbPerf(), iss = MLP.perfIssues(P);
   if (!P.narrative && !P.narrativeEdited){ P.narrative = MLP.perfDraft(P, tbPerfClassesUsed()); P.narrativeDraft = P.narrative; }
   const areas = Array.from(new Set(tbDevices().map(d => d.area).filter(Boolean)));
-  const ov = areas.map(a => { const o = (P.areas || {})[a] || {}; return `<div class="tb-area-ov"><label><input type="checkbox" data-tb-perf-area="${tbEsc(a)}"${o.enabled ? ' checked' : ''}> Override for Area/Group <b>${tbEsc(a)}</b></label>${o.enabled ? `<div class="tb-row">${tbBasisSel(o, a, true)}</div>${tbPerfLimTable(o, a)}` : ''}</div>`; }).join('');
+  const ov = areas.map(a => { const o = (P.areas || {})[a] || {}; return `<div class="tb-area-ov"><label><input type="checkbox" data-tb-perf-area="${tbEsc(a)}"${o.enabled ? ' checked' : ''}> Override for Area/Group <b>${tbEsc(a)}</b></label>${o.enabled ? `<div class="tb-row">${tbStdSel(o, a)}</div>${tbStdNote(o, a)}${o.standard ? tbPerfLimTable(o, a) + tbCodeReqTable(o, a) : ''}` : ''}</div>`; }).join('');
   return `<section class="tb-perf" id="tb-perf"><div class="tb-sec">Performance Criteria ${iss.length ? `<span class="tb-msg err">— ${iss.length} item${iss.length === 1 ? '' : 's'} to define; Export project is blocked</span>` : '<span class="tb-ok">— defined</span>'}</div>
-    <div class="tb-row"><label class="tb-f"><span class="lb">Standards basis (project)</span><select data-tb-perf-k="market" data-scope=""><option value="UL"${ul ? ' selected' : ''}>UL — US default</option><option value="other"${ul ? '' : ' selected'}>FM / NFPA 75 / 76 / 318 / other / custom</option></select></label>
-    ${ul ? `<div class="tb-ulstate"><b>${MLP.UL_STATEMENT}</b><br><small>UL least-sensitive hole limits enforced (SFD/OAP 2.18 %obs/ft overrides the manual's FM 2.50).</small></div>` : tbBasisSel(P, '', false)}
+    <div class="tb-row">${tbStdSel(P, '')}
     <label class="tb-f"><span class="lb">Engineer of Record</span><input data-tb-perf-k="eorName" data-scope="" value="${tbEsc(P.eorName || '')}"></label>
     <label class="tb-f"><span class="lb">Specification reference</span><input data-tb-perf-k="specRef" data-scope="" placeholder="e.g. Section 28 31 00, 2.4.B" value="${tbEsc(P.specRef || '')}"></label></div>
-    ${!ul ? '<p class="tb-note">Only values with a source are prefilled (FM: App. A p.113; NFPA 76 VEWFD: per NFPA 76 as summarized in Honeywell ASAG44201 Table 1). Blank values were not found in a source — enter them with their reference. Each class must be confirmed.</p>' : ''}
-    ${tbPerfLimTable(P, '')}
+    ${tbStdNote(P, '')}
+    ${tbPerfLimTable(P, '')}${tbCodeReqTable(P, '')}
     ${areas.length ? `<details${Object.values(P.areas || {}).some(o => o.enabled) ? ' open' : ''}><summary>Per-Area/Group overrides (optional)</summary>${ov}</details>` : ''}
-    <label class="tb-f" style="margin-top:8px"><span class="lb">Performance narrative (auto-drafted from the selections — edit to match the Engineer of Record's published intent; printed on the summary page)</span><textarea data-tb-perf-k="narrative" data-scope="" rows="4">${tbEsc(P.narrative || '')}</textarea></label>
+    <label class="tb-f" style="margin-top:8px"><span class="lb">Performance narrative (auto-drafted from the selections and naming the referenced standard — edit to match the Engineer of Record's published intent; printed on the summary page)</span><textarea data-tb-perf-k="narrative" data-scope="" rows="4">${tbEsc(P.narrative || '')}</textarea></label>
     <div class="tb-row"><button class="btn" data-tb="perf-draft">Re-draft from selections</button>${P.narrativeEdited ? '<span class="tb-ok">edited by the engineer</span>' : '<span class="tb-warn">draft — edit or confirm</span>'}<label><input type="checkbox" data-tb-perf-k="narrativeConfirmed" data-scope=""${P.narrativeConfirmed ? ' checked' : ''}> Narrative confirmed by the engineer</label></div>
     ${iss.length ? `<ul class="tb-issues">${iss.map(i => `<li class="tb-err">${tbEsc(i)}</li>`).join('')}</ul>` : ''}</section>`;
 }
 function tbOnPerfInput(el){
   const P = tbPerf(); P.areas = P.areas || {};
   const scope = el.dataset.scope || ''; const O = scope ? (P.areas[scope] = P.areas[scope] || { enabled: true }) : P;
-  if (el.dataset.tbPerfArea != null){ const a = el.dataset.tbPerfArea; P.areas[a] = Object.assign(P.areas[a] || { basis: '', limits: {} }, { enabled: el.checked }); }
+  if (el.dataset.tbPerfArea != null){ const a = el.dataset.tbPerfArea; P.areas[a] = Object.assign(P.areas[a] || { standard: '', limits: {}, codeReqs: [] }, { enabled: el.checked }); }
   else if (el.dataset.tbPerfK){ const k = el.dataset.tbPerfK, v = el.type === 'checkbox' ? el.checked : el.value; O[k] = v;
-    if (k === 'market'){ if (v === 'UL'){ P.basis = 'UL'; P.limits = MLP.perfUlLimits(); } else { P.basis = ''; P.limits = MLP.perfPrefill(''); } }
-    if (k === 'basis'){ O.limits = O.basis === 'UL' ? MLP.perfUlLimits() : MLP.perfPrefill(v); }
-    if (k === 'narrative'){ P.narrativeEdited = v !== P.narrativeDraft; P.narrativeConfirmed = false; }
-    if (k !== 'narrative' && k !== 'narrativeConfirmed' && !P.narrativeEdited){ P.narrative = MLP.perfDraft(P, tbPerfClassesUsed()); P.narrativeDraft = P.narrative; } }
+    if (k === 'standard') MLP.perfScopeInit(O, v);
+    if (k === 'narrative'){ P.narrativeEdited = v !== P.narrativeDraft; P.narrativeConfirmed = false; } }
   else if (el.dataset.tbPerfLim){ O.limits = O.limits || {}; const l = O.limits[el.dataset.tbPerfLim] = O.limits[el.dataset.tbPerfLim] || MLP.perfLimitBlank(); const k = el.dataset.k;
     if (k === 'confirmed') l.confirmed = el.checked; else { l[k] = k === 'ref' ? el.value : (el.value === '' ? null : Number(el.value)); l.confirmed = false; if (k !== 'ref') l.src = 'engineer'; } }
+  else if (el.dataset.tbPerfReq != null){ const r = (O.codeReqs || [])[+el.dataset.tbPerfReq]; if (r){ const k = el.dataset.k; if (k === 'confirmed') r.confirmed = el.checked; else { r[k] = el.value; r.confirmed = false; if (k === 'value') r.src = 'engineer'; } } }
+  const k = el.dataset.tbPerfK; if (k !== 'narrative' && k !== 'narrativeConfirmed' && !P.narrativeEdited){ P.narrative = MLP.perfDraft(P, tbPerfClassesUsed()); P.narrativeDraft = P.narrative; }
+  P.market = MLP.perfIsUl(P.standard) ? 'UL' : 'other';
   P.statement = MLP.perfStatement(P); P.definedBy = (document.getElementById('prepared-by-input') || {}).value || ''; P.definedAt = new Date().toISOString(); tbTouch();
 }
 /* ---------------- validation ---------------- */
@@ -116,7 +133,7 @@ function tbCfgIssues(d, c, fa){
     const lv = ['alert', 'action', 'fire1', 'fire2'].map(k => tbNum(v[k]));
     lv.forEach((n, i) => { if (n != null && isNaN(n)) err(['alert', 'action', 'fire1', 'fire2'][i], 'Not a number'); });
     for (let i = 1; i < 4; i++) if (tbOk(lv[i]) && tbOk(lv[i - 1]) && lv[i] <= lv[i - 1]) err(['alert', 'action', 'fire1', 'fire2'][i], 'Alarm levels must rise: Alert < Prealarm < Fire 1 < Fire 2');
-    const PL = MLP.perfLimits(tbPerf()) || {}; const lim = (PL[c.perfClass] && Number(PL[c.perfClass].sens)) || null; if (lim != null && tbOk(lv[2]) && lv[2] >= lim) warn('fire1', `Fire 1 ${lv[2]} is not below the ${c.perfClass} hole-sensitivity limit (<${lim.toFixed(2)} %obs/ft, Performance Criteria) — the limit applies to sampling holes; confirm the alarm setting`);
+    const PL = MLP.perfLimits(tbPerf(), d.area) || {}; const lim = (PL[c.perfClass] && Number(PL[c.perfClass].sens)) || null; if (lim != null && tbOk(lv[2]) && lv[2] >= lim) warn('fire1', `Fire 1 ${lv[2]} is not below the ${c.perfClass} hole-sensitivity limit (<${lim.toFixed(2)} %obs/ft, Performance Criteria) — the limit applies to sampling holes; confirm the alarm setting`);
   }
   MLP.CONFIG_FIELDS.forEach(f => { if (f.kind !== 'num') return; const n = tbNum(v[f.k]); if (n == null) return; if (isNaN(n)) { err(f.k, 'Not a number'); return; }
     if ((f.min != null && n < f.min) || (f.max != null && n > f.max)) err(f.k, `${f.label} must be ${f.min}–${f.max}${f.unit ? ' ' + f.unit : ''}`); });
@@ -380,8 +397,8 @@ function tbRenderChangesBadge(){ const n = tbChanges().filter(c => c.status === 
 function tbShowChanges(){
   const ch = tbChanges(), ap = tbApprovals(); const me = (document.getElementById('prepared-by-input') || {}).value || '';
   const appr = TB_ROLES.map(([r, lbl]) => { const a = ap[r] || {}; const ro = r === 'technician';
-    return `<tr><td><b>${tbEsc(lbl)}</b></td><td>${ro ? tbEsc(a.name || '—') : `<input data-tb-ap="${r}" data-k="name" value="${tbEsc(a.name || (r === 'designer' ? me : ''))}">`}</td><td>${ro ? tbEsc(a.date || '—') : `<input type="date" data-tb-ap="${r}" data-k="date" value="${tbEsc(a.date || '')}">`}</td>
-      <td>${ro ? tbEsc(a.status || '—') : `<select data-tb-ap="${r}" data-k="status">${['', 'pending', 'approved', 'rejected'].map(s => `<option${a.status === s ? ' selected' : ''}>${s}</option>`).join('')}</select>`}</td></tr>`; }).join('');
+    return `<tr><td><b>${tbEsc(lbl)}</b></td><td>${ro ? tbEsc(a.name || '—') : `<input data-tb-ap="${r}" data-k="name" placeholder="Full name (required)" value="${tbEsc(a.name || (r === 'designer' ? me : ''))}">`}</td><td>${tbEsc(a.date || '—')}</td><td><span class="tb-stat">${tbEsc(a.status || '—')}</span></td></tr>`; }).join('')
+    + ((ap.log || []).length ? `<tr><td colspan="4"><details><summary>Approval history (${ap.log.length})</summary><ol class="tb-aplog">${ap.log.map(l => `<li>${tbEsc(new Date(l.at).toLocaleString('en-US', { timeZone: 'America/New_York' }))} ET — ${tbEsc(l.role)} ${tbEsc(l.by)}: ${tbEsc(l.action)}${l.note ? ' — ' + tbEsc(l.note) : ''}</li>`).join('')}</ol></details></td></tr>` : '');
   const rows = ch.map(c => `<tr class="tb-st-${c.status}"><td>${tbEsc(c.devName || c.dev)}</td><td>${tbEsc(c.label || c.field)}${c.pipecad ? ' <span class="tb-chip">PipeCAD</span>' : ''}</td><td>${tbEsc(c.design)}</td><td><b>${tbEsc(c.value)}</b></td>
     <td>${tbEsc(c.by || '—')}<br><small>${tbEsc(c.at ? new Date(c.at).toLocaleString() : '')}</small></td><td>${tbEsc(c.why || '')}${c.photo ? ' 📷' : ''}</td>
     <td><span class="tb-stat">${TB_STATUS_LBL[c.status] || c.status}</span>${c.plCheck ? `<br><small class="tb-pl-${c.plCheck.state}">.pl: ${tbEsc(c.plCheck.state)}${c.plCheck.found !== '' && c.plCheck.found != null ? ' (' + tbEsc(c.plCheck.found) + ')' : ''}</small>` : ''}</td>
@@ -396,17 +413,39 @@ function tbShowChanges(){
     <h4>Approvals</h4><table class="tb-tbl"><thead><tr><th>Role</th><th>Name</th><th>Date</th><th>Status</th></tr></thead><tbody>${appr}</tbody></table>`,
     `<button class="btn" data-tb="fc-checkpl">Check against new .pl…</button><button class="btn" data-tb="rpt" data-rpt="changes">Field Change / As-Built report…</button><button class="btn" data-tb="rpt" data-rpt="pipecad">PipeCAD change list…</button><button class="btn btn-primary" data-tb="fc-qa">QA approve all verified</button>`);
 }
+/* QA 2026-10-13 re-check: sign-off order technician → designer → QA; status is never set by hand;
+   reopening keeps history; real names required; QA overrides are logged. */
+function tbRealName(n){ n = String(n || '').trim(); return n.length >= 2 && /[A-Za-z]/.test(n) && !/^(designer|qa|qa\/auditor|auditor|technician|tech|test|n\/?a|none|name|\(name not set\))$/i.test(n); }
+function tbApLog(role, by, action, note){ const A = tbApprovals(); A.log = A.log || []; A.log.push({ role, by, action, note: note || '', at: new Date().toISOString() }); }
+function tbTechSigned(){ const t = tbApprovals().technician || {}; return tbRealName(t.name) && /^(submitted|signed|approved)$/.test(t.status || ''); }
 function tbFcAction(act, id){
-  const ch = tbChanges(); const c = ch.find(x => x.id === id); const me = (tbApprovals().designer || {}).name || (document.getElementById('prepared-by-input') || {}).value || 'Designer';
+  const ch = tbChanges(); const c = ch.find(x => x.id === id); const A = tbApprovals();
+  const me = String((A.designer || {}).name || '').trim();
   const now = new Date().toISOString();
-  if (act === 'fc-apply' && c){ const r = tbApplyChange(c); c.status = 'verified'; c.verify = { by: me, at: now, note: r === false ? 'Device not found in design' : r === null ? 'Recorded (no design field to edit)' : 'Applied to design' }; }
-  if (act === 'fc-reject' && c){ const note = prompt('Reason for rejecting this change?', '') || ''; c.status = 'rejected'; c.verify = { by: me, at: now, note }; }
-  if (act === 'fc-reopen' && c){ c.status = 'logged'; delete c.verify; }
-  if (act === 'fc-qa'){ const qa = tbApprovals().qa || {}; if (!qa.name){ tbToast('Enter the QA / Auditor name first', 'err'); return; }
+  if (/^fc-(apply|reject|reopen)$/.test(act)){
+    if (!tbTechSigned()){ tbToast('The technician must sign the field changes in the Commissioning Report first (order: technician → designer → QA).', 'err'); return; }
+    if (!tbRealName(me)){ tbToast('Enter the designer\'s real name in Approvals first.', 'err'); return; }
+    if ((A.qa || {}).status === 'approved' && act !== 'fc-reopen'){ tbToast('QA has approved; reopen a change to edit.', 'err'); return; }
+  }
+  if (act === 'fc-apply' && c){ const r = tbApplyChange(c); c.status = 'verified'; c.verify = { by: me, at: now, note: r === false ? 'Device not found in design' : r === null ? 'Recorded (no design field to edit)' : 'Applied to design' }; tbApLog('designer', me, 'verified ' + (c.devName || c.dev) + ' ' + (c.label || c.field)); }
+  if (act === 'fc-reject' && c){ const note = (prompt('Reason for rejecting this change?', '') || '').trim(); if (!note){ tbToast('A reason is required to reject.', 'err'); return; } c.status = 'rejected'; c.verify = { by: me, at: now, note }; tbApLog('designer', me, 'rejected ' + (c.devName || c.dev) + ' ' + (c.label || c.field), note); }
+  if (act === 'fc-reopen' && c){ const note = (prompt('Why reopen this change?', '') || '').trim(); if (!note){ tbToast('A reason is required to reopen.', 'err'); return; }
+    c.history = c.history || []; c.history.push({ status: c.status, verify: c.verify || null, qa: c.qa || null, reopenedBy: me, at: now, note }); c.status = 'logged'; delete c.verify; delete c.qa;
+    if (A.qa && A.qa.status === 'approved'){ A.qa = Object.assign({}, A.qa, { status: 'reopened' }); }
+    tbApLog('designer', me, 'reopened ' + (c.devName || c.dev) + ' ' + (c.label || c.field), note); }
+  if (act === 'fc-qa'){ const qa = A.qa || {};
+    if (!tbRealName(qa.name)){ tbToast('Enter the QA / Auditor\'s real name first', 'err'); return; }
+    if (!tbTechSigned()){ tbToast('Technician sign-off is missing (order: technician → designer → QA).', 'err'); return; }
+    if (!A.designer || A.designer.status !== 'approved' || ch.some(x => x.status === 'logged')){ tbToast('The designer must verify or reject every change first (order: technician → designer → QA).', 'err'); return; }
+    if (String(qa.name).trim().toLowerCase() === me.toLowerCase()){ tbToast('QA must be a different person from the designer.', 'err'); return; }
     const pend = ch.filter(x => x.pipecad && x.status === 'verified' && !(x.plCheck && x.plCheck.state === 'match'));
-    if (pend.length && !confirm(`${pend.length} PipeCAD change(s) are not yet confirmed in a .pl. Approve anyway?`)) return;
-    ch.forEach(x => { if (x.status === 'verified'){ x.status = 'approved'; x.qa = { by: qa.name, at: now }; } }); tbApprovals().qa = Object.assign({}, qa, { status: 'approved', date: qa.date || now.slice(0, 10) }); }
-  if (/^fc-(apply|reject)$/.test(act)){ const d = tbApprovals(); d.designer = Object.assign({ name: me }, d.designer, { date: now.slice(0, 10), status: ch.every(x => x.status !== 'logged') ? 'approved' : 'pending' }); }
+    let override = '';
+    if (pend.length){ override = (prompt(`${pend.length} PipeCAD change(s) are not yet confirmed in a .pl. To approve anyway, enter the override reason (it is logged):`, '') || '').trim(); if (!override){ tbToast('QA approval cancelled — no override reason.', 'err'); return; } }
+    ch.forEach(x => { if (x.status === 'verified'){ x.status = 'approved'; x.qa = Object.assign({ by: qa.name, at: now }, pend.includes(x) ? { override } : {}); } });
+    A.qa = Object.assign({}, qa, { status: 'approved', date: now.slice(0, 10) });
+    if (override){ A.qa.overrides = (A.qa.overrides || []).concat([{ at: now, by: qa.name, reason: override, changes: pend.map(x => x.id) }]); tbApLog('qa', qa.name, `override: approved ${pend.length} PipeCAD change(s) not confirmed in a .pl`, override); }
+    tbApLog('qa', qa.name, 'approved all verified changes'); }
+  if (/^fc-(apply|reject|reopen)$/.test(act)){ A.designer = Object.assign({}, A.designer, { name: me, date: now.slice(0, 10), status: ch.every(x => x.status !== 'logged') ? 'approved' : 'pending' }); }
   tbTouch(); tbRenderChangesBadge(); tbShowChanges();
 }
 function tbVerifyAgainstPl(fileName, parsed){
@@ -435,7 +474,10 @@ function tbReportModel(kind){
     secs.push({ h: 'I/O assignments', head: ['Device', 'Port', 'Function', 'FACU address'], rows: io });
     secs.push({ note: 'Source key: manual = stated in the ModuLaser Install Manual 04-4001-501-0803-05 (flow limits 20% and flow-fault delay 120 s: Table 29, p.76). Fire 1 starts at the class hole-sensitivity limit (App. A, printed p.113) and is typical. typical – unverified = typical starting value with no manual citation yet; must be confirmed. design = set by the designer.' });
     const P = tbPerf(), PL = MLP.perfLimits(P) || {};
-    secs.unshift({ h: 'Performance Criteria', head: ['Statement / basis', 'VEWFD', 'EWFD', 'SFD/OAP'], rows: [[MLP.perfStatement(P), ...MLP.PERF_CLASSES.map(c => PL[c] ? `<${PL[c].sens} %obs/ft · <${PL[c].tt} s` : 'not defined')]] }, { note: 'Performance narrative: ' + (P.narrative || '[NOT DEFINED — required]') });
+    const lc = (L, c) => L && L[c] && L[c].sens != null && L[c].tt != null ? `<${L[c].sens} %obs/ft · ≤${L[c].tt} s` : 'engineer to define';
+    const prow = [['Project', MLP.perfStatement(P), ...MLP.PERF_CLASSES.map(c => lc(PL, c))]].concat(Object.entries(P.areas || {}).filter(([, o]) => o && o.enabled).map(([a, o]) => ['Area/Group: ' + a, MLP.perfStatement(Object.assign({}, o, { areas: {} })), ...MLP.PERF_CLASSES.map(c => lc(MLP.perfLimits(P, a), c))]));
+    const reqs = [['Project', P]].concat(Object.entries(P.areas || {}).filter(([, o]) => o && o.enabled)).flatMap(([a, o]) => (o.codeReqs || []).map(r => [a, r.item, r.value || 'engineer to define', r.ref || '—', r.confirmed ? 'confirmed' : 'NOT CONFIRMED']));
+    secs.unshift({ h: 'Performance Criteria', head: ['Scope', 'Referenced standard / statement', 'VEWFD', 'EWFD', 'SFD/OAP'], rows: prow }, ...(reqs.length ? [{ h: 'Code prescriptions', head: ['Scope', 'Prescription', 'Requirement', 'Reference', 'Status'], rows: reqs }] : []), { note: `Engineer of Record: ${P.eorName || '—'} · Specification reference: ${P.specRef || '—'}` }, { note: 'Performance narrative: ' + (P.narrative || '[NOT DEFINED — required]') });
     return { title: 'Device Configuration Schedule', H, secs };
   }
   if (kind === 'changes' || kind === 'pipecad'){
@@ -554,13 +596,14 @@ function tbInit(){
     if (e.target.closest('#tb-perf')){ tbOnPerfInput(e.target); tbRenderConfig(); return; }
     if (e.target.closest('#tb-cfg-editor')){ tbOnCfgInput(e.target); tbRenderConfig(); return; }
     if (e.target.name === 'tb-rpt'){ const f = document.getElementById('tb-rpt-preview'); if (f) f.srcdoc = tbReportHtml(tbReportModel(e.target.value)); return; }
-    const ap = e.target.dataset && e.target.dataset.tbAp; if (ap){ const A = tbApprovals(); A[ap] = Object.assign({}, A[ap], { [e.target.dataset.k]: e.target.value }); tbTouch(); }
+    const ap = e.target.dataset && e.target.dataset.tbAp; if (ap && e.target.dataset.k === 'name' && ap !== 'technician'){ const A = tbApprovals(); const old = (A[ap] || {}).name || ''; const v = e.target.value.trim(); if (v !== old){ A[ap] = Object.assign({}, A[ap], { name: v }); tbApLog(ap, v || '(blank)', 'name set', old ? 'was ' + old : ''); } tbTouch(); }
   });
   document.addEventListener('input', e => { if (e.target.id === 'tb-cfg-search'){ tbFilter = e.target.value; const pos = e.target.selectionStart; tbRenderConfig(); const s = document.getElementById('tb-cfg-search'); if (s){ s.focus(); s.setSelectionRange(pos, pos); } } });
   if (typeof HOWDOI_COMMON !== 'undefined') HOWDOI_COMMON.push(...TB_HOWDOI);
   tbApplyMode();
 }
 const TB_HOWDOI = [
+  { id: 'tb-perf', title: 'Set the Performance Criteria (referenced standard)', keywords: 'performance criteria referenced standard nfpa 72 76 318 fm ds 5-32 5-48 bs 5839 custom ul 268 narrative engineer of record spec override area group engineer to define', blurb: 'Config → Performance Criteria: pick the Referenced standard (NFPA presets use UL 268 thresholds, FM presets are FM only, BS/Custom are engineer to define), fill and confirm any blank values and code prescriptions with references, add EOR and spec reference, then confirm the auto-drafted narrative.', target: 'tb-qs-perf', common: true },
   { id: 'tb-modes', title: 'Switch between Config, Calculator and Both', keywords: 'mode config calculator both switch toggle view', blurb: 'Use the Config / Calculator / Both switch in the quick row (or View → Mode). The mode is stored per project. In Both, the Config and Battery calc tabs switch views.', target: 'tb-qs-modes', common: true },
   { id: 'tb-config', title: 'Set detector and display configuration', keywords: 'alert prealarm action fire1 fire2 delay latching flow fault day night ldd io output facu address display perf class vewfd ewfd sfd', blurb: 'Config view: pick a device, then Seed from class. Values badged manual come from the ModuLaser Install Manual (flow 20% and flow delay 120 s, Table 29 p.76); typical – unverified values must be checked; edits become design.', target: 'tb-qs-config', common: true },
   { id: 'tb-legacy', title: 'Import an old calculator file or Excel export', keywords: 'legacy old import migrate xlsx excel html json 01.04 01.05 01.06 02.00 mlproj', blurb: 'File → Import legacy calc / Excel… reads Save As .html, state .json and .xlsx exports from 01.04 onward, re-calculates, and shows what did not map. Export project writes the .mlproj.json.', target: 'tb-qs-legacy', common: true },

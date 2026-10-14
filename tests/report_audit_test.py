@@ -10,7 +10,7 @@ doc=copy.deepcopy(base)
 doc['changes']=[{'id':'fc-qa-1','dev':doc['design']['devices'][1]['id'],'devName':doc['design']['devices'][1]['name'],'field':'cfg.fan','label':'Fan speed','design':'5','value':'6','by':'QA tech','at':'2026-10-13T12:00:00Z','why':'qa','photo':'','pipecad':True,'status':'verified','verify':{'by':'Designer','at':'2026-10-13T13:00:00Z','note':'ok'}}]
 doc['approvals']={'technician':{'name':'QA tech','date':'2026-10-13','status':'submitted'},'designer':{'name':'Designer','date':'2026-10-13','status':'approved'}}
 doc['futureKey']={'keep':'me'}
-doc['design']['performance']={'market':'UL','basis':'UL 268','statement':'Complies with UL 268, 7th Edition','limits':{},'areas':{},'narrative':'QA narrative: very early warning for the data hall.','narrativeEdited':True,'narrativeConfirmed':True,'eorName':'J. Engineer, PE','specRef':'Section 28 31 00, 2.4.B'}
+doc['design']['performance']={'standard':'VEWFD – NFPA 76/318','ulConfirmed':True,'market':'UL','statement':'Complies with UL 268, 7th Edition · Referenced standard: VEWFD – NFPA 76/318','limits':{},'codeReqs':[{'item':'NFPA 76 VEWFD','value':'1.0 %obs/ft per hole; transport < 60 s','ref':'NFPA 76-2024 8.5.3.1.2.5','src':'cited','confirmed':True}],'areas':{'Zone FM':{'enabled':True,'standard':'SFD – FM DS 5-48','limits':{'VEWFD':{'sens':1.0,'tt':60,'ref':'FM p.113','confirmed':True},'EWFD':{'sens':1.5,'tt':90,'ref':'FM p.113','confirmed':True},'SFD':{'sens':2.5,'tt':120,'ref':'FM p.113','confirmed':True}},'codeReqs':[]}},'narrative':'QA narrative: very early warning for the data hall.','narrativeEdited':True,'narrativeConfirmed':True,'eorName':'J. Engineer, PE','specRef':'Section 28 31 00, 2.4.B'}
 open(OUT+'in.mlproj.json','w').write(json.dumps(doc))
 async def main():
   async with async_playwright() as p:
@@ -19,13 +19,22 @@ async def main():
     await pg.goto(URL); await pg.evaluate('localStorage.clear()'); await pg.reload(); await pg.wait_for_function('typeof saveProject==="function"')
     await pg.set_input_files('#importProj', OUT+'in.mlproj.json'); await pg.wait_for_selector('#dlg.show'); await pg.click('#dlgApply')
     await pg.wait_for_function('state.modules.length>0')
+    await pg.evaluate("sessionStorage.removeItem('mfr-technician'); window.prompt=()=>''; window.alert=()=>{}")
+    await pg.evaluate("state.ui.view='sec:A'; renderAll()"); await pg.wait_for_timeout(150)
+    fld=await pg.evaluate("(()=>{const el=[...document.querySelectorAll('#app input[data-k]')].find(e=>e.type==='text'||e.type===''||e.type==='search'); return el && el.dataset.k})()")
+    if fld:
+        n0=await pg.evaluate("(state.editLog||[]).length"); before=await pg.evaluate(f"g('{fld}')")
+        sel=f'#app input[data-k="{fld}"]'; await pg.fill(sel,'blocked edit (test)'); await pg.wait_for_timeout(150)
+        chk('edits blocked until a technician name is set', await pg.evaluate("(state.editLog||[]).length")==n0 and await pg.evaluate(f"g('{fld}')")==before, fld)
+    else: chk('edits blocked until a technician name is set (field found)', False)
     await pg.evaluate("sessionStorage.setItem('mfr-technician','Pat Field')")
     i=await pg.evaluate("state.modules.findIndex(m=>m.design && m.design['cfg.fan'])")
     dv=await pg.evaluate(f"state.modules[{i}].design['cfg.fan']")
     nv=str(int(dv)+1)
     await pg.evaluate(f"s('modules.{i}.cfg.fan','{nv}')"); await pg.evaluate(f"s('modules.{i}.cfg.fan','{int(nv)+1}')")
     log=await pg.evaluate("state.editLog")
-    chk('edit log entry has who/when/old/new', log and log[-1]['by']=='Pat Field' and log[-1]['old']==dv and log[-1]['new']==str(int(nv)+1) and log[-1]['at'], log[-1] if log else None)
+    chk('edit log entry has who/when/old/new', log and log[-1]['by']=='Pat Field' and log[-1]['old']==nv and log[-1]['new']==str(int(nv)+1) and log[-1]['at'], log[-1] if log else None)
+    chk('edit log never overwrites: two quick edits = two entries', len(log)>=2 and log[-2]['old']==dv and log[-2]['new']==nv and log[-2]['n']+1==log[-1]['n'], log[-2:])
     ch=await pg.evaluate(f"state.changes.filter(c=>c.status==='logged')")
     chk('field change logged against design value', len(ch)==1 and ch[0]['design']==dv and ch[0]['value']==str(int(nv)+1) and ch[0]['pipecad'], ch)
     j=await pg.evaluate("state.modules.findIndex(m=>m.type==='det')")
@@ -45,9 +54,17 @@ async def main():
     chk('design hash is SHA-256', o['design']['hash'].startswith('sha256:') and len(o['design']['hash'])==71, o['design']['hash'])
     chk('Save keeps Performance Criteria (EOR, spec, narrative)', o['design'].get('performance',{}).get('eorName')=='J. Engineer, PE' and o['design']['performance'].get('specRef')=='Section 28 31 00, 2.4.B' and 'QA narrative' in o['design']['performance'].get('narrative',''))
     txt=await pg.evaluate("JSON.stringify(buildBlocks({}))")
-    chk('Report summary prints UL statement, EOR, spec ref and narrative', all(k in txt for k in ['UL 268, 7th Edition','J. Engineer, PE','Section 28 31 00','QA narrative','2.18']), '')
+    chk('Report summary prints UL statement, referenced standard, code prescriptions, area override, EOR, spec ref and narrative', all(k in txt for k in ['Complies with UL 268, 7th Edition','Referenced standard: VEWFD – NFPA 76/318','NFPA 76-2024 8.5.3.1.2.5','Override: Zone FM','SFD – FM DS 5-48','J. Engineer, PE','Section 28 31 00','QA narrative','2.18']), '')
     lim=await pg.evaluate("limits(state.modules.find(m=>m.type==='det'))")
     chk('Report limits use project Performance Criteria', lim is not None, lim)
+    fz=await pg.evaluate("(()=>{const m=JSON.parse(JSON.stringify(state.modules.find(x=>x.type==='det'))); m.area='Zone FM'; m.perf=Object.assign({},m.perf,{target:'SFD',cSens:'',cTime:''}); return limits(m).sens})()")
+    unc=await pg.evaluate("(()=>{state.design.performance.ulConfirmed=false; const t=JSON.stringify(buildBlocks({})); state.design.performance.ulConfirmed=true; return t})()")
+    chk('Report withholds the UL 268 statement when not confirmed by the engineer', 'Complies with UL 268' not in unc and 'NOT YET CONFIRMED' in unc)
+    chk('Report checks a module against its Area/Group override (FM SFD 2.5)', fz==2.5, fz)
+    await pg.evaluate("state.ui.view='sec:A'; renderAll()"); await pg.wait_for_timeout(200)
+    el=await pg.query_selector('#perf-criteria')
+    if el: await el.screenshot(path=SH+'06c-report-referenced-standard.png')
+    chk('Report summary box shows the referenced standard', el is not None and 'Referenced standard' in (await el.inner_text()))
     chk('site hash present', o['site'].get('hash','').startswith('sha256:'))
     chk('edit log in site', len(o['site']['state'].get('editLog',[]))>=2)
     chk('revision 02.00.001', '02.00.001' in o['savedBy']['rev'], o['savedBy'])

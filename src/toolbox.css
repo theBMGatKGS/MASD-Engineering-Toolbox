@@ -51,3 +51,4 @@ body[data-tb-view=config] #v2-center{width:auto!important;max-width:none!importa
 .tb-config{box-sizing:border-box;width:100%}
 .tb-perf{background:var(--panel-2,#1b1e23);border:1px solid var(--border,#3a3f47);border-radius:8px;padding:10px 14px;margin:10px 0}.tb-perf textarea{width:100%;box-sizing:border-box;font:inherit}.tb-ulstate{font-size:13px;padding:6px 10px;border-left:3px solid #2ea043;background:rgba(46,160,67,.1)}
 .tb-area-ov{border-top:1px solid var(--border,#3a3f47);padding:6px 0}
+.tb-tbd{display:inline-block;font-size:10px;padding:1px 5px;border-radius:3px;background:#5a3a00;color:#ffcf70;margin-left:4px}

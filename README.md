@@ -5,7 +5,7 @@ It absorbs the **ModuLaser Battery Calculator** and adds device configuration, l
 the field-change approval loop with the **ModuLaser MASD Field (Commissioning) Report**.
 
 > **Version 00.01.000_261013 — pre-release.** 01.00.000 is reserved for the refined first release.
-> Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.2.0 (`.mlproj.json`)** ·
+> Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.3.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.00.002**
 
 ![Config mode](docs/screenshots/03-config-editor-seeded.png)
@@ -31,19 +31,28 @@ Values seed from the performance class (VEWFD / EWFD / SFD from the PipeCAD tran
 | Badge | Meaning |
 |---|---|
 | **manual** | Stated in *ModuLaser Install Manual 04-4001-501-0803-05*: flow High/Low limit 20% and flow-fault delay 120 s (Table 29, p.76) |
-| **typical – unverified** | Starting point with no manual citation yet — verify. Includes Fire 1 (starts at the FM/UL **hole** limit, App. A printed p.113: VEWFD <1.00, EWFD <1.50, SFD <2.50 %obs/ft), Alert (ClassiFire factor, Table 24 p.71, default 10; VEWFD 0.2 %obs/ft per NFPA 76 as summarized in Honeywell ASAG44201 Table 1), Prealarm (ModuLaser has no "Action" level), Fire 2 and the 5 s delays (site choice; Table 26 p.73 range 0–90 s) |
+| **typical – unverified** | Starting point with no manual citation yet — verify. Includes Fire 1 (starts at the FM/UL **hole** limit, App. A printed p.113: VEWFD <1.00, EWFD <1.50, SFD <2.50 %obs/ft), Alert (ClassiFire factor, Table 24 p.71, default 10; VEWFD 0.2 %obs/ft per NFPA 76-2024 8.5.3.1.2.5 (VEWFD Alert 0.2 / Alarm 1.0 %/ft = 0.65 / 3.2 %/m, effective at each port, above ambient)), Prealarm (ModuLaser has no "Action" level), Fire 2 and the 5 s delays (site choice; Table 26 p.73 range 0–90 s) |
 | **design** | Set by the designer |
 
 Validation: rising levels, ranges, FACU address format and duplicates, 16-character display names, Fire 1 vs the class hole limit.
 These values travel in `design.devices[].config` and **replace the Commissioning Report's placeholder defaults**; values still marked typical stay flagged there.
 
 ### Performance Criteria (Config)
-Set once per project (optional per-Area/Group overrides), carried in `.mlproj.json` (`design.performance`), printed on the Toolbox Configuration schedule and the Commissioning Report summary page.
+Set once per project (optional per-Area/Group overrides), carried in `.mlproj.json` (`design.performance`), printed on the Toolbox Configuration schedule and the Commissioning Report summary page. The Report checks each module against its Area/Group limits.
 
-- **UL market** (US default): states **"Complies with UL 268, 7th Edition"** and enforces the UL least-sensitive hole limits, strictly less than: **VEWFD 1.0, EWFD 1.5, SFD/OAP 2.18 %obs/ft** (2.18 overrides the FM SFD 2.50).
-- **Other basis** — FM, NFPA 75, NFPA 76, NFPA 318 or custom: only cited values are prefilled (FM: ModuLaser Install Manual 04-4001-501-0803-05, App. A, printed p.113; NFPA 76 VEWFD 1.0 %obs/ft / 60 s per NFPA 76 as summarized in Honeywell ASAG44201 Table 1). Everything else is blank. The engineer enters each value, records its reference and ticks **Confirmed**.
-- **Narrative**: auto-drafted from the basis, classes, limits and transport times; the engineer edits it and confirms it. **Engineer of Record** name and **specification reference** fields.
-- Any blank or unconfirmed value, missing reference or unconfirmed narrative **blocks Export project** and is listed by Config validation.
+**Referenced standard** presets:
+
+| Preset | Rule | Prefilled (cited) | Source |
+|---|---|---|---|
+| VEWFD – NFPA 76/318 | UL 268, 7th Ed. thresholds + code; "Complies with UL 268, 7th Edition" after the engineer confirms | Sensitivity < VEWFD 1.0 / EWFD 1.5 / SFD-OAP 2.18 %obs/ft; transport ≤ 60 / 43 / 43 s; NFPA 76 VEWFD 1.0 %obs/ft per hole, <60 s | UL 268, 7th Ed. Special Application Range 1 / Range 2 / Open Area per Install Manual App. A, printed p.113; EWFD 1.5 from NFPA 76; per NFPA 76-2024 8.5.3.1.2.5 (VEWFD Alert 0.2 / Alarm 1.0 %/ft = 0.65 / 3.2 %/m, effective at each port, above ambient) |
+| EWFD – NFPA 76 | UL 268 thresholds + code (NFPA 76-2024 8.5.3.2.1.2–.5: 1.5 %/ft alarm, 400 ft², mfr criteria → App. A p.113; NFPA 76 allows 90 s transport, UL 43 s governs); UL 268 statement | UL limits as above | Install Manual App. A, printed p.113 (EWFD 1.5 from NFPA 76) |
+| SFD/OAP – NFPA 72 (default) | UL 268 thresholds + code; UL 268 statement | UL limits as above | Install Manual App. A, printed p.113 (EWFD 1.5 from NFPA 76) |
+| EWFD – FM DS 5-32 | FM only, no UL statement | VEWFD 1.00 / EWFD 1.50 / SFD 2.50 %obs/ft, <60 / <90 / <120 s (engineer confirms) | FM Class 3230 per ModuLaser Install Manual 04-4001-501-0803-05, App. A, printed p.113 |
+| SFD – FM DS 5-48 | FM only, no UL statement | Same FM Class 3230 limits | Same |
+| BS 5839-1 Category M/L · M/L + Generator · P (Staffed) · P (Unstaffed) | Same options as the Battery Calculator's Design Basis drop-down | none — engineer to define | — |
+| Custom | Named by the engineer | none — engineer to define | — |
+
+Code prescriptions beyond the cited rows (FM DS 5-32/5-48, NFPA 72/76/318 ASD specifics) are **engineer to define** until research supplies citations. Every blank value must be entered with its reference and **Confirmed**. The narrative is auto-drafted from the selections, names the referenced standard, and is edited and confirmed by the engineer; Engineer of Record and specification reference are recorded. Anything undefined or unconfirmed **blocks Export project**.
 
 ### Battery calculator
 Identical to Battery Calculator 02.00.002: PipeCAD `.pl` import wizard, PSU assignment rules (≤4 detectors + 1 display, ≤65 Ah, no sharing across Area/Groups), live results, Print / Export (PDF, Word, HTML, Excel CAD Schedule + Detail).
@@ -83,7 +92,7 @@ In-app **How to use, How Do I…, Quick Start (offline), FAQ, Standards/Referenc
 - **Single file:** `index.html` also runs straight from disk.
 
 ## File formats
-### `.mlproj.json` (modulaser-project 1.2.0, schemaVersion 1)
+### `.mlproj.json` (modulaser-project 1.3.0, schemaVersion 1)
 | Key | Owner | Content |
 |---|---|---|
 | `project` | all | name, location, designer, company, building, network |
@@ -105,7 +114,7 @@ The battery math and `.pl` import live in one module, **`masd-engine.js`**, embe
 python3 tools/build.py        # builds index.html + quickstart.html from the calculator source, engine, project module and src/
 ```
 Tests (real data only — PipeCAD samples and files produced by the historical calculator builds):
-- `toolbox_test.py` — modes, config, Performance Criteria (UL, NFPA 76 prefill, confirm/reference, area override, narrative), Report round trip, verify/reject, PipeCAD auto-verify, QA, reports, every legacy fixture, help, mobile.
+- `toolbox_test.py` — modes, config, Performance Criteria (preset list incl. calculator BS options, NFPA/UL, FM-only, BS engineer-to-define, code prescriptions, area override, narrative), Report round trip, verify/reject, PipeCAD auto-verify, QA, reports, every legacy fixture, help, mobile.
 - `regress.py` — same scenarios through Battery Calculator and Toolbox; results must be identical.
 - `test.py` / `test_v2.py` with `APP=toolbox` — the calculator suites run against the Toolbox.
 - `mlp_sync_test.py` — modulaser-project.js and masd-engine.js identical across all repos.
@@ -116,7 +125,8 @@ See [`docs/screenshots/`](docs/screenshots/) (copied from the Playwright run). P
 ## QA audit
 | Date | Commit audited | Summary | Issue | Verdict |
 |---|---|---|---|---|
-| 2026-10-13 | none for the Toolbox (new); shared parts audited in Battery Calculator cc55189 and Report 6854f2e | Defaults citations **FAIL → fixed**; Example Project rule **PASS**; audit trail **FAIL → fixed**; Quick Start version **FAIL → fixed** | none yet for the Toolbox (related: [Calculator #1](https://github.com/theBMGatKGS/ModuLaser-Battery-Calculator/issues/1), [Report #8](https://github.com/theBMGatKGS/ModuLaser-Commisioning-Report/issues/8)) | [PENDING RE-CHECK — placeholder] |
+| 2026-10-13 | none for the Toolbox (new); shared parts audited in Battery Calculator cc55189 and Report 6854f2e | Defaults citations **FAIL → fixed**; Example Project rule **PASS**; audit trail **FAIL → fixed**; Quick Start version **FAIL → fixed** | [Toolbox #1](https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1) | [PENDING RE-CHECK — placeholder] |
+| 2026-10-13 re-check (8:28–8:45 PM ET) | e15af39 | **CONDITIONAL PASS** — fixed after re-check: stable design hash, mis-cited table number removed, UL 268 confirmation required, UL thresholds (≤60/43/43 s), sign-off order enforced, name-gated edits, append-only log, ASAG44201 replaced by NFPA 76-2024 clauses, Quick Start 02.00.001+, legacy Ah checks | [#1](https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1)  [PENDING RE-CHECK — placeholder] |
 
 ## License
 GPL-3.0 · © The BMG
