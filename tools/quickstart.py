@@ -1,7 +1,7 @@
 """Offline Quick Start one-pager (no CDN: inline SVG icons, inline IBM Plex fonts).
 Produces docs/quickstart.html (standalone) and returns an in-app Help fragment."""
 import html
-VER='00.01.000'
+VER='00.01.001'
 I={ # 24px stroke icons, inline SVG
  'pipe':'<path d="M3 7h10a4 4 0 0 1 4 4v10"/><path d="M3 11h8a2 2 0 0 1 2 2v8"/>',
  'sliders':'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
@@ -32,7 +32,7 @@ def fragment():
 <div class="tbq-steps">{st}</div>
 <div class="tbq-cols"><div><h4>{ic("check","#2ea043",16)} Do</h4><ul>{"".join(f"<li>{x}</li>" for x in DO)}</ul></div><div><h4>{ic("x","#e5534b",16)} Don't</h4><ul>{"".join(f"<li>{x}</li>" for x in DONT)}</ul></div><div><h4>{ic("shield","#4aa3df",16)} Checklist</h4><ul class="tbq-ck">{"".join(f"<li>☐ {x}</li>" for x in CHECK)}</ul></div></div>
 <div class="tbq-own">{"".join(f"<span><b>{a}</b> = {b}</span>" for a,b in OWN)}</div>
-<p class="tbq-lead"><a href="quickstart.html" target="_blank" rel="noopener">Open the printable one-pager</a></p></div>'''
+<p class="tbq-lead"><b>Web / PWA (live):</b> <a href="https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/" target="_blank" rel="noopener">https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/</a> — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.</p><p class="tbq-lead"><a href="quickstart.html" target="_blank" rel="noopener">Open the printable one-pager</a></p></div>'''
 FRAG_CSS='''#help-tb-quickstart .tbq-lead{font-size:12.5px;color:var(--text-dim)}.tbq-steps{display:grid;gap:10px;margin:10px 0}.tbq-step{display:flex;gap:10px;background:var(--panel-3);border-left:3px solid var(--accent);padding:9px 12px;border-radius:4px}.tbq-step p{margin:3px 0 0;font-size:12.5px;line-height:1.5}.tbq-ic{flex:none;padding-top:2px}.tbq-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;font-size:12.5px}.tbq-cols h4{display:flex;gap:6px;align-items:center;margin:6px 0}.tbq-cols ul{margin:0;padding-left:18px}.tbq-ck{list-style:none;padding-left:0!important}.tbq-own{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;margin:12px 0;padding:8px 12px;border:1px solid var(--border,#333);border-radius:4px}'''
 def standalone(fontcss):
     st=''.join(f'<section class="step"><div class="num">{ic(n,"#0C77BC",26)}</div><h2>{t}</h2><p>{b}</p></section>' for i,n,t,b in STEPS)
@@ -46,7 +46,7 @@ main{{max-width:1100px;margin:0 auto;padding:20px 28px}}.steps{{display:grid;gri
 .cols{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}}@media(max-width:900px){{.cols{{grid-template-columns:1fr}}}}.box{{background:var(--s);border:1px solid var(--l);border-radius:6px;padding:12px}}.box h3{{display:flex;gap:6px;align-items:center;margin:0 0 6px;font-size:14px}}.box ul{{margin:0;padding-left:18px;font-size:12.5px}}.ck{{list-style:none;padding-left:0!important}}
 .own{{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 22px;padding:10px 14px;background:var(--s2);border-radius:6px;font-size:12.5px}}footer{{text-align:center;color:var(--mut);font-size:11px;padding:14px}}
 @media print{{@page{{size:letter landscape;margin:.35in}}body{{background:#fff;color:#1d1d1f;font-size:11px}}header{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}main{{padding:10px 0}}.step,.box{{background:#fff;border-color:#BFC4CA}}.step p{{color:#333}}.own{{background:#F2F2F2;-webkit-print-color-adjust:exact;print-color-adjust:exact}}}}
-</style></head><body><header><span class="tag">Applies to MASD Engineering Toolbox {VER} · Battery Calculator 02.00.002 · Commissioning Report 02.00.001 · MASD engine 1.0.0</span>
+</style></head><body><header><span class="tag">Applies to MASD Engineering Toolbox {VER} · Battery Calculator 02.00.003 · Commissioning Report 02.00.001 · MASD engine 1.0.0</span><span class="tag">Live web / PWA: https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — install from the browser; works offline after the first visit.</span>
 <h1>MASD Engineering Toolbox — Quick Start</h1><p>From PipeCAD design to approved as-built: configure, size batteries, hand off, log site changes, verify and approve.</p></header>
 <main><div class="steps">{st}</div><div class="cols"><div class="box"><h3>{ic("check","#2ea043")} Do</h3><ul>{"".join(f"<li>{x}</li>" for x in DO)}</ul></div><div class="box"><h3>{ic("x","#e5534b")} Don't</h3><ul>{"".join(f"<li>{x}</li>" for x in DONT)}</ul></div><div class="box"><h3>{ic("shield","#0c77bc")} Checklist before sign-off</h3><ul class="ck">{"".join(f"<li>☐ {x}</li>" for x in CHECK)}</ul></div></div>
 <div class="own">{ic("file","#0c77bc",18)} {"".join(f"<span><b>{a}</b> = {b}</span>" for a,b in OWN)}</div></main><footer>Works offline — no web fonts or scripts are loaded. © The BMG</footer></body></html>'''
