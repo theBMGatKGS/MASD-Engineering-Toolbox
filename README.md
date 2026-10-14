@@ -4,7 +4,7 @@ Offline engineering toolbox for **Edwards ModuLaser Modular Aspirating Smoke Det
 It absorbs the **ModuLaser Battery Calculator** and adds device configuration, legacy-file migration and
 the field-change approval loop with the **ModuLaser MASD Field (Commissioning) Report**.
 
-> **Version 00.01.000_261013 — pre-release.** 01.00.000 is reserved for the refined first release.
+> **Version 00.01.001_261014 — pre-release.** 01.00.000 is reserved for the refined first release.
 > Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.3.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.00.002**
 

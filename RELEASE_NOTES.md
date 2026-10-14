@@ -5,6 +5,22 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.01.001 — Needs-entry highlight fix (2026-10-14) · pre-release
+
+**In-app revision:** 00.01.001_261014 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.003
+
+### Recent improvements
+- Needs-entry fields now outlined in **amber** (2px), matching the amber *Needs entry* sidebar dot; the old 1px soft-blue outline was invisible on the dark theme
+- **Show next ›** in Live Results jumps to each field that still needs entry
+- Print label grey `#747574` → `#6b6c6b` (WCAG AA contrast)
+
+### QA audit
+| Date | Commit audited | Result | Brief |
+|---|---|---|---|
+| 2026-10-14 | branch fix/print-label-contrast (pre-release) | Same fix as Calculator 02.00.003; needs-entry regression 5/5 on Brent's saved file | `qa/needs-entry-2026-10-14.md` |
+
+---
+
 ## v00.01.000 — First build (2026-10-13) · pre-release
 
 **In-app revision:** 00.01.000_261013 · **Engine:** MASD engine 1.0.0 · **Project file:** modulaser-project 1.3.0 · **Calculator lineage:** Battery Calculator 02.00.002
