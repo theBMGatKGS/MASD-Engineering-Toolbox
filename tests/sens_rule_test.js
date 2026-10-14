@@ -12,6 +12,7 @@ t('VEWFD below 0.05 lower limit fails', !M.sensPass(0.04, ul.VEWFD) && M.sensPas
 t('SFD below 1.70 Open Area lower limit fails', !M.sensPass(1.69, ul.SFD) && M.sensPass(1.70, ul.SFD));
 t('SFD Open Area final (not provisional), 1.70–2.18, 6–43 s', ul.SFD.provisional === false && /Open Area: 1\.70–2\.18 %obs\/ft, 6–43 s$/.test(ul.SFD.ulRange));
 t('transport ≤ max and ≥ min', M.ttPass(60, ul.VEWFD) && !M.ttPass(61, ul.VEWFD) && !M.ttPass(2, ul.VEWFD) && !M.ttPass(5, ul.SFD) && M.ttPass(43, ul.SFD));
+t('limits computed from UL_RANGES and NFPA_LIMITS (stricter-of)', ['VEWFD','EWFD','SFD'].every(c => M.UL_LIMITS[c].sens === M.stricterOf(M.UL_RANGES[c].sensMax, M.NFPA_LIMITS[c].sens) && M.UL_LIMITS[c].tt === Math.min(M.UL_RANGES[c].ttMax, M.NFPA_LIMITS[c].tt)) && JSON.stringify(M.UL_LIMITS) === JSON.stringify({VEWFD:{sens:1,tt:60,sensMin:0.05,ttMin:3},EWFD:{sens:1.5,tt:43,sensMin:0.05,ttMin:3},SFD:{sens:2.18,tt:43,sensMin:1.7,ttMin:6}}));
 const fm = M.perfPresetLimits('EWFD – FM DS 5-32');
 t('FM preset has no UL lower bound; 1.5 passes', fm.EWFD.sensMin == null && M.sensPass(1.5, Object.assign({}, fm.EWFD)));
 const p = M.perfBlank(); const d = M.perfDraft(p, ['SFD']);

@@ -135,7 +135,7 @@ function tbCfgIssues(d, c, fa){
     lv.forEach((n, i) => { if (n != null && isNaN(n)) err(['alert', 'action', 'fire1', 'fire2'][i], 'Not a number'); });
     for (let i = 1; i < 4; i++) if (tbOk(lv[i]) && tbOk(lv[i - 1]) && lv[i] <= lv[i - 1]) err(['alert', 'action', 'fire1', 'fire2'][i], 'Alarm levels must rise: Alert < Prealarm < Fire 1 < Fire 2');
     const PL = MLP.perfLimits(tbPerf(), d.area) || {}; const lim = (PL[c.perfClass] && Number(PL[c.perfClass].sens)) || null; if (lim != null && tbOk(lv[2]) && lv[2] > lim + 1e-9) warn('fire1', `Fire 1 ${lv[2]} exceeds the ${c.perfClass} hole-sensitivity maximum (≤${lim.toFixed(2)} %obs/ft, Performance Criteria; target ${MLP.SENS_TARGETS[c.perfClass].toFixed(1)}) — the limit applies to sampling holes; confirm the alarm setting`);
-    { const lm = PL[c.perfClass] && PL[c.perfClass].sensMin; if (lm != null && tbOk(lv[2]) && lv[2] < lm - 1e-9) warn('fire1', `Fire 1 ${lv[2]} is below the UL range lower limit ${lm} %obs/ft (${PL[c.perfClass].ulRange}) — outside the listed range`); }
+    { const lm = PL[c.perfClass] && PL[c.perfClass].sensMin; if (lm != null && tbOk(lv[2]) && lv[2] < lm - 1e-9) warn('fire1', `Fire 1 ${lv[2]} — Outside UL 268 listed range: sensitivity below the lower limit ${lm} %obs/ft (${PL[c.perfClass].ulRange})`); }
   }
   MLP.CONFIG_FIELDS.forEach(f => { if (f.kind !== 'num') return; const n = tbNum(v[f.k]); if (n == null) return; if (isNaN(n)) { err(f.k, 'Not a number'); return; }
     if ((f.min != null && n < f.min) || (f.max != null && n > f.max)) err(f.k, `${f.label} must be ${f.min}–${f.max}${f.unit ? ' ' + f.unit : ''}`); });

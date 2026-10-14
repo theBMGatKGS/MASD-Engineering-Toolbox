@@ -138,7 +138,7 @@ async def main():
         chk(f'config schedule {fmt}', ok, os.path.basename(pth))
     await pg.evaluate('closePlWizard()')
     # ---- Report round trip: open Toolbox design in the Commissioning Report, change on site, sign, save
-    rp=await ctx.new_page(); rp.on('pageerror',lambda e: errs.append('report:'+str(e)))
+    rp=await ctx.new_page(); await rp.add_init_script("try{if(location.port==='8765'&&!sessionStorage.getItem('mfr-technician'))sessionStorage.setItem('mfr-technician','Pat Field')}catch(e){}"); rp.on('pageerror',lambda e: errs.append('report:'+str(e)))
     await rp.goto('http://localhost:8765/index.html'); await rp.evaluate('localStorage.clear()'); await rp.reload(); await rp.wait_for_function('typeof saveProject==="function"')
     await rp.set_input_files('#importProj', OUT+'toolbox-design.mlproj.json'); await rp.wait_for_selector('#dlg.show'); await rp.click('#dlgApply'); await rp.wait_for_function('state.modules.length>0')
     cfgok=await rp.evaluate('(()=>{const m=state.modules.find(m=>m.dev && m.cfg && m.cfg.action==="1.2"); return m? [m.cfg.action, !!(m.typical||{})["cfg.action"], !!(m.typical||{})["cfg.alert"]]:null})()')
