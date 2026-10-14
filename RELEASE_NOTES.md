@@ -13,6 +13,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 - Needs-entry fields now outlined in **amber** (2px), matching the amber *Needs entry* sidebar dot; the old 1px soft-blue outline was invisible on the dark theme
 - **Show next ›** in Live Results jumps to each field that still needs entry
 - Print label grey `#747574` → `#6b6c6b` (WCAG AA contrast)
+- Module table: Module Type DISP-MIN / DISP-STD / DISP-CMD / DETECTOR, 2-digit Cluster, Power *Own circuit* / *Ribbon Path*; no truncation or wrap on screen, in print or in Word (Model, Cluster and Power columns added to printed/Word module tables)
 
 ### QA audit
 | Date | Commit audited | Result | Brief |

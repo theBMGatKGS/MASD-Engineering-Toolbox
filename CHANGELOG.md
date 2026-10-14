@@ -6,7 +6,7 @@ document owner; the revision counter increments per distinct change. Generated f
 
 ## 00.01 — 2026-10-14
 
-- **00.01.001** (2026-10-14): Harmonized with Battery Calculator 02.00.003 (engine unchanged, 1.0.0). Needs-entry fields use a 2px amber outline and tint matching the amber sidebar dot (the 1px soft-blue outline was invisible on the dark theme); Live Results adds **Show next ›** to jump to each field; Help/Quick Start/How Do I/FAQ wording blue → amber; print label grey #747574 → #6b6c6b (WCAG AA).
+- **00.01.001** (2026-10-14): Harmonized with Battery Calculator 02.00.003 (engine unchanged, 1.0.0). Needs-entry fields use a 2px amber outline and tint matching the amber sidebar dot (the 1px soft-blue outline was invisible on the dark theme); Live Results adds **Show next ›** to jump to each field; Help/Quick Start/How Do I/FAQ wording blue → amber; print label grey #747574 → #6b6c6b (WCAG AA). Module table columns per Brent: Module Type DISP-MIN / DISP-STD / DISP-CMD / DETECTOR, 2-digit Cluster, Power Own circuit / Ribbon Path, fixed widths with no truncation or wrap; Print/Export and Word module tables add Model, Cluster and Power.
 
 ## 00.01 — 2026-10-13
 
