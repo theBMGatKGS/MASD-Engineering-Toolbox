@@ -8,7 +8,7 @@ const TB_ROLES = MLP.APPROVAL_ROLES;
 const tbEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const tbNum = v => { if (v == null || String(v).trim() === '') return null; const n = Number(String(v).trim()); return isFinite(n) ? n : NaN; };
 const tbOk = n => n != null && !isNaN(n);
-const TB_FIRE1_LIMIT_FM = MLP.HOLE_LIMITS;   // App. A, printed p.113 (FM/UL hole limits, strictly less than)
+const TB_FIRE1_LIMIT_FM = MLP.HOLE_LIMITS;   // App. A, printed p.113 (FM/UL hole limits; pass at or below — Brent 2026-10-13)
 const TB_ADDR_RE = /^\d{1,3}:\d{1,3}:\d{1,4}$/;
 let tbView = 'calc';
 let tbSel = null;      // selected device id in Config view
@@ -66,10 +66,11 @@ function tbPerfClassesUsed(){ const set = new Set(); Object.values(tbCfgStore())
 const TB_TBD = '<span class="tb-tbd">engineer to define</span>';
 function tbPerfLimTable(o, scope){
   const ul = MLP.perfIsUl(o.standard); const L = ul ? MLP.perfUlLimits(o.ulConfirmed) : (o.limits || {}); const pc = (MLP.perfPreset(o.standard) || {}).cls;
-  return `<table class="tb-io"><thead><tr><th>Class</th><th>Max hole sensitivity (%obs/ft, &lt;)</th><th>Max transport (s, ≤)</th><th>Reference</th><th>Confirmed</th></tr></thead><tbody>${MLP.PERF_CLASSES.map(c => { const l = L[c] || {};
+  return `<table class="tb-io"><thead><tr><th>Class</th><th>Target (%obs/ft)</th><th>Max hole sensitivity (%obs/ft, pass ≤)</th><th>Max transport (s, ≤)</th>${ul ? '<th>UL range (lower limit enforced)</th>' : ''}<th>Reference</th><th>Confirmed</th></tr></thead><tbody>${MLP.PERF_CLASSES.map(c => { const l = L[c] || {};
     const at = k => `data-tb-perf-lim="${c}" data-scope="${tbEsc(scope)}" data-k="${k}"`; const nm = `<b>${c === 'SFD' ? 'SFD / OAP' : c}</b>${pc === c ? ' <span class="tb-src tb-src-design">preset class</span>' : ''}`;
-    return ul ? `<tr><td>${nm}</td><td>&lt;${l.sens}</td><td>≤${l.tt}</td><td><small>${tbEsc(l.ref)}</small></td><td>${l.confirmed ? '✓ UL 268 confirmed' : 'confirm UL 268 above'}</td></tr>`
-      : `<tr${l.confirmed ? '' : ' class="err"'}><td>${nm} ${l.src === 'prefill' ? '<span class="tb-src tb-src-manual" title="Prefilled from a cited source — confirm">cited prefill</span>' : (l.sens == null || l.tt == null ? TB_TBD : '')}</td><td><input ${at('sens')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.sens ?? '')}"></td><td><input ${at('tt')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.tt ?? '')}"></td><td><input ${at('ref')} placeholder="Code/section or document" value="${tbEsc(l.ref || '')}"></td><td><input type="checkbox" ${at('confirmed')}${l.confirmed ? ' checked' : ''}></td></tr>`; }).join('')}</tbody></table>`;
+    const tg = `<td>Target ${(l.target ?? MLP.SENS_TARGETS[c]).toFixed(1)}</td>`;
+    return ul ? `<tr><td>${nm}</td>${tg}<td>≤${l.sens}</td><td>≤${l.tt}</td><td>${tbEsc(l.ulRange || '')}${l.provisional ? ' <span class="tb-src tb-src-manual" title="SFD range pending confirmation (Open Area vs Range 2)">provisional</span>' : ''}</td><td><small>${tbEsc(l.ref)}</small></td><td>${l.confirmed ? '✓ UL 268 confirmed' : 'confirm UL 268 above'}</td></tr>`
+      : `<tr${l.confirmed ? '' : ' class="err"'}><td>${nm} ${l.src === 'prefill' ? '<span class="tb-src tb-src-manual" title="Prefilled from a cited source — confirm">cited prefill</span>' : (l.sens == null || l.tt == null ? TB_TBD : '')}</td>${tg}<td><input ${at('sens')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.sens ?? '')}"></td><td><input ${at('tt')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.tt ?? '')}"></td><td><input ${at('ref')} placeholder="Code/section or document" value="${tbEsc(l.ref || '')}"></td><td><input type="checkbox" ${at('confirmed')}${l.confirmed ? ' checked' : ''}></td></tr>`; }).join('')}</tbody></table>`;
 }
 function tbCodeReqTable(o, scope){
   const R = o.codeReqs || []; if (!R.length) return '';
@@ -83,7 +84,7 @@ function tbStdSel(o, scope){
 }
 function tbStdNote(o, scope){
   const p = MLP.perfPreset(o.standard); if (!p) return '';
-  if (p.family === 'NFPA') return `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulConfirmed" data-scope="${tbEsc(scope || '')}"${o.ulConfirmed ? ' checked' : ''}> <b>Engineer confirms: ${MLP.UL_STATEMENT}</b></label> ${o.ulConfirmed ? '<span class="tb-ok">confirmed — printed</span>' : '<span class="tb-msg err">not confirmed — the UL 268 statement will not print</span>'}<br><small>${tbEsc(p.code)} preset: UL 268, 7th Ed. thresholds apply (Install Manual App. A, printed p.113): hole sensitivity strictly less than VEWFD 1.0 (Special Application Range 1) / EWFD 1.5 (Special Application Range 2; 1.5 from NFPA 76) / SFD-OAP 2.18 %obs/ft (Open Area), transport time no more than 60 / 43 / 43 s — plus the code's prescriptions below.</small></div>`;
+  if (p.family === 'NFPA') return `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulConfirmed" data-scope="${tbEsc(scope || '')}"${o.ulConfirmed ? ' checked' : ''}> <b>Engineer confirms: ${MLP.UL_STATEMENT}</b></label> ${o.ulConfirmed ? '<span class="tb-ok">confirmed — printed</span>' : '<span class="tb-msg err">not confirmed — the UL 268 statement will not print</span>'}<br><small>${tbEsc(p.code)} preset: UL 268, 7th Ed. thresholds apply (Install Manual App. A, printed p.113): hole sensitivity at or below (≤) VEWFD 1.0 (Special Application Range 1) / EWFD 1.5 (Special Application Range 2; 1.5 from NFPA 76) / SFD-OAP 2.18 %obs/ft (Open Area), transport time no more than 60 / 43 / 43 s — plus the code's prescriptions below. Targets: VEWFD 1.0 / EWFD 1.5 / SFD 2.0 %obs/ft. UL range lower limits are enforced: VEWFD 0.05 %obs/ft, 3 s; EWFD 0.05, 3 s; SFD 1.70, 6 s.</small></div>`;
   if (p.family === 'FM') return `<p class="tb-note">${tbEsc(p.code)}: FM requirements only — not UL, no UL 268 statement. Hole limits prefilled from FM Class 3230 per the Install Manual App. A p.113; confirm them and define the data-sheet prescriptions.</p>`;
   if (p.family === 'BS') return `<p class="tb-note">${tbEsc(p.code)} (mirrors the Battery Calculator design basis). No cited ASD hole/transport values are on file — every value is engineer to define, with its reference (e.g. BS 5839-1 / EN 54-20 class).</p>`;
   return '<p class="tb-note">Custom: name the standard; every value is engineer to define, with its reference.</p>';
@@ -133,7 +134,8 @@ function tbCfgIssues(d, c, fa){
     const lv = ['alert', 'action', 'fire1', 'fire2'].map(k => tbNum(v[k]));
     lv.forEach((n, i) => { if (n != null && isNaN(n)) err(['alert', 'action', 'fire1', 'fire2'][i], 'Not a number'); });
     for (let i = 1; i < 4; i++) if (tbOk(lv[i]) && tbOk(lv[i - 1]) && lv[i] <= lv[i - 1]) err(['alert', 'action', 'fire1', 'fire2'][i], 'Alarm levels must rise: Alert < Prealarm < Fire 1 < Fire 2');
-    const PL = MLP.perfLimits(tbPerf(), d.area) || {}; const lim = (PL[c.perfClass] && Number(PL[c.perfClass].sens)) || null; if (lim != null && tbOk(lv[2]) && lv[2] >= lim) warn('fire1', `Fire 1 ${lv[2]} is not below the ${c.perfClass} hole-sensitivity limit (<${lim.toFixed(2)} %obs/ft, Performance Criteria) — the limit applies to sampling holes; confirm the alarm setting`);
+    const PL = MLP.perfLimits(tbPerf(), d.area) || {}; const lim = (PL[c.perfClass] && Number(PL[c.perfClass].sens)) || null; if (lim != null && tbOk(lv[2]) && lv[2] > lim + 1e-9) warn('fire1', `Fire 1 ${lv[2]} exceeds the ${c.perfClass} hole-sensitivity maximum (≤${lim.toFixed(2)} %obs/ft, Performance Criteria; target ${MLP.SENS_TARGETS[c.perfClass].toFixed(1)}) — the limit applies to sampling holes; confirm the alarm setting`);
+    { const lm = PL[c.perfClass] && PL[c.perfClass].sensMin; if (lm != null && tbOk(lv[2]) && lv[2] < lm - 1e-9) warn('fire1', `Fire 1 ${lv[2]} is below the UL range lower limit ${lm} %obs/ft (${PL[c.perfClass].ulRange}) — outside the listed range`); }
   }
   MLP.CONFIG_FIELDS.forEach(f => { if (f.kind !== 'num') return; const n = tbNum(v[f.k]); if (n == null) return; if (isNaN(n)) { err(f.k, 'Not a number'); return; }
     if ((f.min != null && n < f.min) || (f.max != null && n > f.max)) err(f.k, `${f.label} must be ${f.min}–${f.max}${f.unit ? ' ' + f.unit : ''}`); });

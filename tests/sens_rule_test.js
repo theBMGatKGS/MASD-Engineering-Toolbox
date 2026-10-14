@@ -1,0 +1,20 @@
+// Brent 2026-10-13: pass at or below the class max (more restrictive of UL/NFPA); Targets; UL range lower limits .
+const path = require('path'); const M = require(path.join(__dirname, '..', 'modulaser-project.js'));
+let pass = 0, fail = 0; const t = (n, c) => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + n); };
+const ul = M.perfUlLimits(true);
+t('targets 1.0/1.5/2.0', M.SENS_TARGETS.VEWFD === 1.0 && M.SENS_TARGETS.EWFD === 1.5 && M.SENS_TARGETS.SFD === 2.0);
+t('UL max = more restrictive (1.0/1.5/2.18; 60/43/43 s)', ul.VEWFD.sens === 1.0 && ul.EWFD.sens === 1.5 && ul.SFD.sens === 2.18 && ul.VEWFD.tt === 60 && ul.EWFD.tt === 43 && ul.SFD.tt === 43);
+t('VEWFD exactly 1.00 passes (≤)', M.sensPass(1.0, ul.VEWFD));
+t('VEWFD 1.01 fails', !M.sensPass(1.01, ul.VEWFD));
+t('EWFD 1.5 passes, 1.6 fails (NFPA 76 cap within Range 2)', M.sensPass(1.5, ul.EWFD) && !M.sensPass(1.6, ul.EWFD));
+t('SFD 2.18 passes', M.sensPass(2.18, ul.SFD));
+t('VEWFD below 0.05 lower limit fails', !M.sensPass(0.04, ul.VEWFD) && M.sensPass(0.05, ul.VEWFD));
+t('SFD below 1.70 Open Area lower limit fails', !M.sensPass(1.69, ul.SFD) && M.sensPass(1.70, ul.SFD));
+t('SFD Open Area final (not provisional), 1.70–2.18, 6–43 s', ul.SFD.provisional === false && /Open Area: 1\.70–2\.18 %obs\/ft, 6–43 s$/.test(ul.SFD.ulRange));
+t('transport ≤ max and ≥ min', M.ttPass(60, ul.VEWFD) && !M.ttPass(61, ul.VEWFD) && !M.ttPass(2, ul.VEWFD) && !M.ttPass(5, ul.SFD) && M.ttPass(43, ul.SFD));
+const fm = M.perfPresetLimits('EWFD – FM DS 5-32');
+t('FM preset has no UL lower bound; 1.5 passes', fm.EWFD.sensMin == null && M.sensPass(1.5, Object.assign({}, fm.EWFD)));
+const p = M.perfBlank(); const d = M.perfDraft(p, ['SFD']);
+t('narrative uses "at or below" and Target', /at or below/.test(d) && /target 2\.0/.test(d) && !/less than/.test(d));
+t('NFPA 318-2025 11.1.3 cited', (M.PERF_CODE_CITED['VEWFD – NFPA 76/318'] || []).some(r => /NFPA 318-2025 11\.1\.3/.test(r.ref)));
+console.log(`${pass}/${pass + fail}`); process.exit(fail ? 1 : 0);
