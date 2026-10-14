@@ -14,12 +14,16 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 - **Show next ›** in Live Results jumps to each field that still needs entry
 - Print label grey `#747574` → `#6b6c6b` (WCAG AA contrast)
 - Live web / PWA URL (https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/) added to README, Quick Start and in-app Help; verified installable there (manifest start_url ./index.html, scope ./, service worker active, no Chrome installability errors)
+- Re-importing a file saved by this Toolbox no longer shows a false *Older revision* warning (QA F1); Toolbox files are compared with the running Toolbox revision, older ones still warn. Calculator lineage 02.00.003 (also written into `.mlproj.json`)
+- **Already-saved .html files keep the code they were saved with.** Opening one of them directly still shows the old look. To get these fixes, open 00.01.001 and bring the data in with **File → Import Calc** (or Import project).
 - Module table: Module Type DISP-MIN / DISP-STD / DISP-CMD / DETECTOR, 2-digit Cluster, Power *Own circuit* / *Ribbon Path*; no truncation or wrap on screen, in print or in Word (Model, Cluster and Power columns added to printed/Word module tables)
 
 ### QA audit
-| Date | Commit audited | Result | Brief |
+| Date | Commits audited | Result | Report |
 |---|---|---|---|
-| 2026-10-14 | branch fix/print-label-contrast (pre-release) | Same fix as Calculator 02.00.003; needs-entry regression 5/5 on Brent's saved file | `qa/needs-entry-2026-10-14.md` |
+| 2026-10-14 | Calculator 3757dd8 · Toolbox ff61dc5 | **Calculator GO / Toolbox re-check pending** | `qa/qa-needs-entry-2026-10-14.md` |
+
+QA findings fixed after that audit: Toolbox false "Older revision" warning when re-importing its own saved file (F1); cross-sheet Cluster hint overflow (F2); "No cluster display" button text (F3); Word default font, fixed table layout and spanned summary rows (F4); a hidden field counted on new sheets, 19 instead of 18 (F5); stale lineage/docs (F6); tests extended to every sheet, imported through the app, Word render checked (F7).
 
 ---
 

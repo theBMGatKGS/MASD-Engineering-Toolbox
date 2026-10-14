@@ -18,7 +18,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 | Mode | Shows |
 |---|---|
 | **Config** | Device configuration only |
-| **Calculator** | The Battery Calculator, unchanged from Battery Calculator 02.00.002 |
+| **Calculator** | The Battery Calculator, unchanged from Battery Calculator 02.00.003 |
 | **Both** | Config and Battery calc tabs |
 
 The mode is stored in the project file (`design.toolbox.mode`). Switching never removes data.
@@ -57,7 +57,7 @@ Set once per project (optional per-Area/Group overrides), carried in `.mlproj.js
 Code prescriptions beyond the cited rows (FM DS 5-32/5-48, NFPA 72/76/318 ASD specifics) are **engineer to define** until research supplies citations. Every blank value must be entered with its reference and **Confirmed**. The narrative is auto-drafted from the selections, names the referenced standard, and is edited and confirmed by the engineer; Engineer of Record and specification reference are recorded. Anything undefined or unconfirmed **blocks Export project**.
 
 ### Battery calculator
-Identical to Battery Calculator 02.00.002: PipeCAD `.pl` import wizard, PSU assignment rules (≤4 detectors + 1 display, ≤65 Ah, no sharing across Area/Groups), live results, Print / Export (PDF, Word, HTML, Excel CAD Schedule + Detail).
+Identical to Battery Calculator 02.00.003: PipeCAD `.pl` import wizard, PSU assignment rules (≤4 detectors + 1 display, ≤65 Ah, no sharing across Area/Groups), live results, Print / Export (PDF, Word, HTML, Excel CAD Schedule + Detail).
 
 ### Legacy imports
 **File → Import legacy calc / Excel…** reads every format in the calculator's history and migrates it to `.mlproj.json`:
