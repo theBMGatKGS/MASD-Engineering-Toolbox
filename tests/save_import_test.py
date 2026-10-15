@@ -31,7 +31,7 @@ async def main():
     t,bt=await first_prompt(pg, op)
     chk('older Toolbox file (00.01.000) still warns', 'Older revision' in t, [t,bt])
     lin=await pg.evaluate("TB_CALC_LINEAGE")
-    chk('calc lineage is 02.00.003', lin=='02.00.003', lin)
+    chk('calc lineage is 02.00.004', lin=='02.00.004', lin)
     chk('no page errors', not errs, errs)
     await b.close()
   print('SUMMARY',sum(R),'/',len(R)); sys.exit(0 if all(R) else 1)

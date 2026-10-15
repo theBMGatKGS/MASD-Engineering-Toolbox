@@ -5,6 +5,26 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.01.002 — Harmonized with Battery Calculator 02.00.004 (2026-10-15) · pre-release, not yet released
+
+**In-app revision:** 00.01.002_261015 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.004
+
+### Recent improvements
+- **Valid defaults are no longer flagged** in the Calculator: Design Basis, Standby (h), Alarm (min), Ambient Temp., Module Type, Power, Addressing, supply mode, edition and margin keep their defaults without amber and no longer make a sheet *Needs entry*; only empty required fields are amber. Confirm defaults kept but no longer needed (harmless).
+- **New calculator sheets start with no modules**; an empty-state guide offers **Import .pl…** or **+ Add Display / + Add Detector**. An empty sheet is *Needs entry* / INCOMPLETE.
+- **Standby (h) / Alarm (min)** boxes no longer cut values off at ≤ 1366 px.
+- **Addressing per mode:** Networked sheets share one SenseNET pool (1–127); a Standalone sheet is its own pool (1–9, per sheet) and may reuse other sheets' addresses; duplicates inside a Standalone sheet are still flagged.
+- **Mixed Networked + Standalone:** banner with **Make all Networked…** / **Make all Standalone…**, confirm first, optional re-address (Networked 1…N across sheets; Standalone 1…n per sheet; module order, ribbon/AUX/cluster unchanged).
+- **Imports keep addresses** and list per-mode conflicts after import.
+- Engine (MASD engine 1.0.0) and `modulaser-project.js` 1.3.0 unchanged.
+
+### QA audit
+| Date | Commits audited | Result | Report |
+|---|---|---|---|
+| pending | — | QA pending | `qa/brief-02.00.004.md` |
+
+---
+
 ## v00.01.001 — Needs-entry highlight fix (2026-10-14) · pre-release
 
 **In-app revision:** 00.01.001_261014 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.003

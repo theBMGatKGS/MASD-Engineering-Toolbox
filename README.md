@@ -6,9 +6,18 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 - **Web / PWA (live):** https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.
 
-> **Version 00.01.001_261014 — pre-release.** 01.00.000 is reserved for the refined first release.
+> **Version 00.01.002_261015 — pre-release.** 01.00.000 is reserved for the refined first release.
 > Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.3.0 (`.mlproj.json`)** ·
-> Calculator lineage: **Battery Calculator 02.00.003**
+> Calculator lineage: **Battery Calculator 02.00.004**
+
+### What's new in 00.01.002 (local, pending QA)
+- **Valid defaults are no longer flagged** in the Calculator: Design Basis, Standby (h), Alarm (min), Ambient Temp., Module Type, Power, Addressing, supply mode, edition and margin keep their defaults without amber and no longer make a sheet *Needs entry*; only empty required fields are amber. Confirm defaults kept but no longer needed (harmless).
+- **New calculator sheets start with no modules**; an empty-state guide offers **Import .pl…** or **+ Add Display / + Add Detector**. An empty sheet is *Needs entry* / INCOMPLETE.
+- **Standby (h) / Alarm (min)** boxes no longer cut values off at ≤ 1366 px.
+- **Addressing per mode:** Networked sheets share one SenseNET pool (1–127); a Standalone sheet is its own pool (1–9, per sheet) and may reuse other sheets' addresses; duplicates inside a Standalone sheet are still flagged.
+- **Mixed Networked + Standalone:** banner with **Make all Networked…** / **Make all Standalone…**, confirm first, optional re-address (Networked 1…N across sheets; Standalone 1…n per sheet; module order, ribbon/AUX/cluster unchanged).
+- **Imports keep addresses** and list per-mode conflicts after import.
+- Engine (MASD engine 1.0.0) and `modulaser-project.js` 1.3.0 unchanged.
 
 ![Config mode](docs/screenshots/03-config-editor-seeded.png)
 
@@ -18,7 +27,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 | Mode | Shows |
 |---|---|
 | **Config** | Device configuration only |
-| **Calculator** | The Battery Calculator, unchanged from Battery Calculator 02.00.003 |
+| **Calculator** | The Battery Calculator, unchanged from Battery Calculator 02.00.004 |
 | **Both** | Config and Battery calc tabs |
 
 The mode is stored in the project file (`design.toolbox.mode`). Switching never removes data.
@@ -57,7 +66,7 @@ Set once per project (optional per-Area/Group overrides), carried in `.mlproj.js
 Code prescriptions beyond the cited rows (FM DS 5-32/5-48, NFPA 72/76/318 ASD specifics) are **engineer to define** until research supplies citations. Every blank value must be entered with its reference and **Confirmed**. The narrative is auto-drafted from the selections, names the referenced standard, and is edited and confirmed by the engineer; Engineer of Record and specification reference are recorded. Anything undefined or unconfirmed **blocks Export project**.
 
 ### Battery calculator
-Identical to Battery Calculator 02.00.003: PipeCAD `.pl` import wizard, PSU assignment rules (≤4 detectors + 1 display, ≤65 Ah, no sharing across Area/Groups), live results, Print / Export (PDF, Word, HTML, Excel CAD Schedule + Detail).
+Identical to Battery Calculator 02.00.004: PipeCAD `.pl` import wizard, PSU assignment rules (≤4 detectors + 1 display, ≤65 Ah, no sharing across Area/Groups), live results, Print / Export (PDF, Word, HTML, Excel CAD Schedule + Detail).
 
 ### Legacy imports
 **File → Import legacy calc / Excel…** reads every format in the calculator's history and migrates it to `.mlproj.json`:
