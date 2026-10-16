@@ -10,7 +10,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 > Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.4.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.00.004**
 
-### What's new in 00.01.002 (local, pending QA)
+### What's new in 00.01.002
 - **Valid defaults are no longer flagged** in the Calculator: Design Basis, Standby (h), Alarm (min), Ambient Temp., Module Type, Power, Addressing, supply mode, edition and margin keep their defaults without amber and no longer make a sheet *Needs entry*; only empty required fields are amber. Confirm defaults kept but no longer needed (harmless).
 - **New calculator sheets start with no modules**; an empty-state guide offers **Import .pl…** or **+ Add Display / + Add Detector**. An empty sheet is *Needs entry* / INCOMPLETE.
 - **Standby (h) / Alarm (min)** boxes no longer cut values off at ≤ 1366 px.

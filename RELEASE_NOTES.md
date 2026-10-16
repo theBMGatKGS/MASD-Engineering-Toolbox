@@ -25,7 +25,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 ### QA audit
 | Date | Commits audited | Result | Report |
 |---|---|---|---|
-| pending | — | QA pending | `qa/brief-02.00.004.md` |
+| 2026-10-16 | Calculator 951f769 / Toolbox 956e1e1 / Report de287fb | QA 2026-10-16: Calculator 951f769 / Toolbox 956e1e1 / Report de287fb GO | `qa/brief-02.00.004.md` |
 
 ---
 
