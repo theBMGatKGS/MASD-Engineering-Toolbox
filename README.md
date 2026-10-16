@@ -7,7 +7,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 - **Web / PWA (live):** https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.
 
 > **Version 00.01.002_261015 — pre-release.** 01.00.000 is reserved for the refined first release.
-> Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.3.0 (`.mlproj.json`)** ·
+> Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.4.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.00.004**
 
 ### What's new in 00.01.002 (local, pending QA)
@@ -21,7 +21,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 - **Address change log + Undo (QA F1/F2).** Unify / re-address, SenseNET network moves and Standalone clears are written to **Edit → Address change log…** (saved with the project and in `.mlproj.json` calculator state) with each module's address and network before and after, and can be undone in one step (Undo bar above the sheet, or Ctrl+Z outside text fields). Make all Standalone lists the addresses above 9 it will clear before you confirm and reports them afterwards; switching one sheet to Standalone does the same. Undo is disarmed by the next manual address/mode/network edit and Ctrl+Z is ignored while any field or dropdown has focus. Automatic SenseNET moves happen only when a network's count rises past 127; while a network is over 127 (e.g. after undoing a move) the flag stays and a **Move overflow to SenseNET n** banner offers the move. Clear file clears the address log.
 - **Confirm Settings? after a .pl import (Brent 10-16).** After **Create sheets**, a prompt summarizes the settings applied during import (Design Basis, standby/alarm, ambient temperature, margin, edition, supply capacity/mode, files → sheets/modules). **Confirm** marks every item configured during the import as confirmed, so only genuinely empty fields (e.g. addresses) stay amber. **Revise import** rolls the import back and reopens the wizard on the review step with every choice kept. (Linked-file updates are unchanged.)
 - **Design Basis and Ambient Temperature start on "- Select -".** It's an empty required selection: amber, and the sheet stays INCOMPLETE/Needs entry until chosen (no de-rating meanwhile, so no NaN). The .pl wizard requires both in step 1. Saved files keep their values; legacy files without these keys keep the old defaults (NFPA 72 Voice, 77 °F). Until a sheet has modules it shows **Incomplete** for battery Ah everywhere: results card, Live Results, sidebar, print, Word and Excel. In `.mlproj.json` the PSU has `requiredAh: null` and `incomplete: true` with no battery. There's no PASS and no battery/PSU recommendation. The Field Report imports it with Required Ah blank, and the shared modules are unchanged.
-- Engine (MASD engine 1.0.0) and `modulaser-project.js` 1.3.0 unchanged.
+- Engine (MASD engine 1.0.0) unchanged. Shared `modulaser-project.js` 1.4.0 (bumped from 1.3.0 for SenseNET networks: each device in .mlproj.json carries its network, the shared validator checks duplicates per network and the 127 limit per network; byte-identical in the Calculator, Toolbox and Field Report 02.00.002).
 
 ![Config mode](docs/screenshots/03-config-editor-seeded.png)
 
@@ -107,7 +107,7 @@ In-app **How to use, How Do I…, Quick Start (offline), FAQ, Standards/Referenc
 - **Single file:** `index.html` also runs straight from disk.
 
 ## File formats
-### `.mlproj.json` (modulaser-project 1.3.0, schemaVersion 1)
+### `.mlproj.json` (modulaser-project 1.4.0, schemaVersion 1)
 | Key | Owner | Content |
 |---|---|---|
 | `project` | all | name, location, designer, company, building, network |
