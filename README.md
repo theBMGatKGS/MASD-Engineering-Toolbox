@@ -13,7 +13,9 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 > Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.4.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.00.004**
 
-### What's new in 00.01.003
+### What's new in 00.01.003 (pre-release, released 2026-10-16)
+
+Recent improvements (QA/Auditor PASS/GO on Toolbox f04f862; all suites green):
 - **Harmonized with Battery Calculator 02.00.005** (engine 1.0.0 and `modulaser-project.js` 1.4.0 unchanged).
 - **Auto addressing** (Calculator): **new build** — Networked or Standalone?, then Auto address? Yes / No; **existing project** gaining modules (new .pl, new sheet, more modules, Merge) — Continue addressing per previous sheets (only the new modules; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? → (mode) → address. Logged, one-step Undo.
 - **Excel CAD Schedule** tables start with each sheet's Standby time (h), Alarm time (min) and Safety margin (%).

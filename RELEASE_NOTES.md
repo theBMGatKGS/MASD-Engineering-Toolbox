@@ -5,10 +5,11 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
-## v00.01.003 — Harmonized with Battery Calculator 02.00.005 (2026-10-16) · not yet released
+## v00.01.003 — Harmonized with Battery Calculator 02.00.005 (2026-10-16) · pre-release, released 2026-10-16
 
 **In-app revision:** 00.01.003_261016 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.005
 
+### Recent improvements
 - **Harmonized with Battery Calculator 02.00.005** (engine 1.0.0 and `modulaser-project.js` 1.4.0 unchanged).
 - **Auto addressing** (Calculator): **new build** — Networked or Standalone?, then Auto address? Yes / No; **existing project** gaining modules (new .pl, new sheet, more modules, Merge) — Continue addressing per previous sheets (only the new modules; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? → (mode) → address. Logged, one-step Undo.
 - **Excel CAD Schedule** tables start with each sheet's Standby time (h), Alarm time (min) and Safety margin (%).
@@ -18,7 +19,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 ### QA audit
 | Date | Commits audited | Result | Report |
 |---|---|---|---|
-| pending | — | QA/Auditor review pending | `qa/brief-02.00.005.md` |
+| 2026-10-16 | Toolbox f04f862 / Calculator 57230cc | QA/Auditor PASS (GO), no blocking findings. Toolbox suites green: amber 22, auto_address 47, cad 6, cvr 12, addrlog 27, sensenet 30, empty 17, confirm 24, toolbox_test 139, report_audit 31, save_import 6, sens_rule 14, mlp_sync OK | `qa/qa-report-02.00.005.md` |
 
 ## v00.01.002 — Harmonized with Battery Calculator 02.00.004 (2026-10-15) · pre-release, released 2026-10-16
 
