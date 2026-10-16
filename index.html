@@ -700,6 +700,45 @@
   .report-table td{ padding:4px 8px 4px 0; border-bottom:1px solid rgba(255,255,255,0.03); color: var(--text-dim); font-family: var(--mono); font-size:11.5px; vertical-align:top; }
   .report-empty{ font-size:12px; color: var(--text-faint); font-style:italic; }
 
+  .report-meta{ font-size:11px; color: var(--text-dim); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border-soft); }
+  .report-meta-name{ color: var(--text); }
+  .report-meta-net{ margin-top:6px; }
+  .report-ps{ color: var(--text-dim); font-size:10.5px; }
+  .report-chip{ display:inline-block; font-family: var(--mono); font-size:10px; font-weight:700; letter-spacing:.04em; padding:0 5px; border-radius:3px; border:1px solid var(--border); white-space:nowrap; }
+  .report-chip.ep{ color: var(--text); }
+  .report-chip.rp{ color: var(--text-dim); border-style:dashed; }
+  .report-chip.fail{ color:#f85149; border-color:#f85149; }
+  .report-chip.inc{ color:#d29922; border-color:#d29922; border-style:dashed; }
+  @media print{
+    html:has(body.report-print), body.report-print{ background:#fff !important; color:#1a1a1a; }
+    body.report-print > footer, body.report-print .sheet-sidebar, body.report-print #app-shell{ display:none !important; }
+    body.report-print .report-card, body.report-print .report-card *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    body.report-print .report-card{ font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; font-size:9.5pt; line-height:1.35; color:#1a1a1a; }
+    body.report-print .report-topbar{ border:0; margin:0 0 8pt; padding:10pt 12pt; background:#102645; border-radius:0; border-bottom:2px solid #0c77bc; }
+    body.report-print .report-topbar h2{ color:#fff; font-size:13.5pt; letter-spacing:.02em; }
+    body.report-print .report-sub{ color:#dfe6ee; font-size:8pt; max-width:none; margin-top:3pt; }
+    body.report-print .report-meta{ background:#f7f8f9; border:1px solid #e2e2e2; border-radius:4px; padding:6pt 10pt; margin-bottom:12pt; color:#6b6c6b; font-size:8pt; }
+    body.report-print .report-meta b{ color:#1a1a1a; }
+    body.report-print .report-meta-name{ color:#102645 !important; font-size:10pt; }
+    body.report-print .report-cluster-block{ background:#fff; border:0; border-radius:0; padding:0; margin:0 0 14pt; }
+    body.report-print .report-cluster-title{ font-family:inherit; font-size:8.5pt; text-transform:uppercase; letter-spacing:.06em; color:#102645; border-bottom:1.5px solid #0c77bc; padding-bottom:2pt; margin-bottom:6pt; break-after:avoid; page-break-after:avoid; }
+    body.report-print .report-segment-title{ color:#102645; font-size:7.5pt; margin:8pt 0 3pt; break-after:avoid; page-break-after:avoid; white-space:nowrap; }
+    body.report-print .report-table{ border:1px solid #d5d8dc; font-size:8.5pt; margin-bottom:4pt; }
+    body.report-print .report-table thead{ display:table-header-group; }
+    body.report-print .report-table tr{ break-inside:avoid; page-break-inside:avoid; }
+    body.report-print .report-table th{ background:#f2f2f2; color:#555; font-size:7.5pt; letter-spacing:.04em; padding:3pt 6pt; border-bottom:1px solid #d5d8dc; white-space:nowrap; }
+    body.report-print .report-table td{ color:#1a1a1a; font-family:inherit; font-size:8.5pt; padding:3pt 6pt; border-bottom:1px solid #e6e8eb; white-space:nowrap; font-variant-numeric:tabular-nums; }
+    body.report-print .report-table tbody tr:nth-child(even) td{ background:#f7f8f9; }
+    body.report-print .report-table tr.report-ep-row td{ font-weight:600; }
+    body.report-print .report-table td:first-child{ color:#102645; font-weight:700; }
+    body.report-print .report-ps{ color:#6b6c6b; font-size:7.5pt; }
+    body.report-print .report-chip{ font-family:inherit; font-size:7pt; padding:0 4pt; border-radius:3px; }
+    body.report-print .report-chip.ep{ color:#102645; background:#e6f0f8; border:1px solid #0c77bc; }
+    body.report-print .report-chip.rp{ color:#555; background:#fff; border:1px dashed #6b6c6b; }
+    body.report-print .report-chip.fail{ color:#ac242a; background:#fbe9ea; border:1.5px solid #ac242a; }
+    body.report-print .report-chip.inc{ color:#8a5a00; background:#fdf3dc; border:1.5px dashed #b07a10; }
+    body.report-print .report-empty{ color:#6b6c6b; }
+  }
   body.report-print .location, body.report-print .topbar, body.report-print .project-info-bar, body.report-print main, body.report-print .print-header{ display:none !important; }
   body.report-print .report-overlay{ position:static; background:none; padding:0; display:block !important; }
   body.report-print .report-overlay.open{ display:block !important; }
@@ -2140,6 +2179,10 @@ body.v2 .model-cell{ font-size:10.5px; }
           <p class="a">Yes (02.00.005). On a new build (first modules in an empty project) you pick <b>Networked or Standalone</b>, then <b>Auto address?</b> Yes / No. In an existing project, new sheets or modules (from a .pl import, + Add, or Merge) bring up three choices: <b>Continue addressing per previous sheets</b> (only the new ones, picking up after the last address; Standalone sheets start at 1), <b>Manually address</b>, or <b>Re-auto address entire project</b>. Each automatic change is logged and Undo (or Ctrl+Z) reverses it in one step. After a .pl import Confirm Settings? always comes first.</p>
         </div>
         <div class="help-faq-item">
+          <div class="q">What does the printed Cluster Validation Report look like?</div>
+          <p class="a">Since 02.00.005 it prints in the KGS palette on white: a navy title bar, a project/network summary box, and per cluster a table with the entry point and Ribbon Path members marked by chips (<b>Entry point</b>, <b>Ribbon Path</b>), plus <b>CALCULATION INVALID</b> / <b>VALIDATION ERROR PENDING</b> chips on a sheet's BOM heading. Every page repeats a header (CLUSTER VALIDATION REPORT · project name · Network #) and a footer (app name and revision · Page n of N); table headers repeat across page breaks, rows are never split and cells don't wrap. Open it from View → Cluster Report and use its Print button.</p>
+        </div>
+        <div class="help-faq-item">
           <div class="q">Does the Excel CAD Schedule show standby, alarm and margin?</div>
           <p class="a">Yes (02.00.005). Each power supply table starts with a row giving that sheet's own Standby time in hours, Alarm time in minutes and Safety margin in percent.</p>
         </div>
@@ -2524,7 +2567,7 @@ const AMENDMENTS = [
   { rev: "000", major: "00", minor: "01", date: "261013", desc: "MASD Engineering Toolbox 00.01.000 \u2014 first build (pre-release; 01.00.000 is reserved for the refined release). Performance Criteria (Config): a Referenced standard drop-down of presets \u2014 VEWFD \u2013 NFPA 76/318, EWFD \u2013 NFPA 76, SFD/OAP \u2013 NFPA 72 (UL 268, 7th Ed. thresholds per Brent 2026-10-13: hole sensitivity at or below (\u2264) VEWFD 1.0 / EWFD 1.5 / SFD-OAP 2.18 %obs/ft and transport time no more than 60 / 43 / 43 s (UL 268, 7th Ed. Special Application Range 1 / Special Application Range 2 / Open Area per ModuLaser Install Manual App. A, printed p.113; EWFD 1.5 %obs/ft from NFPA 76), plus the code's prescriptions; \"Complies with UL 268, 7th Edition\" prints only after the engineer confirms it), EWFD \u2013 FM DS 5-32 and SFD \u2013 FM DS 5-48 (FM requirements only, no UL statement; FM Class 3230 hole limits App. A p.113), the Battery Calculator's four BS 5839-1 design bases, and Custom; only cited values are prefilled, the rest are marked engineer to define and must be entered, referenced and confirmed; optional per-Area/Group overrides; auto-drafted narrative naming the referenced standard, edited and confirmed by the engineer, with Engineer of Record and specification reference; unresolved criteria block Export project; carried in .mlproj.json and printed by the Commissioning Report, which checks each module against its Area/Group limits. The Toolbox absorbs the ModuLaser Battery Calculator 02.00.002 (same UI, same calculation engine, same .pl import) and adds: a per-project mode switch (Config only, Calculator only, Both); Config (design) mode with Alert/Prealarm/Fire 1/Fire 2, delays, latching, flow-fault limits and delay, day/night, LDD, I/O assignments and display settings per device, seeded from the performance class (VEWFD/EWFD/SFD) \u2014 manual-sourced values flagged (flow limits 20% and flow-fault delay 120 s, Table 29 p.76, ModuLaser Install Manual 04-4001-501-0803-05), every other seeded value marked 'typical \u2013 unverified' (Fire 1 starts at the FM/UL hole-sensitivity limit, App. A printed p.113); legacy import of every Battery Calculator save/export format (Save As .html 01.04\u201302.00, state JSON, Excel 01.04\u201302.00) migrated to .mlproj.json with a migration report; the field-change loop (verify/reject changes logged in the Commissioning Report, battery re-check, PipeCAD change list, auto-verify on .pl import, technician \u2192 designer \u2192 QA/Auditor approval chain stored in the file); Toolbox reports (Configuration schedule, Field Change / As-Built, PipeCAD change list, Migration report) as PDF/HTML/Word/Excel; offline Quick Start; PWA and Windows installer. Engine: MASD engine 1.0.0. Harmonization rule: any engine change bumps the Toolbox and the Battery Calculator revisions with matching notes, and each records the engine version. Shared modulaser-project.js 1.3.0 (identical in the Toolbox, Battery Calculator 02.00.002 and Commissioning Report 02.00.001): SHA-256 design hash plus separate site hash, unknown-key pass-through, metric .pl hole-sensitivity warning, corrected citations ('Action' is Prealarm; flow-fault delay 120 s, Table 29 p.76; FM/UL hole limits App. A printed p.113 of ModuLaser Install Manual 04-4001-501-0803-05). QA audit \u2014 date 2026-10-13; commit audited: none (Toolbox is new; the audit covered the shared components in Battery Calculator cc55189 and Report 6854f2e); issue: Toolbox issue #1 (https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1; related: Calculator issue #1, Report issue #8); summary: defaults citations FAIL \u2192 fixed in this revision; Example Project worst-hole rule PASS; audit trail FAIL \u2192 fixed in this revision; Quick Start version text FAIL \u2192 fixed in this revision. QA re-check 2026-10-13 (8:28\u20138:45 PM ET): CONDITIONAL PASS. Fixed after the re-check: design hash stable on a no-op Calculator round trip (site and carried data kept out of design; calculator row ids renumbered by position); the mis-cited table number removed from the Report (App. A, printed p.113); UL 268, 7th Edition compliance never auto-confirmed \u2014 the engineer must confirm it before \"Complies with UL 268, 7th Edition\" prints; UL thresholds for NFPA presets per Brent: sensitivity at or below (\u2264) VEWFD 1.0 / EWFD 1.5 / SFD-OAP 2.18 %obs/ft, transport time no more than 60 / 43 / 43 s (UL 268 Special Application Range 1 / Range 2 / Open Area, ModuLaser Install Manual App. A, printed p.113; EWFD 1.5 from NFPA 76); sign-off order technician \u2192 designer \u2192 QA enforced, no hand-set status, reopening keeps history, real names required, QA overrides logged; Report edits blocked until a technician name is set; the edit log never overwrites entries; ASAG44201 citation replaced by NFPA 76-2024 clauses (Research 2026-10-13); standalone Quick Start says Battery Calculator 02.00.001+; legacy-import tests check required Ah per sheet. Final verdict: QA audit 2026-10-13, final re-check of commit c42156a (clean tree). PASS (pre-release). Tests: toolbox_test 139/139, shared-file and engine parity 2/2. Verified: Config/Calculator/Both modes, engine byte-identical to the Battery Calculator, legacy imports (15 fixtures) with Ah checks, sign-off order technician \u2192 designer \u2192 QA enforced (no manual status, real names required, QA \u2260 designer), reopen keeps verifier history, QA overrides logged with a reason, \"Complies with UL 268, 7th Edition\" printed only after engineer confirmation. Note: the UL 268 thresholds (VEWFD 1.0/60 s, EWFD 1.5/43 s, SFD/OAP 2.18/43 s) are per Brent and not verified by QA. EWFD 1.5 %obs/ft comes from NFPA 76-2024 8.5.3.2.1.3, not from a UL 268 range (Range 2 is 0.05\u20132.18 %obs/ft, 3\u201343 s; Open Area 1.70\u20132.18, 6\u201343 s, Install Manual App. A p.113). Issue: https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1 QA delta re-check 2026-10-13, commit 4878e0e (clean). PASS (pre-release). Verified: \u2264 rule and targets, UL 268 ranges with lower limits (EWFD capped at 1.5 per NFPA 76, labelled as such), NFPA 318-2025 \u00a711.1.3 cleanroom citations, offline Quick Start, shared modulaser-project.js and engine identical across apps. Tests: sens_rule 14/14, toolbox_test 139/139 and report_audit_test 31/31 (committed tests). Final pre-tag pass 2026-10-13 (10:02\u201310:40 PM ET): Calculator 6adde0d / Report 5448488 (release a32d988) / Toolbox 8aa707a \u2014 GO; sens_rule 14/14; committed tests pass (release commits differ from these only by this release-note line)..." },
   { rev: "001", major: "00", minor: "01", date: "261014", desc: "Harmonized with Battery Calculator 02.00.003 (no engine change; MASD engine 1.0.0). <b>Needs-entry fix:</b> sheets showed the amber <i>Needs entry</i> status but the fields were not visibly marked, because the 1px soft-blue (#5b9bd5) outline blended into the dark theme. Needs-entry fields now use a 2px amber outline and tint matching the sidebar dot (inputs, custom dropdown buttons, radio groups), and the Live Results message has a <b>Show next \u203a</b> button that scrolls to and focuses each field in turn. Help, Quick Start, How Do I and FAQ wording changed from blue to amber. Status logic and math unchanged. Also: print label grey #747574 \u2192 #6b6c6b (WCAG AA). <b>Module table columns (harmonized with Battery Calculator 02.00.003, per Brent):</b> Module Type shows DISP-MIN / DISP-STD / DISP-CMD / DETECTOR (stored values unchanged); Cluster shows the 2-digit number only; Power shows Own circuit or Ribbon Path; fixed column widths with no truncation or wrap (sideways scroll when narrow); Print/Export and Word module tables add Model, Cluster and Power with the same labels. Help and Quick Start now give the live web / PWA address, https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ (installable; works offline after the first visit). **QA follow-up (2026-10-14):** cross-sheet Cluster hint clipped with ellipsis and full text on hover; 'No cluster display defined on any page' shows '—' on the button (full text on hover); needs-entry count and Show next skip CSS-hidden fields (a new sheet shows 18, not 19) and Show next starts from the first field on each sheet; Word export has an Arial 9 pt default font (styles.xml), fixed-layout tables and summary rows spanning the descriptive columns so nothing wraps or is clipped. Saved .html files keep their own code: re-open data via File \u2192 Import Calc. <b>Toolbox F1:</b> re-importing a file saved by this Toolbox no longer gives a false 'Older revision' warning (Toolbox-saved files are compared with the running Toolbox revision; 00.01.000 files still warn); calculator lineage is 02.00.003, also in .mlproj.json. Final (QA re-check): Word module table Standby mA / Alarm mA columns 1100 twips (header no longer wraps), summary row shows 'Status:' again; offline cache renamed." },
   { rev: "002", major: "00", minor: "01", date: "261015", desc: "Harmonized with Battery Calculator 02.00.004 (no engine change; MASD engine 1.0.0; shared modulaser-project.js bumped to 1.4.0 for per-device SenseNET networks). <b>Valid defaults are no longer amber-flagged</b> (Design Basis, Standby, Alarm, Ambient Temp., Module Type, Power, Addressing, supply mode, edition, margin); only empty required fields are flagged; Confirm defaults kept but no longer needed. <b>New calculator sheets start with no modules</b>, with an empty-state guide (Import .pl… or + Add Display / + Add Detector). <b>Standby / Alarm boxes</b> no longer cut values off on narrow screens. <b>Addressing per mode</b>: Networked sheets share an address pool per SenseNET network; a Standalone sheet is its own 1–9 pool (per sheet) and may reuse other sheets' addresses; duplicates within a Standalone sheet still flagged. <b>Mixed Networked/Standalone</b> projects show a banner with Make all Networked… / Make all Standalone… and optional re-addressing (confirm first). Imports keep addresses and list per-mode conflicts. <b>SenseNET networks</b>: up to 127 modules per network; each Networked sheet has a SenseNET network number (selector, SN tag, print/Word/Excel settings, saved per sheet; older files network 1); past 127, whole sheets move to SenseNET 2, 3… and are addressed from 1, with a notice to include the new network's infrastructure; duplicates checked per network. <b>Address change log + Undo</b>: unify / re-address, SenseNET moves and Standalone clears are logged (Edit → Address change log…) and undo in one step (Undo bar or Ctrl+Z); Make all Standalone lists and reports addresses above 9 it clears. Undo is disarmed by the next manual address/mode/network edit and ignored while a field/dropdown has focus; auto-move only when a network rises past 127, otherwise a Move overflow banner; Clear file clears the log. <b>Confirm Settings?</b> after a .pl import (Confirm marks imported items confirmed; Revise import rolls back to the review step with choices kept); Design Basis and Ambient Temperature start on <i>- Select -</i> (amber, INCOMPLETE until chosen; saved/legacy files keep values); sheets with no modules show Incomplete for battery Ah everywhere (card, Live Results, print, Word, Excel; .mlproj requiredAh null + incomplete) with no battery/PSU recommendation." },
-  { rev: "003", major: "00", minor: "01", date: "261016", desc: "Harmonized with Battery Calculator 02.00.005 (engine 1.0.0 and modulaser-project.js 1.4.0 unchanged). <b>Auto addressing</b> in the Calculator (Brent 10-16, revised 5:27 PM): <b>new build</b> (first modules in an empty project) \u2014 Networked or Standalone?, then Auto address? Yes / No; <b>existing project</b> gaining modules (new .pl import, new sheet, modules on a sheet, Import Calc \u2192 Merge sheets) \u2014 Continue addressing per previous sheets (only the new modules, picking up after the last address; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? \u2192 (mode) \u2192 address. Each automatic change is one address change log entry with one-step Undo. <b>Excel CAD Schedule</b>: each power supply table starts with that sheet's Standby time (h), Alarm time (min) and Safety margin (%)." }
+  { rev: "003", major: "00", minor: "01", date: "261016", desc: "Harmonized with Battery Calculator 02.00.005 (engine 1.0.0 and modulaser-project.js 1.4.0 unchanged). <b>Auto addressing</b> in the Calculator (Brent 10-16, revised 5:27 PM): <b>new build</b> (first modules in an empty project) \u2014 Networked or Standalone?, then Auto address? Yes / No; <b>existing project</b> gaining modules (new .pl import, new sheet, modules on a sheet, Import Calc \u2192 Merge sheets) \u2014 Continue addressing per previous sheets (only the new modules, picking up after the last address; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? \u2192 (mode) \u2192 address. Each automatic change is one address change log entry with one-step Undo. <b>Excel CAD Schedule</b>: each power supply table starts with that sheet's Standby time (h), Alarm time (min) and Safety margin (%). <b>Cluster Validation Report print</b> (Brent approved): KGS palette, Entry point / Ribbon Path / status chips, running header (CLUSTER VALIDATION REPORT · project · Network #) and footer (MASD Engineering Toolbox revision · Page n of N), repeated table headers, rows never split, no wrapping." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -3973,9 +4016,9 @@ function buildClusterReport(){
   if (primaryCdm) networkBits.push(`<b>Primary CDM:</b> ${primaryCdm}`);
   if (backupCdm) networkBits.push(`<b>Backup CDM:</b> ${backupCdm}`);
 
-  let html = `<div style="font-size:11px; color: var(--text-faint); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border-soft);">
-    <b style="color:var(--text)">${projectName}</b>${preparedBy ? ' &nbsp;·&nbsp; Prepared by ' + preparedBy : ''}${dateLabel ? ' &nbsp;·&nbsp; ' + dateLabel : ''}
-    ${networkBits.length ? '<div style="margin-top:6px; color:var(--text-dim);">' + networkBits.join(' &nbsp;·&nbsp; ') + '</div>' : ''}
+  let html = `<div class="report-meta">
+    <b class="report-meta-name">${projectName}</b>${preparedBy ? ' &nbsp;·&nbsp; Prepared by ' + preparedBy : ''}${dateLabel ? ' &nbsp;·&nbsp; ' + dateLabel : ''}
+    ${networkBits.length ? '<div class="report-meta-net">' + networkBits.join(' &nbsp;·&nbsp; ') + '</div>' : ''}
   </div>`;
 
   clusterNums.forEach(cn => {
@@ -4005,7 +4048,7 @@ function buildClusterReport(){
         const extras = [];
         if (rec.psName) extras.push(rec.psName);
         if (rec.psLocation) extras.push(rec.psLocation);
-        return rec.locName + (extras.length ? ` <span style="color:var(--text-faint); font-size:10.5px;">(${extras.join(' · ')})</span>` : '');
+        return rec.locName + (extras.length ? ` <span class="report-ps">(${extras.join(' · ')})</span>` : '');
       };
       entryPoints.forEach((ep, i) => {
         const followers = followerOf[ep.row.id] || [];
@@ -4014,12 +4057,12 @@ function buildClusterReport(){
           <table class="report-table"><thead><tr>
             <th>Address</th><th>Type</th><th>Zone</th><th>Location (sheet)</th><th>Power</th>
           </tr></thead><tbody>`;
-        html += `<tr>
+        html += `<tr class="report-ep-row">
           <td>${ep.address || '—'}</td>
           <td>${ep.type}</td>
           <td>${ep.zone || '—'}</td>
           <td>${locLabel(ep)}</td>
-          <td>Entry point &nbsp;·&nbsp; ${ep.circuitSource || '(no source)'}</td>
+          <td><span class="report-chip ep">Entry point</span> ${ep.circuitSource || '(no source)'}</td>
         </tr>`;
         followers.forEach(f => {
           html += `<tr>
@@ -4027,7 +4070,7 @@ function buildClusterReport(){
             <td>${f.type}</td>
             <td>${f.zone || '—'}</td>
             <td>${locLabel(f)}</td>
-            <td>Ribbon Path</td>
+            <td><span class="report-chip rp">Ribbon Path</span></td>
           </tr>`;
         });
         html += '</tbody></table>';
@@ -4049,7 +4092,7 @@ function buildClusterReport(){
         <td>${cd.type}</td>
         <td>${cd.zone || '—'}</td>
         <td>${cd.locName}</td>
-        <td>Entry point &nbsp;·&nbsp; ${cd.circuitSource || '(no source)'}</td>
+        <td><span class="report-chip ep">Entry point</span> ${cd.circuitSource || '(no source)'}</td>
       </tr>`;
     });
     html += '</tbody></table></div>';
@@ -4066,7 +4109,7 @@ function buildClusterReport(){
     const isInvalid = locEl.classList.contains('has-invalid-calc');
     const isWithheld = !isInvalid && locEl.classList.contains('recommendations-withheld');
     const bom = (isInvalid || isWithheld) ? [] : buildBOM(locEl);
-    html += `<div class="report-segment-title">${label}${isInvalid ? ' — CALCULATION INVALID' : ''}${isWithheld ? ' — VALIDATION ERROR PENDING' : ''}</div>
+    html += `<div class="report-segment-title">${label}${isInvalid ? ' <span class="report-chip fail">CALCULATION INVALID</span>' : ''}${isWithheld ? ' <span class="report-chip inc">VALIDATION ERROR PENDING</span>' : ''}</div>
       <table class="report-table"><thead><tr>
         <th>Qty</th><th>Manufacturer</th><th>Part Number</th><th>Description</th>
       </tr></thead><tbody>`;
@@ -4092,9 +4135,24 @@ function openReportModal(){
 function closeReportModal(){
   document.getElementById('report-overlay').classList.remove('open');
 }
+function cvrPageCss(){
+  // Running header/footer for the printed Cluster Validation Report (Chrome @page margin boxes)
+  const q = v => '"' + String(v).replace(/[\\"]/g, '\\$&').replace(/[\r\n]+/g, ' ') + '"';
+  const proj = document.getElementById('project-name-input').value.trim() || '(project name)';
+  const net = document.getElementById('network-number-input').value.trim();
+  const rev = 'MASD Engineering Toolbox ' + runningRevisionFull();
+  return `html{ color-scheme:light !important; } html,body{ background:#fff !important; } @page{ size:letter; margin:.6in .5in .55in;
+    @top-left{ content:"CLUSTER VALIDATION REPORT"; font:700 7.5pt -apple-system,"Segoe UI",Roboto,Arial,sans-serif; letter-spacing:.06em; color:#102645; vertical-align:bottom; padding-bottom:6pt; border-bottom:1.5px solid #0c77bc; }
+    @top-right{ content:${q(proj + (net ? ' · ' + net : ''))}; font:7.5pt -apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:#6b6c6b; vertical-align:bottom; padding-bottom:6pt; border-bottom:1.5px solid #0c77bc; }
+    @bottom-left{ content:${q(rev)}; font:7pt -apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:#6b6c6b; }
+    @bottom-right{ content:"Page " counter(page) " of " counter(pages); font:7pt -apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:#6b6c6b; } }`;
+}
 function printReportOnly(){
   document.body.classList.add('report-print');
-  const cleanup = () => { document.body.classList.remove('report-print'); window.removeEventListener('afterprint', cleanup); };
+  let st = document.getElementById('cvr-page-style');
+  if (!st){ st = document.createElement('style'); st.id = 'cvr-page-style'; document.head.appendChild(st); }
+  st.textContent = cvrPageCss();
+  const cleanup = () => { document.body.classList.remove('report-print'); st.textContent = ''; window.removeEventListener('afterprint', cleanup); };
   window.addEventListener('afterprint', cleanup);
   setTimeout(() => window.print(), 50);
 }
