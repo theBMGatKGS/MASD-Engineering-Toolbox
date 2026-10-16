@@ -1,8 +1,12 @@
 """Report 02.00.001 audit-trail regression (QA 2026-10-13 §2c): real calc export + changes/approvals/unknown key."""
 import asyncio, json, copy, os, sys
 from playwright.async_api import async_playwright
-URL=os.environ.get('RPT_URL','http://localhost:8765/index.html'); OUT='/workspace/tb/tests/out-rpt/'; os.makedirs(OUT,exist_ok=True)
-SH='/workspace/toolbox-shots/'; os.makedirs(SH,exist_ok=True)
+import os as _os, tempfile as _tf
+MLP_OUT=_os.environ.get('MLP_TEST_OUT') or _tf.mkdtemp(prefix='mlp-test-')   # all generated output goes here (QA r3)
+def _od(*p):
+    d=_os.path.join(MLP_OUT,*p); _os.makedirs(d,exist_ok=True); return d.rstrip('/')+'/'
+URL=os.environ.get('RPT_URL','http://localhost:8765/index.html'); OUT=_od('tb-out-rpt'); os.makedirs(OUT,exist_ok=True)
+SH=_od('toolbox-shots'); os.makedirs(SH,exist_ok=True)
 R=[]
 def chk(n,c,i=''): R.append((n,bool(c))); print('PASS' if c else 'FAIL', n, i)
 base=json.load(open('/workspace/mlpbuild/calc-export.mlproj.json'))

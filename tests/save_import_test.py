@@ -2,7 +2,7 @@
 and an older Toolbox file (00.01.000) must still warn. Also checks the calc lineage written into .mlproj.json."""
 import asyncio, os, sys, re, tempfile
 from playwright.async_api import async_playwright
-URL=os.environ.get('APP','file:///workspace/MASD-Engineering-Toolbox/index.html'); TMP=tempfile.mkdtemp()
+URL=os.environ.get('APP','file:///workspace/MASD-Engineering-Toolbox/index.html'); TMP=os.environ.get('MLP_TEST_OUT') or tempfile.mkdtemp()
 R=[]
 def chk(n,c,i=''): R.append(bool(c)); print('PASS' if c else 'FAIL',n,str(i)[:300])
 async def first_prompt(pg, path):

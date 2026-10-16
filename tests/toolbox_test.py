@@ -1,7 +1,11 @@
 """MASD Engineering Toolbox 00.01.000 — end-to-end on real data (pl-samples, legacy fixtures, real Report round trip)."""
 import asyncio, json, os, sys, glob, zipfile
 from playwright.async_api import async_playwright
-URL='file:///workspace/MASD-Engineering-Toolbox/index.html'; SH='/workspace/toolbox-shots/'; OUT='/workspace/tb/tests/out-tb/'
+import os as _os, tempfile as _tf
+MLP_OUT=_os.environ.get('MLP_TEST_OUT') or _tf.mkdtemp(prefix='mlp-test-')   # all generated output goes here (QA r3)
+def _od(*p):
+    d=_os.path.join(MLP_OUT,*p); _os.makedirs(d,exist_ok=True); return d.rstrip('/')+'/'
+URL='file:///workspace/MASD-Engineering-Toolbox/index.html'; SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
 os.makedirs(SH,exist_ok=True); os.makedirs(OUT,exist_ok=True)
 FX='/workspace/tb/legacy/fixtures/'; PL=sorted(glob.glob('/workspace/pl-samples/*.pl'))
 R=[]
