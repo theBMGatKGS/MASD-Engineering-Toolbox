@@ -478,6 +478,9 @@
   .addr-mix-banner[hidden], .addr-undo-bar[hidden]{ display:none; }
   .addr-undo-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:0 0 8px; padding:6px 12px; border:1px solid #3a4656; border-left:4px solid #3a9ad6; border-radius:6px; background:#141c26; color:#e6edf3; font-size:12.5px; }
   .rp-big.rp-incomplete{ color:#d29922; font-size:26px; }
+  /* 02.00.005: Incomplete = amber + ⚠ (needs-entry amber, AA on the dark theme) */
+  .inc-flag{ color:#e3b341; font-weight:700; } .sb-ah .inc-flag{ white-space:nowrap; } .rp-status.st-incomplete .inc-flag, .stamp .inc-flag{ color:inherit; }
+  @media print{ .inc-flag{ color:#8a5a00 !important; background:#fdf3dc; padding:0 2px; border-radius:2px; } }
   .addr-undo-bar .aub-act{ display:flex; gap:6px; margin-left:auto; }
   .adl{ max-height:60vh; overflow:auto; } .adl-e{ margin:0 0 10px; } .adl-h{ font-size:12px; margin-bottom:4px; }
   .adl-t{ border-collapse:collapse; font-size:11.5px; width:100%; } .adl-t th, .adl-t td{ border:1px solid #2a3441; padding:2px 6px; text-align:left; white-space:nowrap; }
@@ -2179,6 +2182,10 @@ body.v2 .model-cell{ font-size:10.5px; }
           <p class="a">Yes (02.00.005). On a new build (first modules in an empty project) you pick <b>Networked or Standalone</b>, then <b>Auto address?</b> Yes / No. In an existing project, new sheets or modules (from a .pl import, + Add, or Merge) bring up three choices: <b>Continue addressing per previous sheets</b> (only the new ones, picking up after the last address; Standalone sheets start at 1), <b>Manually address</b>, or <b>Re-auto address entire project</b>. Each automatic change is logged and Undo (or Ctrl+Z) reverses it in one step. After a .pl import Confirm Settings? always comes first.</p>
         </div>
         <div class="help-faq-item">
+          <div class="q">Why is "Incomplete" shown in amber with ⚠?</div>
+          <p class="a">Since 02.00.005 every Incomplete indication — the sheet status (⚠ INCOMPLETE), an empty sheet's required Ah, battery and power-supply recommendation, the sidebar figure, the Live Results panel, the print stamp, summary tiles and tables, Word and Excel cells, and the Cluster Validation Report's pending-validation chip — is amber with a warning symbol, in the same amber as the needs-entry outlines on screen and dark amber (#8a5a00 on #fdf3dc) in print, Word and Excel. The ⚠ and the word keep it readable in grayscale. Project files (.mlproj.json) still store the plain status.</p>
+        </div>
+        <div class="help-faq-item">
           <div class="q">What does the printed Cluster Validation Report look like?</div>
           <p class="a">Since 02.00.005 it prints in the KGS palette on white: a navy title bar, a project/network summary box, and per cluster a table with the entry point and Ribbon Path members marked by chips (<b>Entry point</b>, <b>Ribbon Path</b>), plus <b>CALCULATION INVALID</b> / <b>VALIDATION ERROR PENDING</b> chips on a sheet's BOM heading. Every page repeats a header (CLUSTER VALIDATION REPORT · project name · Network #) and a footer (app name and revision · Page n of N); table headers repeat across page breaks, rows are never split and cells don't wrap. Open it from View → Cluster Report and use its Print button.</p>
         </div>
@@ -2567,7 +2574,7 @@ const AMENDMENTS = [
   { rev: "000", major: "00", minor: "01", date: "261013", desc: "MASD Engineering Toolbox 00.01.000 \u2014 first build (pre-release; 01.00.000 is reserved for the refined release). Performance Criteria (Config): a Referenced standard drop-down of presets \u2014 VEWFD \u2013 NFPA 76/318, EWFD \u2013 NFPA 76, SFD/OAP \u2013 NFPA 72 (UL 268, 7th Ed. thresholds per Brent 2026-10-13: hole sensitivity at or below (\u2264) VEWFD 1.0 / EWFD 1.5 / SFD-OAP 2.18 %obs/ft and transport time no more than 60 / 43 / 43 s (UL 268, 7th Ed. Special Application Range 1 / Special Application Range 2 / Open Area per ModuLaser Install Manual App. A, printed p.113; EWFD 1.5 %obs/ft from NFPA 76), plus the code's prescriptions; \"Complies with UL 268, 7th Edition\" prints only after the engineer confirms it), EWFD \u2013 FM DS 5-32 and SFD \u2013 FM DS 5-48 (FM requirements only, no UL statement; FM Class 3230 hole limits App. A p.113), the Battery Calculator's four BS 5839-1 design bases, and Custom; only cited values are prefilled, the rest are marked engineer to define and must be entered, referenced and confirmed; optional per-Area/Group overrides; auto-drafted narrative naming the referenced standard, edited and confirmed by the engineer, with Engineer of Record and specification reference; unresolved criteria block Export project; carried in .mlproj.json and printed by the Commissioning Report, which checks each module against its Area/Group limits. The Toolbox absorbs the ModuLaser Battery Calculator 02.00.002 (same UI, same calculation engine, same .pl import) and adds: a per-project mode switch (Config only, Calculator only, Both); Config (design) mode with Alert/Prealarm/Fire 1/Fire 2, delays, latching, flow-fault limits and delay, day/night, LDD, I/O assignments and display settings per device, seeded from the performance class (VEWFD/EWFD/SFD) \u2014 manual-sourced values flagged (flow limits 20% and flow-fault delay 120 s, Table 29 p.76, ModuLaser Install Manual 04-4001-501-0803-05), every other seeded value marked 'typical \u2013 unverified' (Fire 1 starts at the FM/UL hole-sensitivity limit, App. A printed p.113); legacy import of every Battery Calculator save/export format (Save As .html 01.04\u201302.00, state JSON, Excel 01.04\u201302.00) migrated to .mlproj.json with a migration report; the field-change loop (verify/reject changes logged in the Commissioning Report, battery re-check, PipeCAD change list, auto-verify on .pl import, technician \u2192 designer \u2192 QA/Auditor approval chain stored in the file); Toolbox reports (Configuration schedule, Field Change / As-Built, PipeCAD change list, Migration report) as PDF/HTML/Word/Excel; offline Quick Start; PWA and Windows installer. Engine: MASD engine 1.0.0. Harmonization rule: any engine change bumps the Toolbox and the Battery Calculator revisions with matching notes, and each records the engine version. Shared modulaser-project.js 1.3.0 (identical in the Toolbox, Battery Calculator 02.00.002 and Commissioning Report 02.00.001): SHA-256 design hash plus separate site hash, unknown-key pass-through, metric .pl hole-sensitivity warning, corrected citations ('Action' is Prealarm; flow-fault delay 120 s, Table 29 p.76; FM/UL hole limits App. A printed p.113 of ModuLaser Install Manual 04-4001-501-0803-05). QA audit \u2014 date 2026-10-13; commit audited: none (Toolbox is new; the audit covered the shared components in Battery Calculator cc55189 and Report 6854f2e); issue: Toolbox issue #1 (https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1; related: Calculator issue #1, Report issue #8); summary: defaults citations FAIL \u2192 fixed in this revision; Example Project worst-hole rule PASS; audit trail FAIL \u2192 fixed in this revision; Quick Start version text FAIL \u2192 fixed in this revision. QA re-check 2026-10-13 (8:28\u20138:45 PM ET): CONDITIONAL PASS. Fixed after the re-check: design hash stable on a no-op Calculator round trip (site and carried data kept out of design; calculator row ids renumbered by position); the mis-cited table number removed from the Report (App. A, printed p.113); UL 268, 7th Edition compliance never auto-confirmed \u2014 the engineer must confirm it before \"Complies with UL 268, 7th Edition\" prints; UL thresholds for NFPA presets per Brent: sensitivity at or below (\u2264) VEWFD 1.0 / EWFD 1.5 / SFD-OAP 2.18 %obs/ft, transport time no more than 60 / 43 / 43 s (UL 268 Special Application Range 1 / Range 2 / Open Area, ModuLaser Install Manual App. A, printed p.113; EWFD 1.5 from NFPA 76); sign-off order technician \u2192 designer \u2192 QA enforced, no hand-set status, reopening keeps history, real names required, QA overrides logged; Report edits blocked until a technician name is set; the edit log never overwrites entries; ASAG44201 citation replaced by NFPA 76-2024 clauses (Research 2026-10-13); standalone Quick Start says Battery Calculator 02.00.001+; legacy-import tests check required Ah per sheet. Final verdict: QA audit 2026-10-13, final re-check of commit c42156a (clean tree). PASS (pre-release). Tests: toolbox_test 139/139, shared-file and engine parity 2/2. Verified: Config/Calculator/Both modes, engine byte-identical to the Battery Calculator, legacy imports (15 fixtures) with Ah checks, sign-off order technician \u2192 designer \u2192 QA enforced (no manual status, real names required, QA \u2260 designer), reopen keeps verifier history, QA overrides logged with a reason, \"Complies with UL 268, 7th Edition\" printed only after engineer confirmation. Note: the UL 268 thresholds (VEWFD 1.0/60 s, EWFD 1.5/43 s, SFD/OAP 2.18/43 s) are per Brent and not verified by QA. EWFD 1.5 %obs/ft comes from NFPA 76-2024 8.5.3.2.1.3, not from a UL 268 range (Range 2 is 0.05\u20132.18 %obs/ft, 3\u201343 s; Open Area 1.70\u20132.18, 6\u201343 s, Install Manual App. A p.113). Issue: https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1 QA delta re-check 2026-10-13, commit 4878e0e (clean). PASS (pre-release). Verified: \u2264 rule and targets, UL 268 ranges with lower limits (EWFD capped at 1.5 per NFPA 76, labelled as such), NFPA 318-2025 \u00a711.1.3 cleanroom citations, offline Quick Start, shared modulaser-project.js and engine identical across apps. Tests: sens_rule 14/14, toolbox_test 139/139 and report_audit_test 31/31 (committed tests). Final pre-tag pass 2026-10-13 (10:02\u201310:40 PM ET): Calculator 6adde0d / Report 5448488 (release a32d988) / Toolbox 8aa707a \u2014 GO; sens_rule 14/14; committed tests pass (release commits differ from these only by this release-note line)..." },
   { rev: "001", major: "00", minor: "01", date: "261014", desc: "Harmonized with Battery Calculator 02.00.003 (no engine change; MASD engine 1.0.0). <b>Needs-entry fix:</b> sheets showed the amber <i>Needs entry</i> status but the fields were not visibly marked, because the 1px soft-blue (#5b9bd5) outline blended into the dark theme. Needs-entry fields now use a 2px amber outline and tint matching the sidebar dot (inputs, custom dropdown buttons, radio groups), and the Live Results message has a <b>Show next \u203a</b> button that scrolls to and focuses each field in turn. Help, Quick Start, How Do I and FAQ wording changed from blue to amber. Status logic and math unchanged. Also: print label grey #747574 \u2192 #6b6c6b (WCAG AA). <b>Module table columns (harmonized with Battery Calculator 02.00.003, per Brent):</b> Module Type shows DISP-MIN / DISP-STD / DISP-CMD / DETECTOR (stored values unchanged); Cluster shows the 2-digit number only; Power shows Own circuit or Ribbon Path; fixed column widths with no truncation or wrap (sideways scroll when narrow); Print/Export and Word module tables add Model, Cluster and Power with the same labels. Help and Quick Start now give the live web / PWA address, https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ (installable; works offline after the first visit). **QA follow-up (2026-10-14):** cross-sheet Cluster hint clipped with ellipsis and full text on hover; 'No cluster display defined on any page' shows '—' on the button (full text on hover); needs-entry count and Show next skip CSS-hidden fields (a new sheet shows 18, not 19) and Show next starts from the first field on each sheet; Word export has an Arial 9 pt default font (styles.xml), fixed-layout tables and summary rows spanning the descriptive columns so nothing wraps or is clipped. Saved .html files keep their own code: re-open data via File \u2192 Import Calc. <b>Toolbox F1:</b> re-importing a file saved by this Toolbox no longer gives a false 'Older revision' warning (Toolbox-saved files are compared with the running Toolbox revision; 00.01.000 files still warn); calculator lineage is 02.00.003, also in .mlproj.json. Final (QA re-check): Word module table Standby mA / Alarm mA columns 1100 twips (header no longer wraps), summary row shows 'Status:' again; offline cache renamed." },
   { rev: "002", major: "00", minor: "01", date: "261015", desc: "Harmonized with Battery Calculator 02.00.004 (no engine change; MASD engine 1.0.0; shared modulaser-project.js bumped to 1.4.0 for per-device SenseNET networks). <b>Valid defaults are no longer amber-flagged</b> (Design Basis, Standby, Alarm, Ambient Temp., Module Type, Power, Addressing, supply mode, edition, margin); only empty required fields are flagged; Confirm defaults kept but no longer needed. <b>New calculator sheets start with no modules</b>, with an empty-state guide (Import .pl… or + Add Display / + Add Detector). <b>Standby / Alarm boxes</b> no longer cut values off on narrow screens. <b>Addressing per mode</b>: Networked sheets share an address pool per SenseNET network; a Standalone sheet is its own 1–9 pool (per sheet) and may reuse other sheets' addresses; duplicates within a Standalone sheet still flagged. <b>Mixed Networked/Standalone</b> projects show a banner with Make all Networked… / Make all Standalone… and optional re-addressing (confirm first). Imports keep addresses and list per-mode conflicts. <b>SenseNET networks</b>: up to 127 modules per network; each Networked sheet has a SenseNET network number (selector, SN tag, print/Word/Excel settings, saved per sheet; older files network 1); past 127, whole sheets move to SenseNET 2, 3… and are addressed from 1, with a notice to include the new network's infrastructure; duplicates checked per network. <b>Address change log + Undo</b>: unify / re-address, SenseNET moves and Standalone clears are logged (Edit → Address change log…) and undo in one step (Undo bar or Ctrl+Z); Make all Standalone lists and reports addresses above 9 it clears. Undo is disarmed by the next manual address/mode/network edit and ignored while a field/dropdown has focus; auto-move only when a network rises past 127, otherwise a Move overflow banner; Clear file clears the log. <b>Confirm Settings?</b> after a .pl import (Confirm marks imported items confirmed; Revise import rolls back to the review step with choices kept); Design Basis and Ambient Temperature start on <i>- Select -</i> (amber, INCOMPLETE until chosen; saved/legacy files keep values); sheets with no modules show Incomplete for battery Ah everywhere (card, Live Results, print, Word, Excel; .mlproj requiredAh null + incomplete) with no battery/PSU recommendation." },
-  { rev: "003", major: "00", minor: "01", date: "261016", desc: "Harmonized with Battery Calculator 02.00.005 (engine 1.0.0 and modulaser-project.js 1.4.0 unchanged). <b>Auto addressing</b> in the Calculator (Brent 10-16, revised 5:27 PM): <b>new build</b> (first modules in an empty project) \u2014 Networked or Standalone?, then Auto address? Yes / No; <b>existing project</b> gaining modules (new .pl import, new sheet, modules on a sheet, Import Calc \u2192 Merge sheets) \u2014 Continue addressing per previous sheets (only the new modules, picking up after the last address; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? \u2192 (mode) \u2192 address. Each automatic change is one address change log entry with one-step Undo. <b>Excel CAD Schedule</b>: each power supply table starts with that sheet's Standby time (h), Alarm time (min) and Safety margin (%). <b>Cluster Validation Report print</b> (Brent approved): KGS palette, Entry point / Ribbon Path / status chips, running header (CLUSTER VALIDATION REPORT · project · Network #) and footer (MASD Engineering Toolbox revision · Page n of N), repeated table headers, rows never split, no wrapping." }
+  { rev: "003", major: "00", minor: "01", date: "261016", desc: "Harmonized with Battery Calculator 02.00.005 (engine 1.0.0 and modulaser-project.js 1.4.0 unchanged). <b>Auto addressing</b> in the Calculator (Brent 10-16, revised 5:27 PM): <b>new build</b> (first modules in an empty project) \u2014 Networked or Standalone?, then Auto address? Yes / No; <b>existing project</b> gaining modules (new .pl import, new sheet, modules on a sheet, Import Calc \u2192 Merge sheets) \u2014 Continue addressing per previous sheets (only the new modules, picking up after the last address; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? \u2192 (mode) \u2192 address. Each automatic change is one address change log entry with one-step Undo. <b>Excel CAD Schedule</b>: each power supply table starts with that sheet's Standby time (h), Alarm time (min) and Safety margin (%). <b>Cluster Validation Report print</b> (Brent approved): KGS palette, Entry point / Ribbon Path / status chips, running header (CLUSTER VALIDATION REPORT · project · Network #) and footer (MASD Engineering Toolbox revision · Page n of N), repeated table headers, rows never split, no wrapping. <b>Incomplete in amber with ⚠</b>: every Incomplete indication (status, empty-sheet Ah / battery / PSU recommendation, sidebar, Live Results, print, Word, Excel, CVR pending chip) is amber with a warning symbol; .mlproj.json keeps the plain status." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -4109,7 +4116,7 @@ function buildClusterReport(){
     const isInvalid = locEl.classList.contains('has-invalid-calc');
     const isWithheld = !isInvalid && locEl.classList.contains('recommendations-withheld');
     const bom = (isInvalid || isWithheld) ? [] : buildBOM(locEl);
-    html += `<div class="report-segment-title">${label}${isInvalid ? ' <span class="report-chip fail">CALCULATION INVALID</span>' : ''}${isWithheld ? ' <span class="report-chip inc">VALIDATION ERROR PENDING</span>' : ''}</div>
+    html += `<div class="report-segment-title">${label}${isInvalid ? ' <span class="report-chip fail">CALCULATION INVALID</span>' : ''}${isWithheld ? ' <span class="report-chip inc">\u26A0 VALIDATION ERROR PENDING</span>' : ''}</div>
       <table class="report-table"><thead><tr>
         <th>Qty</th><th>Manufacturer</th><th>Part Number</th><th>Description</th>
       </tr></thead><tbody>`;
@@ -8116,9 +8123,9 @@ async function plConfirmSettings(created, prevState){
       l.classList.toggle('sheet-no-modules', empty);
       if (empty){
         l.classList.add('recommendations-withheld');
-        l.querySelectorAll('.standby-ah, .alarm-ah, .initial-ah, .required-ah, .ah-per-supply, .export-required-ah, .export-standby-ah, .export-alarm-ah').forEach(e => { e.textContent = 'Incomplete'; });
-        l.querySelectorAll('.hw-supply, .hw-enclosure, .hw-battery').forEach(e => { e.textContent = 'Incomplete — add modules'; });
-        l.querySelectorAll('.cd-battery-model-detail').forEach(e => { e.textContent = 'Incomplete — add modules'; });
+        l.querySelectorAll('.standby-ah, .alarm-ah, .initial-ah, .required-ah, .ah-per-supply, .export-required-ah, .export-standby-ah, .export-alarm-ah').forEach(e => { e.innerHTML = '<span class="inc-flag">\u26A0 Incomplete</span>'; });
+        l.querySelectorAll('.hw-supply, .hw-enclosure, .hw-battery').forEach(e => { e.innerHTML = '<span class="inc-flag">\u26A0 Incomplete — add modules</span>'; });
+        l.querySelectorAll('.cd-battery-model-detail').forEach(e => { e.innerHTML = '<span class="inc-flag">\u26A0 Incomplete — add modules</span>'; });
         l.querySelectorAll('.gauge-max-label').forEach(e => { e.textContent = ''; });
       }
     }
@@ -8737,7 +8744,7 @@ function v2SheetModel(locEl){
   } else {
     batteryLabel = 'Third-party (loads exported)';
   }
-  if (!locEl.querySelector('[data-role="module"]')){ batteryAh = null; batteryLabel = 'Incomplete — add modules'; }   // QA r3 H1
+  if (!locEl.querySelector('[data-role="module"]')){ batteryAh = null; batteryLabel = '\u26A0 Incomplete — add modules'; }   // QA r3 H1
   const invalidList = Array.from(locEl.querySelectorAll('.icb-list li')).filter(li => !li.closest('[hidden]')).map(li => li.textContent.trim()).filter(Boolean);
   const flags = Array.from(locEl.querySelectorAll('.flags-list li')).filter(li => !li.closest('[hidden]')).map(li => li.textContent.trim()).filter(Boolean);
   const needs = v2NeedsFields(locEl).length;
@@ -8802,10 +8809,15 @@ function v2AllModels(scope){
   return els.map(v2SheetModel);
 }
 function v2PsTag(m){ return m.psName || ('Sheet ' + m.idx); }
-function v2StatusWord(s){ return s === 'pass' ? 'PASS' : s === 'fail' ? 'FAIL' : 'INCOMPLETE'; }
+function v2StatusWord(s){ return s === 'pass' ? 'PASS' : s === 'fail' ? 'FAIL' : '\u26A0 INCOMPLETE'; }
+// 02.00.005 (Brent 10-16 6:07 PM): every Incomplete indication is amber with a warning symbol (⚠). Wrap such text in HTML
+// as <span class="inc-flag"> (screen: needs-entry amber; print: #8a5a00 on #fdf3dc). Text inside an existing inc-flag is left alone.
+function v2IncWrap(html){
+  return String(html).replace(/(<[^>]*>)([^<]*)/g, (m, tag, txt) => /inc-flag/.test(tag) ? m : tag + txt.replace(/\u26A0 (?:Incomplete|INCOMPLETE)(?: \u2014 [^<]*)?/g, x => `<span class="inc-flag">${x}</span>`));
+}
 // QA r3 H1: an empty (no-module) sheet has no battery figure anywhere — 'Incomplete' instead of the PSU-only Ah.
-function v2AhFmt(m, n, d){ return m && m.noModules ? 'Incomplete' : v2Fmt(n, d); }
-function v2AhU(m, n, d){ return m && m.noModules ? 'Incomplete' : v2Fmt(n, d) + ' Ah'; }
+function v2AhFmt(m, n, d){ return m && m.noModules ? '\u26A0 Incomplete' : v2Fmt(n, d); }
+function v2AhU(m, n, d){ return m && m.noModules ? '\u26A0 Incomplete' : v2Fmt(n, d) + ' Ah'; }
 function v2Fmt(n, d){ return isFinite(n) ? Number(n).toFixed(d == null ? 2 : d) : '—'; }
 
 /* Calculation steps by detail level. Every value string comes from the sheet's own
@@ -8903,7 +8915,7 @@ function v2RenderSidebar(models, cur){
       <span class="dot st-${m.dot}" aria-label="${dotTitle[m.dot]}"></span>${m.overrides.length ? '<span class="dot st-overridden" aria-label="Overridden"></span>' : ''}
       <span class="sb-name">${v2Esc(v2PsTag(m))}${addrSchemeOf(m.el) === 'networked' ? `<span class="sb-net" title="SenseNET network ${sheetSenseNet(m.el)}">SN${sheetSenseNet(m.el)}</span>` : ''}</span>
       ${m.flags.length + m.invalidList.length ? `<span class="sb-cnt">${m.flags.length + m.invalidList.length}</span>` : ''}
-      <span class="sb-ah">${m.noModules ? 'Incomplete' : (isFinite(m.requiredAh) ? v2AhFmt(m, m.requiredAh, 1) + ' Ah' : '')}</span></button>`).join('')}</div>`).join('')
+      <span class="sb-ah">${m.noModules ? '<span class="inc-flag">\u26A0 Incomplete</span>' : (isFinite(m.requiredAh) ? v2AhFmt(m, m.requiredAh, 1) + ' Ah' : '')}</span></button>`).join('')}</div>`).join('')
     : '<p class="sb-empty">No power supply sheets yet. Click <b>+ Add power supply</b> or <b>Import .pl</b>.</p>';
   const c = document.getElementById('sb-count'); if (c) c.textContent = models.length + (models.length === 1 ? ' sheet' : ' sheets');
 }
@@ -8920,15 +8932,16 @@ function v2GaugeSvgDark(m){
     <text x="${x(CHARGER_MAX_AH)}" y="42" fill="#f85149" font-size="8" text-anchor="middle">${CHARGER_MAX_AH} Ah max</text>
     <text x="4" y="42" fill="#8b98a8" font-size="8">0 Ah</text></svg>`;
 }
-function v2RenderResults(m){
+function v2RenderResults(m){ v2RenderResultsInner(m); const p = document.getElementById('rp-body'); if (p && /\u26A0 (Incomplete|INCOMPLETE)/.test(p.innerHTML)) p.innerHTML = v2IncWrap(p.innerHTML); }
+function v2RenderResultsInner(m){
   const p = document.getElementById('rp-body'); if (!p) return;
   if (!m){ p.innerHTML = '<p class="rp-empty">Select a power supply sheet to see its live results.</p>'; return; }
   const word = v2StatusWord(m.status);
   const det = m.modules.filter(x => x.kind === 'detector').length, disp = m.modules.length - det;
   if (m.noModules){   // 02.00.004: no modules yet → no Ah figure and no PASS, just Incomplete
     p.innerHTML = `<div class="rp-card rp-cap"><div class="rp-k">Required capacity · ${v2Esc(v2PsTag(m))}</div>
-      <div class="rp-big rp-incomplete">Incomplete</div>
-      <div class="rp-status st-incomplete" id="rp-status">Incomplete — add modules (Import .pl… or + Add Display / + Add Detector) to calculate the battery</div></div>
+      <div class="rp-big rp-incomplete">\u26A0 Incomplete</div>
+      <div class="rp-status st-incomplete" id="rp-status">\u26A0 Incomplete — add modules (Import .pl… or + Add Display / + Add Detector) to calculate the battery</div></div>
       <div class="rp-card"><div class="rp-k">Messages</div><div class="rp-msgs" id="rp-msgs"><div class="rp-msg needs"><span>No modules yet — use <b>Import .pl…</b> or <b>+ Add Display</b> / <b>+ Add Detector</b> on the sheet.</span></div></div></div>`;
     return;
   }
@@ -9083,6 +9096,7 @@ tfoot td{background:#f7f8f9;font-weight:700}
 .tiles{display:flex;gap:6px;margin:8px 0 2px}.tile{flex:1;border:1px solid #e2e2e2;border-top:3px solid #0c77bc;background:#f7f8f9;padding:5px 7px}
 .tile b{display:block;font-size:15pt;color:#102645;line-height:1.1}.tile span{font-size:7pt;color:#6b6c6b;text-transform:uppercase}
 .tile.pass{border-top-color:#1b7a3a}.tile.pass b{color:#1b7a3a}.tile.fail{border-top-color:#ac242a}.tile.fail b{color:#ac242a}.tile.incomplete{border-top-color:#b07a10}.tile.incomplete b{color:#8a5a00}
+.inc-flag{color:#8a5a00;background:#fdf3dc;font-weight:700;padding:0 2px;border-radius:2px}.stamp .inc-flag,.st .inc-flag{background:none;padding:0;color:inherit}
 .st{font-weight:700}.st.pass{color:#1b7a3a}.st.fail{color:#ac242a}.st.incomplete{color:#8a5a00}
 .math td{font-size:8pt}.math .sym{font-family:Consolas,Menlo,monospace;font-size:7.6pt;color:#102645}.math .sub{font-family:Consolas,Menlo,monospace;font-size:7.6pt}
 .math .res{font-weight:700;white-space:nowrap}.math .ref{font-size:7pt;color:#6b6c6b}
@@ -9108,7 +9122,7 @@ var pages=document.querySelectorAll('.page');pages.forEach(function(p,i){var s=p
 document.documentElement.setAttribute('data-fit','done');})();`;
 
 function v2GaugeSvgPrint(m){
-  if (m.noModules) return '<p style="font-size:9pt;color:#8a5a00;font-weight:700;margin:6px 0">Battery capacity: Incomplete — add modules to calculate</p>';   // QA r3 H1
+  if (m.noModules) return '<p style="font-size:9pt;margin:6px 0">Battery capacity: <span class="inc-flag">\u26A0 Incomplete — add modules to calculate</span></p>';   // QA r3 H1
   const per = isFinite(m.ahPerSupply) ? m.ahPerSupply : 0, bat = m.batteryAh || 0, init = isFinite(m.initialAh) ? m.initialAh / (m.psRequired || 1) : 0;
   const max = Math.ceil(Math.max(CHARGER_MAX_AH, per, bat) * 1.08 / 10) * 10, W = 700, L = 10, R = W - 10, x = v => L + (R - L) * Math.min(Math.max(v, 0), max) / max;
   const fill = m.status === 'pass' ? '#1b7a3a' : m.status === 'fail' ? '#ac242a' : '#b07a10';
@@ -9178,7 +9192,7 @@ function v2SummaryPages(models, H, level){
   return chunks.map((ch, ci) => `<section class="page summary">
     <div class="band"><div><h1>ModuLaser Battery Calculation — Project Summary${ci ? ' (cont.)' : ''}</h1><div class="sub">${v2Esc(H.project)}</div></div><div class="rev">Calculator rev ${v2Esc(H.rev)}<br>Detail level: ${V2_LEVELS[level]}</div></div>
     ${ci ? '' : `<div class="info" style="margin-top:8px">${[['Project', H.project], ['Prepared by', H.preparedBy], ['Date', H.date], ['Network #', H.network], ['Building', H.building], ['Primary CDM location', H.cdm1], ['Backup CDM location', H.cdm2], ['Power supplies', String(models.length)]].map(([k, v]) => `<div><span>${k}</span><b>${v2Esc(v || '—')}</b></div>`).join('')}</div>
-    <div class="tiles"><div class="tile"><b>${models.length}</b><span>Power supplies</span></div><div class="tile pass"><b>${counts.pass}</b><span>Pass</span></div><div class="tile fail"><b>${counts.fail}</b><span>Fail</span></div><div class="tile incomplete"><b>${counts.incomplete}</b><span>Incomplete</span></div></div>`}
+    <div class="tiles"><div class="tile"><b>${models.length}</b><span>Power supplies</span></div><div class="tile pass"><b>${counts.pass}</b><span>Pass</span></div><div class="tile fail"><b>${counts.fail}</b><span>Fail</span></div><div class="tile incomplete"><b>${counts.incomplete}</b><span>\u26A0 Incomplete</span></div></div>`}
     <h2>Power supplies</h2>
     <table><thead><tr><th>Sheet</th><th>PSU</th><th>Area/Group</th><th>Design basis</th><th class="n">Required Ah</th><th>Battery</th><th>Status</th></tr></thead><tbody>
     ${ch.map(m => `<tr><td>${m.idx}</td><td>${v2Esc(v2PsTag(m))}</td><td>${v2Esc(m.area || '—')}</td><td>${v2Esc(m.settings[0][1])}</td><td class="n">${v2AhFmt(m, m.requiredAh)}</td><td>${v2Esc(m.batteryLabel)}</td><td class="st ${m.status}">${v2StatusWord(m.status)}</td></tr>`).join('')}</tbody></table>
@@ -9215,7 +9229,7 @@ function v2PsuPage(m, H, opts){
 function v2BuildPrintHtml(opts){
   opts = Object.assign({ scope: 'all', level: 'standard', bom: !!(document.getElementById('print-bom-toggle') || {}).checked, summary: true, preview: false, html: false }, opts || {});
   const models = v2AllModels(opts.scope), H = v2Header();
-  const body = (opts.summary ? v2SummaryPages(models, H, opts.level) : '') + models.map(m => v2PsuPage(m, H, opts)).join('');
+  const body = v2IncWrap((opts.summary ? v2SummaryPages(models, H, opts.level) : '') + models.map(m => v2PsuPage(m, H, opts)).join(''));
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${v2Esc(H.project)} — ModuLaser Battery Calculation</title><style>${V2_PRINT_CSS}</style></head><body class="${opts.preview ? 'preview' : ''}">${body}<script>${V2_FIT_SCRIPT}<\/script></body></html>`;
 }
 
@@ -9291,14 +9305,14 @@ function v2X(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&
 
 /* ---------- XLSX ---------- */
 // style ids: 0 plain · 1 thin border · 2 thin border bold · 3 bold (no border) · 4 thin border, right-aligned number
-function v2SheetXml(rows, widths){
+function v2SheetXml(rows, widths, xo){ xo = xo || {};
   const col = i => { let s = ''; i++; while (i){ const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
   const maxLevel = rows.reduce((n, r) => Math.max(n, r.level || 0), 0);
   const data = rows.map((r, ri) => {
     const attrs = (r.level ? ` outlineLevel="${r.level}"` : '');
     const cells = (r.cells || []).map((v, ci) => {
       if (v == null || v === '') return r.style ? `<c r="${col(ci)}${ri + 1}" s="${r.style}"/>` : '';
-      const st = (typeof v === 'number' && r.style === 1) ? 4 : (r.style || 0);
+      const st = (typeof v === 'string' && v.indexOf('\u26A0') >= 0) ? (xo.noFill ? 6 : 5) : (typeof v === 'number' && r.style === 1) ? 4 : (r.style || 0);   // 5 = 02.00.005 amber Incomplete (fill); 6 = amber text only for the CAD Schedule, which stays fill-free for AutoCAD pasting
       return typeof v === 'number' && isFinite(v) ? `<c r="${col(ci)}${ri + 1}" s="${st}"><v>${v}</v></c>` : `<c r="${col(ci)}${ri + 1}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${v2X(v)}</t></is></c>`;
     }).join('');
     return `<row r="${ri + 1}"${attrs}>${cells}</row>`;
@@ -9329,7 +9343,7 @@ function v2DetailRows(models, level){
   if (H.network) rows.push({ cells: ['Network Number', H.network] }); if (H.building) rows.push({ cells: ['Building', H.building] });
   rows.push({ cells: [] });
   models.forEach(m => {
-    rows.push({ style: 3, cells: [`${v2PsTag(m)} — ${m.area || 'No Area/Group'}`, 'Required Ah', m.noModules ? 'Incomplete' : (isFinite(m.requiredAh) ? +m.requiredAh.toFixed(2) : '—'), 'Status', v2StatusWord(m.status)] });
+    rows.push({ style: 3, cells: [`${v2PsTag(m)} — ${m.area || 'No Area/Group'}`, 'Required Ah', m.noModules ? '\u26A0 Incomplete' : (isFinite(m.requiredAh) ? +m.requiredAh.toFixed(2) : '—'), 'Status', v2StatusWord(m.status)] });
     if (level === 'summary'){
       rows.push({ level: 1, cells: ['Battery', m.batteryLabel] }, { level: 1, cells: ['Design Basis', m.settings[0][1]] }, { level: 1, cells: ['Addressing', (m.settings.find(x => x[0] === 'Addressing') || [])[1] || ''] }, { level: 1, cells: ['Total load (mA)', m.totalMa] });
     } else {
@@ -9349,13 +9363,13 @@ function v2DetailRows(models, level){
 }
 function v2BuildXlsx(opts){
   const level = (opts && opts.level) || 'standard', models = v2AllModels((opts && opts.scope) || 'all');
-  const sheets = [['CAD Schedule', v2SheetXml(v2CadRows(models), [24, 26, 11, 9, 14, 12])], ['Detail', v2SheetXml(v2DetailRows(models, level), [30, 34, 40, 14, 30, 12, 12, 14])]];
+  const sheets = [['CAD Schedule', v2SheetXml(v2CadRows(models), [24, 26, 11, 9, 14, 12], { noFill: true })], ['Detail', v2SheetXml(v2DetailRows(models, level), [30, 34, 40, 14, 30, 12, 12, 14])]];
   const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<fonts count="2"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font></fonts>
-<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>
+<fonts count="3"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FF8A5A00"/><name val="Arial"/></font></fonts>
+<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFDF3DC"/><bgColor indexed="64"/></patternFill></fill></fills>
 <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color auto="1"/></left><right style="thin"><color auto="1"/></right><top style="thin"><color auto="1"/></top><bottom style="thin"><color auto="1"/></bottom><diagonal/></border></borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf></cellXfs>
+<cellXfs count="7"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf><xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1"/></cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
   const files = [
     { name: '[Content_Types].xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>` },
@@ -9389,7 +9403,7 @@ const V2_DOCX_STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><
 function v2DocxTable(head, rows, widths, o){
   o = o || {};
   const tw = widths.reduce((a, b) => a + b, 0);
-  const cell = (t, w, opt) => `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${o.noWrap ? '<w:noWrap/>' : ''}${opt.fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${opt.fill}"/>` : ''}${opt.span ? `<w:gridSpan w:val="${opt.span}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/>${opt.right ? '<w:jc w:val="right"/>' : ''}</w:pPr>${v2DocxRun(t, { b: opt.b, sz: opt.sz || 16, color: opt.color, mono: opt.mono })}</w:p></w:tc>`;
+  const cell = (t, w, opt0) => { const inc = String(t).indexOf('\u26A0') >= 0; const opt = inc ? Object.assign({}, opt0, { fill: 'FDF3DC', color: '8A5A00', b: true }) : opt0; return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${o.noWrap ? '<w:noWrap/>' : ''}${opt.fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${opt.fill}"/>` : ''}${opt.span ? `<w:gridSpan w:val="${opt.span}"/>` : ''}</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/>${opt.right ? '<w:jc w:val="right"/>' : ''}</w:pPr>${v2DocxRun(t, { b: opt.b, sz: opt.sz || 16, color: opt.color, mono: opt.mono })}</w:p></w:tc>`; };
   // opt.spans (02.00.003): per-cell grid spans, e.g. [7, 1, 1] so a summary label spans the descriptive columns
   const tr = (cells, opt) => { let col = 0; return `<w:tr><w:trPr><w:cantSplit/></w:trPr>${cells.map((c, i) => { const sp = (opt.spans && opt.spans[i]) || 1; const at = col; col += sp;
     const w = widths.slice(at, at + sp).reduce((a, b) => a + b, 0);
@@ -9413,7 +9427,7 @@ async function v2BuildDocx(opts){
     const c = { pass: 0, fail: 0, incomplete: 0 }; models.forEach(m => c[m.status]++);
     body += band('ModuLaser Battery Calculation — Project Summary', `${H.project} · Calculator rev ${H.rev} · Detail level: ${V2_LEVELS[opts.level]}`);
     body += v2DocxTable(null, [['Project', H.project, 'Prepared by', H.preparedBy || '—'], ['Date', H.date || '—', 'Network #', H.network || '—'], ['Building', H.building || '—', 'Primary CDM', H.cdm1 || '—'], ['Backup CDM', H.cdm2 || '—', 'Power supplies', String(models.length)]], [1700, 3700, 1700, 3700]);
-    body += v2DocxTable(['Power supplies', 'Pass', 'Fail', 'Incomplete'], [{ cells: [String(models.length), String(c.pass), String(c.fail), String(c.incomplete)], b: true, sz: 24 }], [2700, 2700, 2700, 2700]);
+    body += v2DocxTable(['Power supplies', 'Pass', 'Fail', '\u26A0 Incomplete'], [{ cells: [String(models.length), String(c.pass), String(c.fail), String(c.incomplete)], b: true, sz: 24 }], [2700, 2700, 2700, 2700]);
     body += v2DocxH('Power supplies');
     body += v2DocxTable(['Sheet', 'PSU', 'Area/Group', 'Design basis', 'Required Ah', 'Battery', 'Status'], models.map(m => [m.idx, v2PsTag(m), m.area || '—', m.settings[0][1], v2AhFmt(m, m.requiredAh), m.batteryLabel, v2StatusWord(m.status)]), [600, 1300, 1700, 2500, 1100, 2300, 1300], { right: [4] });
   }
@@ -10072,7 +10086,7 @@ function mlpBuildDesign(){
       battery: { model: bat, ah: isFinite(m.batteryAh) ? m.batteryAh : null, qty: bomQty, part: bomBat ? bomBat.partNumber : '' },
       requiredAh: !m.noModules && isFinite(m.requiredAh) ? +m.requiredAh.toFixed(2) : null, incomplete: m.noModules || undefined,
       standbyHours: v2Num(v2Val(locEl, '.standby-hours')), alarmMinutes: v2Num(v2Val(locEl, '.alarm-minutes')),
-      designBasis: m.basisKey || '', totalMa: isFinite(m.totalMa) ? m.totalMa : null, status: v2StatusWord(m.status), flags: m.invalidList || [] });
+      designBasis: m.basisKey || '', totalMa: isFinite(m.totalMa) ? m.totalMa : null, status: v2StatusWord(m.status).replace('\u26A0 ', ''), flags: m.invalidList || [] });
     const rows = Array.from(locEl.querySelectorAll('[data-role="module"]'));
     const sa = addrSchemeOf(locEl) === 'standalone', net = sheetSenseNet(locEl);   // MLP 1.4.0: per-device SenseNET network
     m.modules.forEach((mod, ri) => {
@@ -10223,9 +10237,9 @@ body[data-tb-view=config] #v2-center{width:auto!important;max-width:none!importa
    (same engine: masd-engine.js; same project file: modulaser-project.js)
    Modes · Config (design) · Legacy imports · Field-change loop · Reports
    ===================================================================== */
-const TB_CALC_LINEAGE = '02.00.004';          // Battery Calculator revision this Toolbox embeds (same engine)
-// Toolbox revision -> Battery Calculator revision it embedded (for comparing Toolbox-saved files)
 const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005' };
+const TB_CALC_LINEAGE = (() => { const l = AMENDMENTS[AMENDMENTS.length - 1]; return TB_LINEAGE_BY_REV[`${l.major}.${l.minor}.${l.rev}`] || '02.00.005'; })();   // QA F1: derived from the running Toolbox revision          // Battery Calculator revision this Toolbox embeds (same engine)
+// Toolbox revision -> Battery Calculator revision it embedded (for comparing Toolbox-saved files)
 const TB_ROLES = MLP.APPROVAL_ROLES;
 const tbEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const tbNum = v => { if (v == null || String(v).trim() === '') return null; const n = Number(String(v).trim()); return isFinite(n) ? n : NaN; };

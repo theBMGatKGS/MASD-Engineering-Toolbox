@@ -5,7 +5,7 @@ import os as _os, tempfile as _tf
 MLP_OUT=_os.environ.get('MLP_TEST_OUT') or _tf.mkdtemp(prefix='mlp-test-')   # all generated output goes here (QA r3)
 def _od(*p):
     d=_os.path.join(MLP_OUT,*p); _os.makedirs(d,exist_ok=True); return d.rstrip('/')+'/'
-URL='file:///workspace/MASD-Engineering-Toolbox/index.html'; SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
+TBDIR=os.environ.get('TOOLBOX_DIR','/workspace/MASD-Engineering-Toolbox').rstrip('/'); URL='file://'+TBDIR+'/index.html'; SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
 os.makedirs(SH,exist_ok=True); os.makedirs(OUT,exist_ok=True)
 FX='/workspace/tb/legacy/fixtures/'; PL=sorted(glob.glob('/workspace/pl-samples/*.pl'))
 R=[]
@@ -24,7 +24,7 @@ async def main():
     chk('engine block byte-identical to masd-engine.js', eng.strip()==open('/workspace/tb/engine/masd-engine.js').read().strip())
     calc=open('/workspace/ModuLaser-Battery-Calculator/modulaser_battery_calculator.html').read()
     chk('engine identical to calculator', eng.strip() in calc)
-    chk('no CDN references', 'fonts.googleapis' not in open('/workspace/MASD-Engineering-Toolbox/index.html').read())
+    chk('no CDN references', 'fonts.googleapis' not in open(TBDIR+'/index.html').read())
     # ---- modes
     for m in ['calc','config','both']:
         await pg.click(f'#tb-mode [data-mode={m}]'); await pg.wait_for_timeout(150)

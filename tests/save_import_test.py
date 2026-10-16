@@ -2,7 +2,7 @@
 and an older Toolbox file (00.01.000) must still warn. Also checks the calc lineage written into .mlproj.json."""
 import asyncio, os, sys, re, tempfile
 from playwright.async_api import async_playwright
-URL=os.environ.get('APP','file:///workspace/MASD-Engineering-Toolbox/index.html'); TMP=os.environ.get('MLP_TEST_OUT') or tempfile.mkdtemp()
+URL=os.environ.get('APP','file://'+os.environ.get('TOOLBOX_DIR','/workspace/MASD-Engineering-Toolbox').rstrip('/')+'/index.html'); TMP=os.environ.get('MLP_TEST_OUT') or tempfile.mkdtemp()
 R=[]
 def chk(n,c,i=''): R.append(bool(c)); print('PASS' if c else 'FAIL',n,str(i)[:300])
 async def first_prompt(pg, path):
@@ -31,7 +31,13 @@ async def main():
     t,bt=await first_prompt(pg, op)
     chk('older Toolbox file (00.01.000) still warns', 'Older revision' in t, [t,bt])
     lin=await pg.evaluate("TB_CALC_LINEAGE")
-    chk('calc lineage is 02.00.004', lin=='02.00.004', lin)
+    # QA F1: derive the expected lineage — the Toolbox's own lineage map for its running revision, and the Battery Calculator's latest revision-log entry
+    exp=await pg.evaluate("TB_LINEAGE_BY_REV[runningRevisionFull().replace(/^\\D*/,'').slice(0,9)]")
+    import re as _re
+    cal=open(os.environ.get('CALC_HTML','/workspace/ModuLaser-Battery-Calculator/modulaser_battery_calculator.html')).read()
+    am=cal[cal.index('const AMENDMENTS = ['):]; am=am[:am.index('\n];')]
+    last=_re.findall(r'rev: "(\d+)", major: "(\d+)", minor: "(\d+)"',am)[-1]; calrev=f'{last[1]}.{last[2]}.{last[0]}'
+    chk('calc lineage matches the lineage map and the Battery Calculator revision', lin==exp==calrev, [lin,exp,calrev])
     chk('no page errors', not errs, errs)
     await b.close()
   print('SUMMARY',sum(R),'/',len(R)); sys.exit(0 if all(R) else 1)

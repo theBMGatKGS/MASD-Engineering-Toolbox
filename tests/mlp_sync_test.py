@@ -1,7 +1,7 @@
 """Shared-module sync check: modulaser-project.js and masd-engine.js must be identical everywhere they are used."""
-import hashlib, re, sys
+import hashlib, os, re, sys
 H=lambda b: hashlib.sha256(b.encode()).hexdigest()[:16]
-TB='/workspace/MASD-Engineering-Toolbox/'; CA='/workspace/ModuLaser-Battery-Calculator/'; RP='/workspace/ModuLaser-Commisioning-Report/'
+TB=os.environ.get('TOOLBOX_DIR','/workspace/MASD-Engineering-Toolbox').rstrip('/')+'/'; CA='/workspace/ModuLaser-Battery-Calculator/'; RP='/workspace/ModuLaser-Commisioning-Report/'
 def block(path, sid):
     s=open(path).read(); m=re.search(r'<script id="%s">\n(.*?)\n</script>'%sid, s, re.S); return m.group(1) if m else None
 mlp={ 'source /workspace/mlp': open('/workspace/mlp/modulaser-project.js').read(),

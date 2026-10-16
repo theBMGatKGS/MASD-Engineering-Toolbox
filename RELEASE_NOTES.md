@@ -13,6 +13,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 - **Auto addressing** (Calculator): **new build** — Networked or Standalone?, then Auto address? Yes / No; **existing project** gaining modules (new .pl, new sheet, more modules, Merge) — Continue addressing per previous sheets (only the new modules; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? → (mode) → address. Logged, one-step Undo.
 - **Excel CAD Schedule** tables start with each sheet's Standby time (h), Alarm time (min) and Safety margin (%).
 - **Cluster Validation Report print redesign** (Brent approved): KGS palette, Entry point / Ribbon Path / status chips, running header and footer with Page n of N on every page, repeated table headers, rows never split, no wrapping.
+- **Incomplete shown in amber with ⚠** (Brent 6:07 PM): status, empty-sheet Ah / battery / PSU recommendation, sidebar, Live Results, print, Word, Excel and the CVR pending chip; needs-entry amber on screen, #8a5a00 on #fdf3dc in exports; `.mlproj.json` keeps the plain status.
 
 ### QA audit
 | Date | Commits audited | Result | Report |
