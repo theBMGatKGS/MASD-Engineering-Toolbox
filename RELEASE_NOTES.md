@@ -10,7 +10,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 **In-app revision:** 00.01.003_261016 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.005
 
 - **Harmonized with Battery Calculator 02.00.005** (engine 1.0.0 and `modulaser-project.js` 1.4.0 unchanged).
-- **Allow auto addressing?** Yes / No after a .pl import (after Confirm Settings? → Confirm) and whenever modules are added (+ Add Display / + Add Detector, Import Calc → Merge sheets). Yes: Networked sheets 1, 2, 3… in sheet order across all Networked sheets (SenseNET network 2 starts at 1 past 127, with the infrastructure notice); Standalone sheets start at 1 on every sheet. Logged in the address change log, one-step Undo. No: addresses stay as entered.
+- **Auto addressing** (Calculator): **new build** — Networked or Standalone?, then Auto address? Yes / No; **existing project** gaining modules (new .pl, new sheet, more modules, Merge) — Continue addressing per previous sheets (only the new modules; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? → (mode) → address. Logged, one-step Undo.
 - **Excel CAD Schedule** tables start with each sheet's Standby time (h), Alarm time (min) and Safety margin (%).
 
 ### QA audit
