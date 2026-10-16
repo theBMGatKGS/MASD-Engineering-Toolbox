@@ -5,7 +5,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
-## v00.01.002 — Harmonized with Battery Calculator 02.00.004 (2026-10-15) · pre-release, not yet released
+## v00.01.002 — Harmonized with Battery Calculator 02.00.004 (2026-10-15) · pre-release, released 2026-10-16
 
 **In-app revision:** 00.01.002_261015 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.004
 
