@@ -6,6 +6,14 @@ MLP_OUT=_os.environ.get('MLP_TEST_OUT') or _tf.mkdtemp(prefix='mlp-test-')   # a
 def _od(*p):
     d=_os.path.join(MLP_OUT,*p); _os.makedirs(d,exist_ok=True); return d.rstrip('/')+'/'
 URL=os.environ.get('RPT_URL','http://localhost:8765/index.html'); OUT=_od('tb-out-rpt'); os.makedirs(OUT,exist_ok=True)
+
+def _latest_report_rev():
+    # Expected revision = last AMENDMENTS entry in the Report's index.html (what revShort()/fullRev() use).
+    import re, urllib.request
+    html=urllib.request.urlopen(URL).read().decode('utf-8')
+    maj=re.search(r'const APP_MAJOR = "(\d+)"',html).group(1); mnr=re.search(r'const APP_MINOR = "(\d+)"',html).group(1)
+    ents=re.findall(r'AMENDMENTS\.push\(\{\s*rev:\s*"(\d+)"(?:,\s*major:\s*"(\d+)")?(?:,\s*minor:\s*"(\d+)")?',html)
+    r,ma,mi=ents[-1]; return f"{ma or maj}.{mi or mnr}.{r}"
 SH=_od('toolbox-shots'); os.makedirs(SH,exist_ok=True)
 R=[]
 def chk(n,c,i=''): R.append((n,bool(c))); print('PASS' if c else 'FAIL', n, i)
@@ -93,7 +101,8 @@ async def main():
     chk('no edit-log entry without a technician name', not any(e.get('by') in ('(name not set)','',None) for e in (await pg.evaluate('state.editLog'))))
     chk('site hash present', o['site'].get('hash','').startswith('sha256:'))
     chk('edit log in site', len(o['site']['state'].get('editLog',[]))>=2)
-    chk('revision 02.00.001', '02.00.001' in o['savedBy']['rev'], o['savedBy'])
+    exp=_latest_report_rev()
+    chk('revision matches latest Report revision log entry '+exp, exp in o['savedBy']['rev'], o['savedBy'])
     chk('no page errors', not errs, errs)
     await b.close()
 asyncio.run(main())
