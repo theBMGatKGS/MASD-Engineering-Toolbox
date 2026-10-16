@@ -9,9 +9,14 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 - **Web / PWA (live):** https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.
 
-> **Version 00.01.002_261015 — pre-release.** 01.00.000 is reserved for the refined first release.
+> **Version 00.01.003_261016 — pre-release.** 01.00.000 is reserved for the refined first release.
 > Calculation engine: **MASD engine 1.0.0** · Project file: **modulaser-project 1.4.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.00.004**
+
+### What's new in 00.01.003
+- **Harmonized with Battery Calculator 02.00.005** (engine 1.0.0 and `modulaser-project.js` 1.4.0 unchanged).
+- **Allow auto addressing?** Yes / No after a .pl import (after Confirm Settings? → Confirm) and whenever modules are added (+ Add Display / + Add Detector, Import Calc → Merge sheets). Yes: Networked sheets 1, 2, 3… in sheet order across all Networked sheets (SenseNET network 2 starts at 1 past 127, with the infrastructure notice); Standalone sheets start at 1 on every sheet. Logged in the address change log, one-step Undo. No: addresses stay as entered.
+- **Excel CAD Schedule** tables start with each sheet's Standby time (h), Alarm time (min) and Safety margin (%).
 
 ### What's new in 00.01.002
 - **Valid defaults are no longer flagged** in the Calculator: Design Basis, Standby (h), Alarm (min), Ambient Temp., Module Type, Power, Addressing, supply mode, edition and margin keep their defaults without amber and no longer make a sheet *Needs entry*; only empty required fields are amber. Confirm defaults kept but no longer needed (harmless).

@@ -1,8 +1,8 @@
 {
   "name": "masd-engineering-toolbox",
   "productName": "MASD Engineering Toolbox",
-  "version": "0.1.2",
-  "appRevision": "00.01.002",
+  "version": "0.1.3",
+  "appRevision": "00.01.003",
   "description": "ModuLaser MASD design configuration, battery calculation, legacy migration and field-change approval.",
   "author": "Brent",
   "license": "GPL-3.0",

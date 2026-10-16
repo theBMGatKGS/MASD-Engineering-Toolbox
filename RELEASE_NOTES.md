@@ -5,6 +5,19 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.01.003 — Harmonized with Battery Calculator 02.00.005 (2026-10-16) · not yet released
+
+**In-app revision:** 00.01.003_261016 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.005
+
+- **Harmonized with Battery Calculator 02.00.005** (engine 1.0.0 and `modulaser-project.js` 1.4.0 unchanged).
+- **Allow auto addressing?** Yes / No after a .pl import (after Confirm Settings? → Confirm) and whenever modules are added (+ Add Display / + Add Detector, Import Calc → Merge sheets). Yes: Networked sheets 1, 2, 3… in sheet order across all Networked sheets (SenseNET network 2 starts at 1 past 127, with the infrastructure notice); Standalone sheets start at 1 on every sheet. Logged in the address change log, one-step Undo. No: addresses stay as entered.
+- **Excel CAD Schedule** tables start with each sheet's Standby time (h), Alarm time (min) and Safety margin (%).
+
+### QA audit
+| Date | Commits audited | Result | Report |
+|---|---|---|---|
+| pending | — | QA/Auditor review pending | `qa/brief-02.00.005.md` |
+
 ## v00.01.002 — Harmonized with Battery Calculator 02.00.004 (2026-10-15) · pre-release, released 2026-10-16
 
 **In-app revision:** 00.01.002_261015 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.004
