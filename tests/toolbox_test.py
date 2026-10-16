@@ -1,11 +1,15 @@
 """MASD Engineering Toolbox 00.01.000 — end-to-end on real data (pl-samples, legacy fixtures, real Report round trip)."""
 import asyncio, json, os, sys, glob, zipfile
+# QA D1: never run silently against the wrong checkout — TOOLBOX_DIR must be set explicitly.
+if not os.environ.get('TOOLBOX_DIR'):
+    sys.stderr.write('ERROR: set TOOLBOX_DIR to the Toolbox checkout to test (e.g. TOOLBOX_DIR=$PWD/..). Refusing to guess.\n'); sys.exit(2)
+
 from playwright.async_api import async_playwright
 import os as _os, tempfile as _tf
 MLP_OUT=_os.environ.get('MLP_TEST_OUT') or _tf.mkdtemp(prefix='mlp-test-')   # all generated output goes here (QA r3)
 def _od(*p):
     d=_os.path.join(MLP_OUT,*p); _os.makedirs(d,exist_ok=True); return d.rstrip('/')+'/'
-TBDIR=os.environ.get('TOOLBOX_DIR','/workspace/MASD-Engineering-Toolbox').rstrip('/'); URL='file://'+TBDIR+'/index.html'; SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
+TBDIR=os.environ['TOOLBOX_DIR'].rstrip('/'); URL='file://'+TBDIR+'/index.html'; SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
 os.makedirs(SH,exist_ok=True); os.makedirs(OUT,exist_ok=True)
 FX='/workspace/tb/legacy/fixtures/'; PL=sorted(glob.glob('/workspace/pl-samples/*.pl'))
 R=[]

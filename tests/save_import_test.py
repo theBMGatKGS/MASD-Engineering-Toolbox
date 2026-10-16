@@ -1,8 +1,12 @@
 """Regression (00.01.001 QA F1): a file saved by this Toolbox must re-import without an 'Older revision' warning,
 and an older Toolbox file (00.01.000) must still warn. Also checks the calc lineage written into .mlproj.json."""
 import asyncio, os, sys, re, tempfile
+# QA D1: never run silently against the wrong checkout — TOOLBOX_DIR must be set explicitly.
+if not os.environ.get('TOOLBOX_DIR'):
+    sys.stderr.write('ERROR: set TOOLBOX_DIR to the Toolbox checkout to test (e.g. TOOLBOX_DIR=$PWD/..). Refusing to guess.\n'); sys.exit(2)
+
 from playwright.async_api import async_playwright
-URL=os.environ.get('APP','file://'+os.environ.get('TOOLBOX_DIR','/workspace/MASD-Engineering-Toolbox').rstrip('/')+'/index.html'); TMP=os.environ.get('MLP_TEST_OUT') or tempfile.mkdtemp()
+URL=os.environ.get('APP','file://'+os.environ['TOOLBOX_DIR'].rstrip('/')+'/index.html'); TMP=os.environ.get('MLP_TEST_OUT') or tempfile.mkdtemp()
 R=[]
 def chk(n,c,i=''): R.append(bool(c)); print('PASS' if c else 'FAIL',n,str(i)[:300])
 async def first_prompt(pg, path):
@@ -37,6 +41,7 @@ async def main():
     cal=open(os.environ.get('CALC_HTML','/workspace/ModuLaser-Battery-Calculator/modulaser_battery_calculator.html')).read()
     am=cal[cal.index('const AMENDMENTS = ['):]; am=am[:am.index('\n];')]
     last=_re.findall(r'rev: "(\d+)", major: "(\d+)", minor: "(\d+)"',am)[-1]; calrev=f'{last[1]}.{last[2]}.{last[0]}'
+    chk('lineage map has an entry for the running Toolbox revision (no fallback)', not await pg.evaluate('TB_LINEAGE_MISSING'))
     chk('calc lineage matches the lineage map and the Battery Calculator revision', lin==exp==calrev, [lin,exp,calrev])
     chk('no page errors', not errs, errs)
     await b.close()

@@ -1,7 +1,11 @@
 """Shared-module sync check: modulaser-project.js and masd-engine.js must be identical everywhere they are used."""
 import hashlib, os, re, sys
+# QA D1: never run silently against the wrong checkout — TOOLBOX_DIR must be set explicitly.
+if not os.environ.get('TOOLBOX_DIR'):
+    sys.stderr.write('ERROR: set TOOLBOX_DIR to the Toolbox checkout to test (e.g. TOOLBOX_DIR=$PWD/..). Refusing to guess.\n'); sys.exit(2)
+
 H=lambda b: hashlib.sha256(b.encode()).hexdigest()[:16]
-TB=os.environ.get('TOOLBOX_DIR','/workspace/MASD-Engineering-Toolbox').rstrip('/')+'/'; CA='/workspace/ModuLaser-Battery-Calculator/'; RP='/workspace/ModuLaser-Commisioning-Report/'
+TB=os.environ['TOOLBOX_DIR'].rstrip('/')+'/'; CA='/workspace/ModuLaser-Battery-Calculator/'; RP='/workspace/ModuLaser-Commisioning-Report/'
 def block(path, sid):
     s=open(path).read(); m=re.search(r'<script id="%s">\n(.*?)\n</script>'%sid, s, re.S); return m.group(1) if m else None
 mlp={ 'source /workspace/mlp': open('/workspace/mlp/modulaser-project.js').read(),
