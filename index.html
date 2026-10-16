@@ -477,6 +477,7 @@
   .addr-mix-banner{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:0 0 8px; padding:8px 12px; border:1px solid #d29922; border-left-width:4px; border-radius:6px; background:#2a2312; color:#e6edf3; font-size:12.5px; }
   .addr-mix-banner[hidden], .addr-undo-bar[hidden]{ display:none; }
   .addr-undo-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:0 0 8px; padding:6px 12px; border:1px solid #3a4656; border-left:4px solid #3a9ad6; border-radius:6px; background:#141c26; color:#e6edf3; font-size:12.5px; }
+  .rp-big.rp-incomplete{ color:#d29922; font-size:26px; }
   .addr-undo-bar .aub-act{ display:flex; gap:6px; margin-left:auto; }
   .adl{ max-height:60vh; overflow:auto; } .adl-e{ margin:0 0 10px; } .adl-h{ font-size:12px; margin-bottom:4px; }
   .adl-t{ border-collapse:collapse; font-size:11.5px; width:100%; } .adl-t th, .adl-t td{ border:1px solid #2a3441; padding:2px 6px; text-align:left; white-space:nowrap; }
@@ -1642,7 +1643,7 @@ body.v2 .model-cell{ font-size:10.5px; }
           <div class="qs-step-num">4</div>
           <div class="qs-step-body">
             <div class="qs-step-title" id="qs-step-design-basis">Pick a design basis</div>
-            <p>NFPA 72 Standard/Voice, NFPA 72 + NFPA 110 Generator Backup (Non-Voice/Voice), UFC 3-600-01 Hydro or FA/MNS, AWS, CAN/ULC-S524:2024 Standard/Voice, four BS 5839-1 categories (M/L, M/L + Generator, P Staffed, P Unstaffed), or Custom — sets Standby and Alarm duration. The generator-backup presets reflect a 4-hour standby basis where a code-compliant NFPA 110 generator serves as secondary power in place of the full 24-hour battery standby — confirm with your AHJ that a generator qualifies for your specific installation before relying on this basis. BS 5839-1 presets use that standard's own formula rather than the NFPA-72-style formula used everywhere else — its De-Rating factor is determined automatically (1 or 1.75, per Annex E's own rule) based on the selected battery, and the Safety Margin control locks to 25% automatically since that matches BS 5839-1's fixed aging factor. Category P (Unstaffed) is the one preset where Standby stays editable, capped at 72 hours. A new <b>Ambient Temperature</b> selector next to Alarm applies a de-rating multiplier when batteries won't sit at the standard 77°F/25°C — set per sheet, since different power supplies may be in different environments. When a design basis has a known code citation and the sheet's calculation is clean, a compliance statement citing the exact section/paragraph appears at the bottom of the sheet automatically.</p>
+            <p>NFPA 72 Standard/Voice, NFPA 72 + NFPA 110 Generator Backup (Non-Voice/Voice), UFC 3-600-01 Hydro or FA/MNS, AWS, CAN/ULC-S524:2024 Standard/Voice, four BS 5839-1 categories (M/L, M/L + Generator, P Staffed, P Unstaffed), or Custom — sets Standby and Alarm duration. <b>New sheets start on <i>- Select -</i></b> for Design Basis and Ambient Temperature: both are amber (needs entry) and the sheet stays INCOMPLETE until you choose them; nothing is de-rated meanwhile. Saved and legacy files keep their values. The generator-backup presets reflect a 4-hour standby basis where a code-compliant NFPA 110 generator serves as secondary power in place of the full 24-hour battery standby — confirm with your AHJ that a generator qualifies for your specific installation before relying on this basis. BS 5839-1 presets use that standard's own formula rather than the NFPA-72-style formula used everywhere else — its De-Rating factor is determined automatically (1 or 1.75, per Annex E's own rule) based on the selected battery, and the Safety Margin control locks to 25% automatically since that matches BS 5839-1's fixed aging factor. Category P (Unstaffed) is the one preset where Standby stays editable, capped at 72 hours. A new <b>Ambient Temperature</b> selector next to Alarm applies a de-rating multiplier when batteries won't sit at the standard 77°F/25°C — set per sheet, since different power supplies may be in different environments. When a design basis has a known code citation and the sheet's calculation is clean, a compliance statement citing the exact section/paragraph appears at the bottom of the sheet automatically.</p>
             <figure class="qs-figure"><img data-qs-slot="3-design-basis" alt="Design basis dropdown"><figcaption>Screenshot: Design Basis dropdown expanded, with Ambient Temperature selector</figcaption></figure>
           </div>
         </div>
@@ -1722,7 +1723,7 @@ body.v2 .model-cell{ font-size:10.5px; }
           <div class="qs-step-num">12</div>
           <div class="qs-step-body">
             <div class="qs-step-title" id="qs-step-results">Read the live results panel</div>
-            <p>The right-hand panel updates as you type. <b>Required capacity</b> shows the Ah per supply in large type with a gauge: the solid part is the standby + alarm load, the lighter part is the safety margin and temperature de-rating, the blue mark is the selected battery and the dashed red mark is the 65 Ah maximum. Below it a status line reads <b>PASS</b> (valid, no flags, within the selected battery and 65 Ah), <b>FAIL</b> (an INVALID CALCULATION condition, more than one supply needed, or capacity beyond the battery / 65 Ah) or <b>INCOMPLETE</b> (Validation Error flags still open). Then the selected battery and recommended hardware, the load breakdown (modules, power supply quiescent + AUX, total, standby/alarm/required Ah), the clusters on this supply, and the sheet's own validation messages — red for INVALID CALCULATION, yellow for Validation Errors, amber for fields that still need entry (with <b>Show next ›</b> to jump to each one). The full calculation, hardware and Bill of Materials stay on the sheet below the module table.</p>
+            <p>The right-hand panel updates as you type. <b>Required capacity</b> shows the Ah per supply in large type with a gauge: the solid part is the standby + alarm load, the lighter part is the safety margin and temperature de-rating, the blue mark is the selected battery and the dashed red mark is the 65 Ah maximum. Below it a status line reads <b>PASS</b> (valid, no flags, within the selected battery and 65 Ah), <b>FAIL</b> (an INVALID CALCULATION condition, more than one supply needed, or capacity beyond the battery / 65 Ah) or <b>INCOMPLETE</b> (Validation Error flags still open). Then the selected battery and recommended hardware, the load breakdown (modules, power supply quiescent + AUX, total, standby/alarm/required Ah), the clusters on this supply, and the sheet's own validation messages — red for INVALID CALCULATION, yellow for Validation Errors, amber for fields that still need entry (with <b>Show next ›</b> to jump to each one). The full calculation, hardware and Bill of Materials stay on the sheet below the module table. Until a sheet has modules, Live Results and the sidebar show <b>Incomplete</b> for it: no Ah figure, no PASS.</p>
           </div>
         </div>
         <div class="qs-step">
@@ -1789,7 +1790,7 @@ body.v2 .model-cell{ font-size:10.5px; }
           <div class="qs-step-num">20</div>
           <div class="qs-step-body">
             <div class="qs-step-title" id="qs-step-import-pl">Import PipeCAD .pl files</div>
-            <p><b>File → Import .pl…</b> (or <b>Import .pl</b> in the quick row) opens a four-step wizard. <b>1 Battery settings</b> — set Design Basis, standby/alarm, ambient temperature, safety margin, NFPA 72 edition, power-supply capacity and supply mode <i>first</i>; they become the defaults on every new sheet and drive the 65 Ah check. <b>2 Pick files</b> — drop or choose one or more .pl files; each shows its project (the file name is used when ProjectName is blank), units (metric files are converted to feet), Areas/Groups, detectors, displays and PSU positions. Untick any Area/Group you don't want. Unknown detector types or display part numbers are listed and skipped. <b>3 Rename</b> — set a naming pattern from {project} {file} {area} {name} {##} (default <span class="mono-inline">{project}-{area}-Det{##}</span>, remembered for next time), edit any zone or Area/Group name, and watch the live character counter. The ModuLaser display shows 16 characters total, including spaces, so names over 16 are blocked until shortened — use the suggested short name or <b>Shorten all over 16</b>. Duplicate names are outlined in red. <b>4 Power supplies</b> — each Area/Group gets at least one supply, a supply never spans Areas/Groups, and each takes at most 4 detectors and 1 display with the required battery ≤ 65 Ah (display load included). Suggestions start from PSU positions in the file (nearest device first) and devices within 3 ft of each other in plan view (X/Y); oversize groups are split by distance. Any device that isn't near a file PSU or within 3 ft of another device is <i>not</i> auto-assigned — it waits in that Area/Group's <b>Unassigned — group these to a power supply</b> tray, and you're prompted to group it: drag it onto a supply card or use <i>Move to…</i>, and click <b>+ Add power supply</b> for more supplies (removing a supply sends its devices back to the tray). <b>Pack into fewest</b> is an optional shortcut that assigns the whole Area/Group to the fewest supplies. <b>Create sheets</b> stays disabled, showing how many detectors are still unassigned, until every device is on a supply and every rule passes. One sheet is created per supply, with type, zone name, fan speed and display model filled in, its Location set to the Area/Group (so the sidebar groups them), and addresses and anything the file doesn't provide highlighted for you to enter — the sidebar shows those sheets with an amber <i>needs entry</i> dot until you finish.</p>
+            <p><b>File → Import .pl…</b> (or <b>Import .pl</b> in the quick row) opens a four-step wizard. <b>1 Battery settings</b> — set Design Basis, standby/alarm, ambient temperature, safety margin, NFPA 72 edition, power-supply capacity and supply mode <i>first</i>; they become the defaults on every new sheet and drive the 65 Ah check. <b>2 Pick files</b> — drop or choose one or more .pl files; each shows its project (the file name is used when ProjectName is blank), units (metric files are converted to feet), Areas/Groups, detectors, displays and PSU positions. Untick any Area/Group you don't want. Unknown detector types or display part numbers are listed and skipped. <b>3 Rename</b> — set a naming pattern from {project} {file} {area} {name} {##} (default <span class="mono-inline">{project}-{area}-Det{##}</span>, remembered for next time), edit any zone or Area/Group name, and watch the live character counter. The ModuLaser display shows 16 characters total, including spaces, so names over 16 are blocked until shortened — use the suggested short name or <b>Shorten all over 16</b>. Duplicate names are outlined in red. <b>4 Power supplies</b> — each Area/Group gets at least one supply, a supply never spans Areas/Groups, and each takes at most 4 detectors and 1 display with the required battery ≤ 65 Ah (display load included). Suggestions start from PSU positions in the file (nearest device first) and devices within 3 ft of each other in plan view (X/Y); oversize groups are split by distance. Any device that isn't near a file PSU or within 3 ft of another device is <i>not</i> auto-assigned — it waits in that Area/Group's <b>Unassigned — group these to a power supply</b> tray, and you're prompted to group it: drag it onto a supply card or use <i>Move to…</i>, and click <b>+ Add power supply</b> for more supplies (removing a supply sends its devices back to the tray). <b>Pack into fewest</b> is an optional shortcut that assigns the whole Area/Group to the fewest supplies. <b>Create sheets</b> stays disabled, showing how many detectors are still unassigned, until every device is on a supply and every rule passes. One sheet is created per supply, with type, zone name, fan speed and display model filled in, its Location set to the Area/Group (so the sidebar groups them), and addresses and anything the file doesn't provide highlighted for you to enter — the sidebar shows those sheets with an amber <i>needs entry</i> dot until you finish. Design Basis and Ambient Temp. must be chosen in step 1 (they start on <i>- Select -</i>). After <b>Create sheets</b> a <b>Confirm Settings?</b> prompt summarizes the settings applied: <b>Confirm</b> marks everything configured during the import as confirmed, so only genuinely empty fields (e.g. addresses) stay amber; <b>Revise import</b> undoes the import and returns you to the review step with your choices kept.</p>
           </div>
         </div>
         <div class="qs-step">
@@ -2161,6 +2162,10 @@ body.v2 .model-cell{ font-size:10.5px; }
           <p class="a">One file that both ModuLaser tools save. The Battery Calculator writes the <i>design</i>: project details, power supplies and batteries, detectors and displays with their addresses and 16-character names, and the PipeCAD pipe and sampling-hole data. The MASD Field Report writes the <i>site</i> results: inspections, configuration, tests and sign-off. Each tool keeps the other tool's part exactly as it found it, and neither replaces data without first showing you what would change. Use File → Export project… here and File → Import project… in the Field Report. Your normal Save As… calculator file still works the same way.</p>
         </div>
         <div class="help-faq-item">
+          <div class="q">Why are Design Basis and Ambient Temperature amber on a new sheet?</div>
+          <p class="a">They start on <i>- Select -</i> because there's no safe default: pick the code basis and the room temperature for this supply. Until both are chosen the sheet is INCOMPLETE (no de-rating is applied meanwhile, so no figures break). Files saved earlier keep their values. After a .pl import, <b>Confirm Settings?</b> applies the wizard's choices and marks them confirmed.</p>
+        </div>
+        <div class="help-faq-item">
           <div class="q">Will Validation Error flags stop me from finishing?</div>
           <p class="a">No — they don't stop you from editing, and you can keep working with flags showing. What they do withhold is the power supply/battery recommendation section, the multi-supply recommendation, the Recommended Power Supply Arrangement, and the Bill of Materials — all four stay blank until every flag clears. The INVALID CALCULATION banner works the same way but for its own three more severe conditions.</p>
         </div>
@@ -2508,7 +2513,7 @@ const APP_AUTHOR = "The BMG";
 const AMENDMENTS = [
   { rev: "000", major: "00", minor: "01", date: "261013", desc: "MASD Engineering Toolbox 00.01.000 \u2014 first build (pre-release; 01.00.000 is reserved for the refined release). Performance Criteria (Config): a Referenced standard drop-down of presets \u2014 VEWFD \u2013 NFPA 76/318, EWFD \u2013 NFPA 76, SFD/OAP \u2013 NFPA 72 (UL 268, 7th Ed. thresholds per Brent 2026-10-13: hole sensitivity at or below (\u2264) VEWFD 1.0 / EWFD 1.5 / SFD-OAP 2.18 %obs/ft and transport time no more than 60 / 43 / 43 s (UL 268, 7th Ed. Special Application Range 1 / Special Application Range 2 / Open Area per ModuLaser Install Manual App. A, printed p.113; EWFD 1.5 %obs/ft from NFPA 76), plus the code's prescriptions; \"Complies with UL 268, 7th Edition\" prints only after the engineer confirms it), EWFD \u2013 FM DS 5-32 and SFD \u2013 FM DS 5-48 (FM requirements only, no UL statement; FM Class 3230 hole limits App. A p.113), the Battery Calculator's four BS 5839-1 design bases, and Custom; only cited values are prefilled, the rest are marked engineer to define and must be entered, referenced and confirmed; optional per-Area/Group overrides; auto-drafted narrative naming the referenced standard, edited and confirmed by the engineer, with Engineer of Record and specification reference; unresolved criteria block Export project; carried in .mlproj.json and printed by the Commissioning Report, which checks each module against its Area/Group limits. The Toolbox absorbs the ModuLaser Battery Calculator 02.00.002 (same UI, same calculation engine, same .pl import) and adds: a per-project mode switch (Config only, Calculator only, Both); Config (design) mode with Alert/Prealarm/Fire 1/Fire 2, delays, latching, flow-fault limits and delay, day/night, LDD, I/O assignments and display settings per device, seeded from the performance class (VEWFD/EWFD/SFD) \u2014 manual-sourced values flagged (flow limits 20% and flow-fault delay 120 s, Table 29 p.76, ModuLaser Install Manual 04-4001-501-0803-05), every other seeded value marked 'typical \u2013 unverified' (Fire 1 starts at the FM/UL hole-sensitivity limit, App. A printed p.113); legacy import of every Battery Calculator save/export format (Save As .html 01.04\u201302.00, state JSON, Excel 01.04\u201302.00) migrated to .mlproj.json with a migration report; the field-change loop (verify/reject changes logged in the Commissioning Report, battery re-check, PipeCAD change list, auto-verify on .pl import, technician \u2192 designer \u2192 QA/Auditor approval chain stored in the file); Toolbox reports (Configuration schedule, Field Change / As-Built, PipeCAD change list, Migration report) as PDF/HTML/Word/Excel; offline Quick Start; PWA and Windows installer. Engine: MASD engine 1.0.0. Harmonization rule: any engine change bumps the Toolbox and the Battery Calculator revisions with matching notes, and each records the engine version. Shared modulaser-project.js 1.3.0 (identical in the Toolbox, Battery Calculator 02.00.002 and Commissioning Report 02.00.001): SHA-256 design hash plus separate site hash, unknown-key pass-through, metric .pl hole-sensitivity warning, corrected citations ('Action' is Prealarm; flow-fault delay 120 s, Table 29 p.76; FM/UL hole limits App. A printed p.113 of ModuLaser Install Manual 04-4001-501-0803-05). QA audit \u2014 date 2026-10-13; commit audited: none (Toolbox is new; the audit covered the shared components in Battery Calculator cc55189 and Report 6854f2e); issue: Toolbox issue #1 (https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1; related: Calculator issue #1, Report issue #8); summary: defaults citations FAIL \u2192 fixed in this revision; Example Project worst-hole rule PASS; audit trail FAIL \u2192 fixed in this revision; Quick Start version text FAIL \u2192 fixed in this revision. QA re-check 2026-10-13 (8:28\u20138:45 PM ET): CONDITIONAL PASS. Fixed after the re-check: design hash stable on a no-op Calculator round trip (site and carried data kept out of design; calculator row ids renumbered by position); the mis-cited table number removed from the Report (App. A, printed p.113); UL 268, 7th Edition compliance never auto-confirmed \u2014 the engineer must confirm it before \"Complies with UL 268, 7th Edition\" prints; UL thresholds for NFPA presets per Brent: sensitivity at or below (\u2264) VEWFD 1.0 / EWFD 1.5 / SFD-OAP 2.18 %obs/ft, transport time no more than 60 / 43 / 43 s (UL 268 Special Application Range 1 / Range 2 / Open Area, ModuLaser Install Manual App. A, printed p.113; EWFD 1.5 from NFPA 76); sign-off order technician \u2192 designer \u2192 QA enforced, no hand-set status, reopening keeps history, real names required, QA overrides logged; Report edits blocked until a technician name is set; the edit log never overwrites entries; ASAG44201 citation replaced by NFPA 76-2024 clauses (Research 2026-10-13); standalone Quick Start says Battery Calculator 02.00.001+; legacy-import tests check required Ah per sheet. Final verdict: QA audit 2026-10-13, final re-check of commit c42156a (clean tree). PASS (pre-release). Tests: toolbox_test 139/139, shared-file and engine parity 2/2. Verified: Config/Calculator/Both modes, engine byte-identical to the Battery Calculator, legacy imports (15 fixtures) with Ah checks, sign-off order technician \u2192 designer \u2192 QA enforced (no manual status, real names required, QA \u2260 designer), reopen keeps verifier history, QA overrides logged with a reason, \"Complies with UL 268, 7th Edition\" printed only after engineer confirmation. Note: the UL 268 thresholds (VEWFD 1.0/60 s, EWFD 1.5/43 s, SFD/OAP 2.18/43 s) are per Brent and not verified by QA. EWFD 1.5 %obs/ft comes from NFPA 76-2024 8.5.3.2.1.3, not from a UL 268 range (Range 2 is 0.05\u20132.18 %obs/ft, 3\u201343 s; Open Area 1.70\u20132.18, 6\u201343 s, Install Manual App. A p.113). Issue: https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/issues/1 QA delta re-check 2026-10-13, commit 4878e0e (clean). PASS (pre-release). Verified: \u2264 rule and targets, UL 268 ranges with lower limits (EWFD capped at 1.5 per NFPA 76, labelled as such), NFPA 318-2025 \u00a711.1.3 cleanroom citations, offline Quick Start, shared modulaser-project.js and engine identical across apps. Tests: sens_rule 14/14, toolbox_test 139/139 and report_audit_test 31/31 (committed tests). Final pre-tag pass 2026-10-13 (10:02\u201310:40 PM ET): Calculator 6adde0d / Report 5448488 (release a32d988) / Toolbox 8aa707a \u2014 GO; sens_rule 14/14; committed tests pass (release commits differ from these only by this release-note line)..." },
   { rev: "001", major: "00", minor: "01", date: "261014", desc: "Harmonized with Battery Calculator 02.00.003 (no engine change; MASD engine 1.0.0). <b>Needs-entry fix:</b> sheets showed the amber <i>Needs entry</i> status but the fields were not visibly marked, because the 1px soft-blue (#5b9bd5) outline blended into the dark theme. Needs-entry fields now use a 2px amber outline and tint matching the sidebar dot (inputs, custom dropdown buttons, radio groups), and the Live Results message has a <b>Show next \u203a</b> button that scrolls to and focuses each field in turn. Help, Quick Start, How Do I and FAQ wording changed from blue to amber. Status logic and math unchanged. Also: print label grey #747574 \u2192 #6b6c6b (WCAG AA). <b>Module table columns (harmonized with Battery Calculator 02.00.003, per Brent):</b> Module Type shows DISP-MIN / DISP-STD / DISP-CMD / DETECTOR (stored values unchanged); Cluster shows the 2-digit number only; Power shows Own circuit or Ribbon Path; fixed column widths with no truncation or wrap (sideways scroll when narrow); Print/Export and Word module tables add Model, Cluster and Power with the same labels. Help and Quick Start now give the live web / PWA address, https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ (installable; works offline after the first visit). **QA follow-up (2026-10-14):** cross-sheet Cluster hint clipped with ellipsis and full text on hover; 'No cluster display defined on any page' shows '—' on the button (full text on hover); needs-entry count and Show next skip CSS-hidden fields (a new sheet shows 18, not 19) and Show next starts from the first field on each sheet; Word export has an Arial 9 pt default font (styles.xml), fixed-layout tables and summary rows spanning the descriptive columns so nothing wraps or is clipped. Saved .html files keep their own code: re-open data via File \u2192 Import Calc. <b>Toolbox F1:</b> re-importing a file saved by this Toolbox no longer gives a false 'Older revision' warning (Toolbox-saved files are compared with the running Toolbox revision; 00.01.000 files still warn); calculator lineage is 02.00.003, also in .mlproj.json. Final (QA re-check): Word module table Standby mA / Alarm mA columns 1100 twips (header no longer wraps), summary row shows 'Status:' again; offline cache renamed." },
-  { rev: "002", major: "00", minor: "01", date: "261015", desc: "Harmonized with Battery Calculator 02.00.004 (no engine change; MASD engine 1.0.0, modulaser-project.js 1.3.0). <b>Valid defaults are no longer amber-flagged</b> (Design Basis, Standby, Alarm, Ambient Temp., Module Type, Power, Addressing, supply mode, edition, margin); only empty required fields are flagged; Confirm defaults kept but no longer needed. <b>New calculator sheets start with no modules</b>, with an empty-state guide (Import .pl… or + Add Display / + Add Detector). <b>Standby / Alarm boxes</b> no longer cut values off on narrow screens. <b>Addressing per mode</b>: Networked sheets share an address pool per SenseNET network; a Standalone sheet is its own 1–9 pool (per sheet) and may reuse other sheets' addresses; duplicates within a Standalone sheet still flagged. <b>Mixed Networked/Standalone</b> projects show a banner with Make all Networked… / Make all Standalone… and optional re-addressing (confirm first). Imports keep addresses and list per-mode conflicts. <b>SenseNET networks</b>: up to 127 modules per network; each Networked sheet has a SenseNET network number (selector, SN tag, print/Word/Excel settings, saved per sheet; older files network 1); past 127, whole sheets move to SenseNET 2, 3… and are addressed from 1, with a notice to include the new network's infrastructure; duplicates checked per network. <b>Address change log + Undo</b>: unify / re-address, SenseNET moves and Standalone clears are logged (Edit → Address change log…) and undo in one step (Undo bar or Ctrl+Z); Make all Standalone lists and reports addresses above 9 it clears. Undo is disarmed by the next manual address/mode/network edit and ignored while a field/dropdown has focus; auto-move only when a network rises past 127, otherwise a Move overflow banner; Clear file clears the log." }
+  { rev: "002", major: "00", minor: "01", date: "261015", desc: "Harmonized with Battery Calculator 02.00.004 (no engine change; MASD engine 1.0.0, modulaser-project.js 1.3.0). <b>Valid defaults are no longer amber-flagged</b> (Design Basis, Standby, Alarm, Ambient Temp., Module Type, Power, Addressing, supply mode, edition, margin); only empty required fields are flagged; Confirm defaults kept but no longer needed. <b>New calculator sheets start with no modules</b>, with an empty-state guide (Import .pl… or + Add Display / + Add Detector). <b>Standby / Alarm boxes</b> no longer cut values off on narrow screens. <b>Addressing per mode</b>: Networked sheets share an address pool per SenseNET network; a Standalone sheet is its own 1–9 pool (per sheet) and may reuse other sheets' addresses; duplicates within a Standalone sheet still flagged. <b>Mixed Networked/Standalone</b> projects show a banner with Make all Networked… / Make all Standalone… and optional re-addressing (confirm first). Imports keep addresses and list per-mode conflicts. <b>SenseNET networks</b>: up to 127 modules per network; each Networked sheet has a SenseNET network number (selector, SN tag, print/Word/Excel settings, saved per sheet; older files network 1); past 127, whole sheets move to SenseNET 2, 3… and are addressed from 1, with a notice to include the new network's infrastructure; duplicates checked per network. <b>Address change log + Undo</b>: unify / re-address, SenseNET moves and Standalone clears are logged (Edit → Address change log…) and undo in one step (Undo bar or Ctrl+Z); Make all Standalone lists and reports addresses above 9 it clears. Undo is disarmed by the next manual address/mode/network edit and ignored while a field/dropdown has focus; auto-move only when a network rises past 127, otherwise a Move overflow banner; Clear file clears the log. <b>Confirm Settings?</b> after a .pl import (Confirm marks imported items confirmed; Revise import rolls back to the review step with choices kept); Design Basis and Ambient Temperature start on <i>- Select -</i> (amber, INCOMPLETE until chosen; saved/legacy files keep values); sheets with no modules show Incomplete in Live Results (no Ah, no PASS)." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -2563,7 +2568,7 @@ function applyDesignBasis(loc){
   const basis = locEl.querySelector('.design-basis-select').value;
   const standbyInput = locEl.querySelector('.standby-hours');
   const alarmInput = locEl.querySelector('.alarm-minutes');
-  if (basis === 'Custom'){
+  if (basis === 'Custom' || basis === ''){
     standbyInput.disabled = false;
     standbyInput.removeAttribute('max');
     alarmInput.disabled = false;
@@ -2827,8 +2832,9 @@ function restoreLocation(saved){
   }
   locEl.querySelector('.standby-hours').value = saved.standbyHours;
   locEl.querySelector('.alarm-minutes').value = saved.alarmMinutes;
-  if (saved.designBasis) locEl.querySelector('.design-basis-select').value = saved.designBasis;
-  if (saved.temperature && locEl.querySelector('.temperature-select')) locEl.querySelector('.temperature-select').value = saved.temperature;
+  // 02.00.004: new sheets start on '- Select -'; saved files keep their value; legacy files without the key keep the old defaults
+  locEl.querySelector('.design-basis-select').value = saved.designBasis !== undefined ? saved.designBasis : 'NFPA 72 Voice';
+  if (locEl.querySelector('.temperature-select')) locEl.querySelector('.temperature-select').value = saved.temperature !== undefined ? String(saved.temperature) : '77';
   if (saved.nfpa72Edition && locEl.querySelector('.nfpa72-edition-select')) locEl.querySelector('.nfpa72-edition-select').value = saved.nfpa72Edition;
   if (saved.derating && locEl.querySelector('.derating-input')) locEl.querySelector('.derating-input').value = saved.derating;
   if (locEl.querySelector('.show-calc-detail-checkbox')){
@@ -3195,8 +3201,9 @@ function locationTemplate(loc){
         <div class="field-mini design-basis-field">
           <label>Design Basis</label>
           <select class="design-basis-select" onchange="applyDesignBasis('${loc}')">
+            <option value="" selected>- Select -</option>
             <option value="NFPA 72 Standard">NFPA 72 Standard</option>
-            <option value="NFPA 72 Voice" selected>NFPA 72 Voice</option>
+            <option value="NFPA 72 Voice">NFPA 72 Voice</option>
             <option value="NFPA 72 + NFPA 110 Generator Backup (Non-Voice)">NFPA 72 + NFPA 110 Generator Backup (Non-Voice)</option>
             <option value="NFPA 72 + NFPA 110 Generator Backup (Voice)">NFPA 72 + NFPA 110 Generator Backup (Voice)</option>
             <option value="UFC 3-600-01 Hydro (Voice Evacuation)">UFC 3-600-01 Hydro (Voice Evacuation)</option>
@@ -3222,7 +3229,8 @@ function locationTemplate(loc){
         <div class="field-mini ambient-temp-field">
           <label>Ambient Temp.</label>
           <select class="temperature-select" onchange="recalcLocation('${loc}')">
-            <option value="77" selected>77°F / 25°C (no de-rating)</option>
+            <option value="" selected>- Select -</option>
+            <option value="77">77°F / 25°C (no de-rating)</option>
             <option value="68">68°F / 20°C</option>
             <option value="50">50°F / 10°C</option>
             <option value="32">32°F / 0°C</option>
@@ -5193,7 +5201,7 @@ function recalcLocationInner(loc){
   }
 
   const tempSelect = locEl.querySelector('.temperature-select');
-  const tempKey = tempSelect ? parseInt(tempSelect.value) : 77;
+  const tempKey = tempSelect && tempSelect.value !== '' ? parseInt(tempSelect.value) : 77;   // '- Select -' → no de-rating until chosen (sheet stays INCOMPLETE)
   const engAh = MASD_ENGINE.batteryAh({ standbyHours, alarmMinutes, totalMa, derating: bs5839Derating, margin: safetyMargin, temperatureF: tempKey });
   const standbyAh = engAh.standbyAh, alarmAh = engAh.alarmAh, initialAh = engAh.initialAh, tempMultiplier = engAh.tempMultiplier;
   let requiredAh = engAh.requiredAh;
@@ -6253,10 +6261,10 @@ let currentLocId = null;
 let promptResolver = null;
 
 const FACTORY_FIELD_DEFAULTS = [
-  { sel: '.design-basis-select', value: 'NFPA 72 Voice' },
+  { sel: '.design-basis-select', value: '' },
   { sel: '.standby-hours', value: '24' },
   { sel: '.alarm-minutes', value: '15' },
-  { sel: '.temperature-select', value: '77' },
+  { sel: '.temperature-select', value: '' },
   { sel: '.nfpa72-edition-select', value: '2022plus' },
   { sel: '.margin-select', value: '0.25' },
   { sel: '.ps-capacity-select', value: '6' },
@@ -6395,6 +6403,7 @@ function showPromptModal({ title, desc, buttons, extraHtml }){
       btn.className = b.primary ? 'btn btn-primary btn-sm' : (b.danger ? 'btn btn-danger-ghost btn-sm' : 'btn btn-ghost btn-sm');
       if (b.className) btn.className = b.className;
       btn.textContent = b.label;
+      btn.dataset.value = String(b.value);
       btn.addEventListener('click', () => {
         closePromptModal();
         promptResolver = null;
@@ -6910,6 +6919,13 @@ const HOWDOI_COMMON = [
     keywords: 'mixed addressing networked standalone re-address readdress renumber duplicate address banner',
     blurb: 'When Networked and Standalone sheets are mixed, the banner above the sheet offers Make all Networked… / Make all Standalone… with an optional Also re-address all modules (Networked 1…N across sheets; Standalone 1…n per sheet). Confirm first; Cancel changes nothing.',
     target: 'qs-step-addressing',
+  },
+  {
+    id: 'confirm-import-settings',
+    title: 'Confirm or revise the settings after a .pl import',
+    keywords: 'confirm settings import pl review revise decline accept amber select default design basis ambient temperature',
+    blurb: 'After Create sheets, Confirm Settings? lists what was applied. Confirm marks it confirmed (only empty fields stay amber); Revise import goes back to the review step with your choices kept. Design Basis and Ambient Temp start on - Select - and must be chosen.',
+    target: 'qs-step-import-pl',
   },
   {
     id: 'addr-log-undo',
@@ -7443,10 +7459,10 @@ function plDefaultSettings(){
   const cur = getCurrentLocationEl && getCurrentLocationEl();
   const g = sel => cur && cur.querySelector(sel);
   return {
-    designBasis: g('.design-basis-select') ? g('.design-basis-select').value : 'NFPA 72 Voice',
+    designBasis: g('.design-basis-select') ? g('.design-basis-select').value : '',
     standbyHours: g('.standby-hours') ? g('.standby-hours').value : '24',
     alarmMinutes: g('.alarm-minutes') ? g('.alarm-minutes').value : '15',
-    temperature: g('.temperature-select') ? g('.temperature-select').value : '77',
+    temperature: g('.temperature-select') ? g('.temperature-select').value : '',
     margin: g('.margin-select') ? g('.margin-select').value : '0.25',
     nfpa72Edition: g('.nfpa72-edition-select') ? g('.nfpa72-edition-select').value : '2022plus',
     psCapacity: g('.ps-capacity-select') ? g('.ps-capacity-select').value : '6',
@@ -7495,10 +7511,10 @@ function plRenderStep1(body){
   body.innerHTML = `
     <p class="plw-warn"><b>Set these before importing.</b> Standby, alarm, ambient temperature, safety margin and the other battery factors drive the 65 Ah check that the power-supply suggestions in step 4 use. They're applied as the defaults on every new sheet the import creates; you can still change any sheet afterwards.</p>
     <div class="plw-grid">
-      <label>Design Basis<select id="plw-basis">${bases.map(b => `<option ${b === s.designBasis ? 'selected' : ''}>${plEsc(b)}</option>`).join('')}</select></label>
+      <label>Design Basis<select id="plw-basis"><option value="" ${s.designBasis ? '' : 'selected'}>- Select -</option>${bases.map(b => `<option ${b === s.designBasis ? 'selected' : ''}>${plEsc(b)}</option>`).join('')}</select></label>
       <label>Standby (h)<input type="number" id="plw-standby" min="0" step="1" value="${plEsc(s.standbyHours)}"></label>
       <label>Alarm (min)<input type="number" id="plw-alarm" min="0" step="1" value="${plEsc(s.alarmMinutes)}"></label>
-      <label>Ambient Temp.<select id="plw-temp">${[['77','77°F / 25°C (no de-rating)'],['68','68°F / 20°C'],['50','50°F / 10°C'],['32','32°F / 0°C'],['14','14°F / -10°C']].map(([v,t]) => `<option value="${v}" ${v === String(s.temperature) ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label>Ambient Temp.<select id="plw-temp"><option value="" ${s.temperature ? '' : 'selected'}>- Select -</option>${[['77','77°F / 25°C (no de-rating)'],['68','68°F / 20°C'],['50','50°F / 10°C'],['32','32°F / 0°C'],['14','14°F / -10°C']].map(([v,t]) => `<option value="${v}" ${v === String(s.temperature) ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <label>Safety margin<select id="plw-margin">${[['0.25','25%'],['0.20','20%'],['0.30','30%'],['0','0%']].map(([v,t]) => `<option value="${v}" ${parseFloat(v) === parseFloat(s.margin) ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <label>NFPA 72 Edition<select id="plw-edition"><option value="2022plus" ${s.nfpa72Edition === '2022plus' ? 'selected' : ''}>2022 and Later</option><option value="2019minus" ${s.nfpa72Edition === '2019minus' ? 'selected' : ''}>2019 and Earlier</option></select></label>
       <label>Power supply capacity<select id="plw-pscap"><option value="6" ${s.psCapacity === '6' ? 'selected' : ''}>6 A (APS6A / BPS6A)</option><option value="10" ${s.psCapacity === '10' ? 'selected' : ''}>10 A (APS10A / BPS10A)</option></select></label>
@@ -7766,7 +7782,10 @@ function plValidateStep4(){
 }
 function plNext(){
   const msg = document.getElementById('plw-msg');
-  if (plWiz.step === 1){ plReadStep1(); plWiz.step = 2; plWiz.suggested = false; return plRender(); }
+  if (plWiz.step === 1){ plReadStep1();
+    const miss = [!plWiz.settings.designBasis && 'Design Basis', !plWiz.settings.temperature && 'Ambient Temp.'].filter(Boolean);
+    if (miss.length){ msg.textContent = `Choose ${miss.join(' and ')} before continuing (required — no default).`; return; }
+    plWiz.step = 2; plWiz.suggested = false; return plRender(); }
   if (plWiz.step === 2){
     if (!plWiz.files.length){ msg.textContent = 'Add at least one .pl file.'; return; }
     if (!plIncludedGroups().length){ msg.textContent = 'Tick at least one Area/Group to import.'; return; }
@@ -7792,9 +7811,11 @@ function plIsPristineDoc(){
   return Array.from(locs[0].querySelectorAll('[data-role="module"]')).every(r => !r.querySelector('.zone-name').value && !r.querySelector('.module-address').value && !r.querySelector('.fanspeed-select').value)
     && !locs[0].querySelector('.ps-name').value;
 }
-function plFinish(){
+async function plFinish(){
   if (plStep4Problems().length) return plValidateStep4();
   const s = plWiz.settings;
+  const confirmable = plWiz.mode !== 'update';
+  const prevState = confirmable ? JSON.parse(JSON.stringify(buildStateObject())) : null;
   if (plWiz.mode !== 'update' && plIsPristineDoc()){ document.getElementById('locations-container').innerHTML = ''; }
   let psNum = document.querySelectorAll('.location').length;
   const created = [];
@@ -7831,6 +7852,41 @@ function plFinish(){
   if (first){ setCurrentLocation(first); first.scrollIntoView({ block: 'start' }); }
   refreshAllAmber(); syncPrintHeaders(); scheduleSave(); plRenderBanner();
   closePlWizard();
+  if (confirmable && created.length) await plConfirmSettings(created, prevState);
+}
+// 02.00.004 (Brent 10-16): after a .pl import, summarize the settings applied and ask to confirm them.
+// Confirm → every configured item on the imported sheets is marked confirmed (only genuinely empty fields stay amber).
+// Revise import → the import is rolled back and the wizard reopens on the review step with every choice kept.
+async function plConfirmSettings(created, prevState){
+  const s = plWiz.settings;
+  const opt = (sel, v) => { const o = Array.from((document.querySelector(sel) || { options: [] }).options).find(x => x.value === String(v)); return o ? o.textContent : String(v); };
+  const nMods = created.reduce((n, loc) => n + document.querySelectorAll(`#location-${loc} [data-role="module"]`).length, 0);
+  const files = Array.from(new Set(plWiz.files.map(f => f.fileName)));
+  const rows = [['Design Basis', s.designBasis], ['Standby', s.standbyHours + ' h'], ['Alarm', s.alarmMinutes + ' min'], ['Ambient temperature', opt('.temperature-select', s.temperature)],
+    ['Safety margin', Math.round(parseFloat(s.margin) * 100) + '%'], ['NFPA 72 edition', s.nfpa72Edition === '2019minus' ? '2019 and earlier' : '2022 and later'],
+    ['Power supply capacity', s.psCapacity + ' A'], ['Battery / supply mode', s.mode === 'thirdparty' ? 'Third-party' : 'Edwards A/BPS'],
+    ['Addressing', 'Networked (addresses left blank to assign)'], ['Imported', `${files.join(', ')} → ${created.length} sheet${created.length === 1 ? '' : 's'}, ${nMods} module${nMods === 1 ? '' : 's'}`]];
+  const desc = `<p>These settings were applied to the imported sheets:</p><table class="adl-t cs-sum">${rows.map(([k, v]) => `<tr><th>${v2Esc(k)}</th><td>${v2Esc(v)}</td></tr>`).join('')}</table>
+    <p class="plw-note">Confirm marks everything configured during the import as confirmed, so only fields that are genuinely empty (e.g. addresses) stay amber. Revise import returns you to the import review with your choices kept.</p>`;
+  const v = await showPromptModal({ title: 'Confirm Settings?', desc, buttons: [{ label: 'Revise import', value: 'revise' }, { label: 'Confirm', value: 'confirm', primary: true }] });
+  if (v === 'revise'){
+    applyLoadedState(prevState);
+    if (typeof refreshAllAmber === 'function') refreshAllAmber();
+    scheduleSave();
+    document.getElementById('plw-overlay').classList.add('open');
+    plWiz.step = 4; plRender();
+    return 'revise';
+  }
+  if (v === 'confirm'){
+    created.forEach(loc => {
+      const l = document.getElementById('location-' + loc); if (!l) return;
+      l.dataset.plConfirmed = '1';
+      l.querySelectorAll('input, select').forEach(e => { if (e.type !== 'hidden' && String(e.value ?? '').trim() !== '') e.dataset.confirmed = '1'; });
+      l.querySelectorAll('[data-confirmed], .field-needs-wrap').forEach(w => w.classList.remove('field-needs-wrap'));
+    });
+    refreshAllAmber(); scheduleSave();
+  }
+  return v;
 }
 
 /* ---------- persistence hooks ---------- */
@@ -8453,7 +8509,9 @@ function v2SheetModel(locEl){
   else if (withheld) status = 'incomplete';
   const noModules = !locEl.querySelector('[data-role="module"]');
   if (noModules && status === 'pass') status = 'incomplete';   // 02.00.004: an empty sheet is not a PASS
-  const dot = (invalid || flags.length) ? 'error' : ((needs || noModules) ? 'needs' : 'complete');
+  const unselected = ['.design-basis-select', '.temperature-select'].some(q => { const e = locEl.querySelector(q); return e && e.value === ''; });
+  if (unselected && status === 'pass') status = 'incomplete';   // '- Select -' Design Basis / Ambient Temp
+  const dot = (invalid || flags.length) ? 'error' : ((needs || noModules || unselected) ? 'needs' : 'complete');
   const basisKey = v2Val(locEl, '.design-basis-select');
   const preset = DESIGN_BASIS_PRESETS[basisKey];
   const bs = !!(preset && preset.formula === 'bs5839');
@@ -8604,7 +8662,7 @@ function v2RenderSidebar(models, cur){
       <span class="dot st-${m.dot}" aria-label="${dotTitle[m.dot]}"></span>${m.overrides.length ? '<span class="dot st-overridden" aria-label="Overridden"></span>' : ''}
       <span class="sb-name">${v2Esc(v2PsTag(m))}${addrSchemeOf(m.el) === 'networked' ? `<span class="sb-net" title="SenseNET network ${sheetSenseNet(m.el)}">SN${sheetSenseNet(m.el)}</span>` : ''}</span>
       ${m.flags.length + m.invalidList.length ? `<span class="sb-cnt">${m.flags.length + m.invalidList.length}</span>` : ''}
-      <span class="sb-ah">${isFinite(m.requiredAh) ? v2Fmt(m.requiredAh, 1) + ' Ah' : ''}</span></button>`).join('')}</div>`).join('')
+      <span class="sb-ah">${m.noModules ? 'Incomplete' : (isFinite(m.requiredAh) ? v2Fmt(m.requiredAh, 1) + ' Ah' : '')}</span></button>`).join('')}</div>`).join('')
     : '<p class="sb-empty">No power supply sheets yet. Click <b>+ Add power supply</b> or <b>Import .pl</b>.</p>';
   const c = document.getElementById('sb-count'); if (c) c.textContent = models.length + (models.length === 1 ? ' sheet' : ' sheets');
 }
@@ -8626,6 +8684,13 @@ function v2RenderResults(m){
   if (!m){ p.innerHTML = '<p class="rp-empty">Select a power supply sheet to see its live results.</p>'; return; }
   const word = v2StatusWord(m.status);
   const det = m.modules.filter(x => x.kind === 'detector').length, disp = m.modules.length - det;
+  if (m.noModules){   // 02.00.004: no modules yet → no Ah figure and no PASS, just Incomplete
+    p.innerHTML = `<div class="rp-card rp-cap"><div class="rp-k">Required capacity · ${v2Esc(v2PsTag(m))}</div>
+      <div class="rp-big rp-incomplete">Incomplete</div>
+      <div class="rp-status st-incomplete" id="rp-status">Incomplete — add modules (Import .pl… or + Add Display / + Add Detector) to calculate the battery</div></div>
+      <div class="rp-card"><div class="rp-k">Messages</div><div class="rp-msgs" id="rp-msgs"><div class="rp-msg needs"><span>No modules yet — use <b>Import .pl…</b> or <b>+ Add Display</b> / <b>+ Add Detector</b> on the sheet.</span></div></div></div>`;
+    return;
+  }
   p.innerHTML = `
     <div class="rp-card rp-cap"><div class="rp-k">Required capacity${m.psRequired > 1 ? ' (per supply)' : ''} · ${v2Esc(v2PsTag(m))}</div>
       <div class="rp-big">${v2Fmt(m.ahPerSupply, 1)}<small> Ah</small></div>
