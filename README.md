@@ -1,5 +1,8 @@
 # MASD Engineering Toolbox
 
+![MASD Engineering Toolbox PWA in its dark theme: empty new project with power-supply sidebar, sheet settings and Live Results panel](docs/screenshot.png)
+
+
 Offline engineering toolbox for **Edwards ModuLaser Modular Aspirating Smoke Detector (MASD)** projects.
 It absorbs the **ModuLaser Battery Calculator** and adds device configuration, legacy-file migration and
 the field-change approval loop with the **ModuLaser MASD Field (Commissioning) Report**.
