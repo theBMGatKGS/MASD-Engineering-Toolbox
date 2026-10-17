@@ -1,7 +1,7 @@
 // MiniLaser FHSD8075-ULF (modulaser-project.js 1.5.0) — real fixture: Brent's Example Shaft .pl (qa/minilaser/minilaser.pl).
-// Run: node tests/mlp_minilaser_test.js  (needs @xmldom/xmldom; set XMLDOM_DIR or keep the Calculator checkout's node_modules)
+// Run: node tests/mlp_minilaser_test.js  (needs @xmldom/xmldom: `cd electron && npm install` — it's an electron devDependency; or set XMLDOM_DIR)
 const path = require('path'), fs = require('fs');
-const xd = require(process.env.XMLDOM_DIR || '/workspace/ModuLaser-Battery-Calculator/node_modules/@xmldom/xmldom');
+const xd = require(process.env.XMLDOM_DIR || require.resolve('@xmldom/xmldom', { paths: [path.join(__dirname, '..', 'electron'), path.join(__dirname, '..')] }));
 // xmldom lacks Element.children/localName on some nodes; the shared parser only needs children + localName/tagName + textContent
 const proto = Object.getPrototypeOf(new xd.DOMParser().parseFromString('<a/>', 'application/xml').documentElement);
 if (!('children' in proto)) Object.defineProperty(proto, 'children', { get(){ return Array.from(this.childNodes).filter(n => n.nodeType === 1); } });
@@ -60,6 +60,12 @@ const ML = M.MINILASER;
 t('draw table 120…365 mA', JSON.stringify(Object.values(ML.fanMa)) === '[120,134,157,180,200,230,255,285,320,365]');
 t('relay labels exact', ML.relays.map(r => r.label).join('|') === 'R1 Fault relay (fixed)|R2 Relay output 1 (Prealarm)|R3 Relay output 2 (Fire Alarm)' && ML.relays[0].failsafe);
 t('expansion 9-30520 / 9-30521, 5 out + 2 in, max 2', ML.expansion.housing === '9-30520' && ML.expansion.module === '9-30521' && ML.expansion.outPerModule === 5 && ML.expansion.inPerModule === 2 && ML.expansion.maxModules === 2);
+t('F1: 20 holes on VEWFD fails (M p.66 max 10)', M.miniLaserPipeCheck({ key: 'VEWFD', holes: 20 }).ok === false && /maximum of 10/.test(M.miniLaserPipeCheck({ key: 'VEWFD', holes: 20 }).errors[0]));
+t('F1: 10 holes VEWFD, 20 EWFD, 35 SFD pass; 36 SFD fails', M.miniLaserPipeCheck({ key: 'VEWFD', holes: 10 }).ok && M.miniLaserPipeCheck({ key: 'EWFD', holes: 20 }).ok && M.miniLaserPipeCheck({ key: 'SFD', holes: 35 }).ok && !M.miniLaserPipeCheck({ key: 'SFD', holes: 36 }).ok);
+t('F1: UL OAP 24 holes / 300 ft; SA Range 2 200 ft; ULC 35 holes / 400 ft', M.miniLaserPipeCheck({ key: 'UL 268 Ed.7 OAP', holes: 24, lengthFt: 300 }).ok && !M.miniLaserPipeCheck({ key: 'UL 268 Ed.7 OAP', holes: 25 }).ok && !M.miniLaserPipeCheck({ key: 'UL 268 Ed.7 SA Range 2', lengthFt: 201 }).ok && M.miniLaserPipeCheck({ key: 'ULC-S529', holes: 35, lengthFt: 400 }).ok);
+t('F1: NFPA length 400 ft; 401 ft fails', M.miniLaserPipeCheck({ key: 'SFD', lengthFt: 400 }).ok && !M.miniLaserPipeCheck({ key: 'SFD', lengthFt: 401 }).ok);
+t('F1: first hole > 16 ft fails when known', !M.miniLaserPipeCheck({ key: 'SFD', firstHoleFt: 20 }).ok && M.miniLaserPipeCheck({ key: 'SFD', firstHoleFt: 16 }).ok);
+t('F1: .pl import carries pipeCheck (Example Shaft-like 8 holes SFD OK; 20 holes VEWFD fails)', M.miniLaserFromPl({ fan: 4, pipe: { holes: new Array(8).fill({}), lengthFt: 100 } }, 'SFD').pipeCheck.ok && !M.miniLaserFromPl({ fan: 4, pipe: { holes: new Array(20).fill({}) } }, { cls: 'VEWFD', src: 'area' }).pipeCheck.ok);
 t('pre-engineered: 9 tables, diameter counts match holes (T per branch)', ML.preEngineered.length === 9 && ML.preEngineered.every(tb => tb.rows.every(r => r.diameters.length === (tb.shape === 'T' ? r.holes / 2 : r.holes) && r.lengthFt > 0)));
 const lk = M.preEngLookup('I', 4, 4, 8);
 t('lookup I/fan 4/4 holes/AF8 → 34 s, 2.00 SFD|SA|OAP, 9/64 ×4, 80 ft (M Tables 23–24)', lk && lk.row.transport === 34 && lk.af.avg === 2 && lk.af.classes.join() === 'SFD,SA,OAP' && lk.row.diameters.every(x => x === '9/64') && lk.row.lengthFt === 80);

@@ -1,9 +1,10 @@
-"""Toolbox 00.02.000 — MiniLaser (FHSD8075-ULF) in Config mode. Requires TOOLBOX_DIR; screenshots → $SHOTS (default temp)."""
+"""Toolbox 00.02.000 — MiniLaser (FHSD8075-ULF) in Config mode. Requires TOOLBOX_DIR; output → $MLP_TEST_OUT (default: a fresh temp dir), screenshots → $SHOTS (default $MLP_TEST_OUT/shots)."""
 import asyncio, os, sys, tempfile
 from playwright.async_api import async_playwright
 TB = os.environ.get('TOOLBOX_DIR')
 if not TB: print('TOOLBOX_DIR is required'); sys.exit(2)
-URL = 'file://' + TB + '/index.html'; SHOTS = os.environ.get('SHOTS') or tempfile.mkdtemp(prefix='tb-ml-'); os.makedirs(SHOTS, exist_ok=True)
+URL = 'file://' + TB + '/index.html'; OUT = os.environ.get('MLP_TEST_OUT') or tempfile.mkdtemp(prefix='tb-ml-'); os.makedirs(OUT, exist_ok=True)
+SHOTS = os.environ.get('SHOTS') or os.path.join(OUT, 'shots'); os.makedirs(SHOTS, exist_ok=True)
 R = []
 def ok(n, c, i=''): R.append(bool(c)); print('PASS' if c else 'FAIL', n, str(i)[:300])
 async def main():
