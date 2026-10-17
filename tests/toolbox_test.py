@@ -23,7 +23,7 @@ async def main():
     pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog', lambda d: asyncio.ensure_future(d.accept()))
     await pg.goto(URL); await pg.evaluate('localStorage.clear()'); await pg.reload(); await pg.wait_for_function('typeof tbSetMode==="function"')
     info=await pg.evaluate('[runningRevisionFull(), MASD_ENGINE_VERSION, MLP.VERSION, document.querySelector("#about-amendments-body")!=null]')
-    chk('revision 00.01.003, engine 1.0.0, MLP 1.4.0', info[0].startswith('00.01.003') and info[1]=='1.0.0' and info[2]=='1.4.0', info)
+    chk('revision 00.02.000, engine 1.1.0, MLP 1.5.0', info[0].startswith('00.02.000') and info[1]=='1.1.0' and info[2]=='1.5.0', info)
     eng=await pg.evaluate('document.getElementById("masd-engine").textContent')
     chk('engine block byte-identical to masd-engine.js', eng.strip()==open('/workspace/tb/engine/masd-engine.js').read().strip())
     calc=open('/workspace/ModuLaser-Battery-Calculator/modulaser_battery_calculator.html').read()

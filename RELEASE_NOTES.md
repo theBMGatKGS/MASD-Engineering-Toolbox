@@ -5,6 +5,16 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.02.000 — MiniLaser ASD support, harmonized with Battery Calculator 02.01.000 (2026-10-16) · not yet released
+
+### Recent improvements
+- **Harmonized with Battery Calculator 02.01.000: MiniLaser ASD (FHSD8075-ULF).** Each sheet gets a Standalone ASDs table; MiniLasers are never addressed. Each MiniLaser uses its own dedicated AUX circuit (35 mA overhead, 3.0 A limit), and overflow recommends adding a power supply. You can add 0–2 I/O Expansion Modules (9-30521); the 9-30520 housing is added automatically. **+ Add MiniLaser** offers the Pre-engineered picker (Tables 13–31) or Manual config. A blank fan speed shows amber with ⚠. On .pl import, SOLO detectors become MiniLasers, with alarm-factor derivation and DIP/Remote advice.
+- **Config mode: MiniLaser devices.** The relays are R1 Fault relay (fixed, fail-safe, locked), R2 Relay output 1 (Prealarm) and R3 Relay output 2 (Fire Alarm). Ports are IN1 (15 kΩ supervised) and expansion X1/X2 OUT1–5 / IN1–2. Application (Table 35), alarm delay and flow-fault level/delay start blank, with no numeric prefills. A flow fault of 40% on a UL/FM application gives a warning.
+- `masd-engine.js` 1.1.0, `modulaser-project.js` 1.5.0. New tests: `tests/mlp_minilaser_test.js` (34) and `tests/minilaser_config_test.py` (9).
+
+### QA audit
+- Pending.
+
 ## v00.01.003 — Harmonized with Battery Calculator 02.00.005 (2026-10-16) · pre-release, released 2026-10-16
 
 **In-app revision:** 00.01.003_261016 · **Engine:** MASD engine 1.0.0 (unchanged) · **Calculator lineage:** Battery Calculator 02.00.005
