@@ -5,7 +5,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
-## v00.02.000 — MiniLaser ASD support, harmonized with Battery Calculator 02.01.000 (2026-10-16) · not yet released
+## v00.02.000 — MiniLaser ASD support, harmonized with Battery Calculator 02.01.000 (2026-10-16) · pre-release, released 2026-10-17
 
 ### Recent improvements
 - **Harmonized with Battery Calculator 02.01.000: MiniLaser ASD (FHSD8075-ULF).** Each sheet gets a Standalone ASDs table; MiniLasers are never addressed. Each MiniLaser uses its own dedicated AUX circuit (35 mA overhead, 3.0 A limit), and overflow recommends adding a power supply. You can add 0–2 I/O Expansion Modules (9-30521); the 9-30520 housing is added automatically. **+ Add MiniLaser** offers the Pre-engineered picker (Tables 13–31) or Manual config. A blank fan speed shows amber with ⚠. On .pl import, SOLO detectors become MiniLasers, with alarm-factor derivation and DIP/Remote advice.
@@ -21,7 +21,10 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 - **MiniLaser detection class from a .pl (Brent-approved):** area override → project standard → SFD. Max transport time is no longer used. **A MiniLaser imported from a .pl is non-pre-engineered by default** (Brent: pre-engineered units don't need a PipeCAD design), so elbow/tee counts no longer decide it. The recommendation is DIP only when the fan is 2/4/7/10 and the AF is 2/4/6/8, otherwise Remote. Tick **Pre-engineered** on an imported row to override; DIP is then recommended (saved with the project and carried in `.mlproj.json` as `minilaser.preEngineered`).
 
 ### QA audit
-- Pending.
+- **QA/Auditor verdict: GO** (Delta review 4, 2026-10-17, on Calculator c59a78c / Toolbox e3dfb68 / Report b7cbadb; `qa/qa-report-02.01.000.md`). No blocking findings.
+- **Findings fixed before release:** F1 MiniLaser pipe limits (manual p.66) enforced; F3/F4 test hygiene (fixture tests report SKIPPED, fail with `REQUIRE_FIXTURES=1`; repo-under-test defaults); F5 40% flow wording (PASS with a warning note); F6 print font; F8 Disparate-clusters made a warning only (sheet can pass; nothing withheld); dead A/BPS branch removed; `modulaser-project.js` 1.5.1; side-panel flag vs warning styling; service-worker cache bumps; README versions.
+- **Suites green:** minilaser 46, regression set green, v2 64, toolbox_test 139, report_audit 31, save_import 6, minilaser_config 9, mlp_sync PASS, sens_rule 14, mlp_minilaser 48.
+- **Remaining non-blocking nits:** `mlp_sync_test` silently skips `/workspace/mlp` when it's absent and doesn't compare the engine build source; the Calculator root build registers a `sw.js` that isn't present at the repo root (pwa/ and docs/ builds have one; predates this release).
 
 ## v00.01.003 — Harmonized with Battery Calculator 02.00.005 (2026-10-16) · pre-release, released 2026-10-16
 
