@@ -25,7 +25,16 @@ t('deviceFromPl model FHSD8075-ULF, standalone, no address', dev && dev.model ==
 t('devNetwork → null (standalone; not counted on SenseNET)', dev && M.devNetwork(dev) === null && Object.keys(M.networkCounts([dev])).length === 0);
 const ml = dev && dev.minilaser;
 t('AF derived (not 0 from .pl): 8 holes × 0.25 = 2.00 ≤ SFD 2.0 → AF 8', ml && ml.alarmFactor === 8 && ml.alarmFactorSrc === 'derived' && ml.derivation.avg === 2, ml && ml.derivation);
-t('class source recorded (maxTransitTime 42 → not a class; suite default SFD)', ml && ml.perfClass === 'SFD' && /default/.test(ml.perfClassSrc), ml && ml.perfClassSrc);
+t('class source recorded (no Area/project class → default SFD)', ml && ml.perfClass === 'SFD' && ml.perfClassSrc === 'default SFD', ml && ml.perfClassSrc);
+// Brent-approved class order: Area/Group → project → SFD
+const P = { standard: 'EWFD – NFPA 76', areas: { Floor: { enabled: true, standard: 'VEWFD – NFPA 76/318' }, Other: { enabled: false, standard: 'VEWFD – NFPA 76/318' } } };
+t('class order: Area/Group override wins', JSON.stringify(M.miniLaserClass(P, 'Floor')) === JSON.stringify({ cls: 'VEWFD', src: 'area' }), M.miniLaserClass(P, 'Floor'));
+t('class order: disabled area → project class', JSON.stringify(M.miniLaserClass(P, 'Other')) === JSON.stringify({ cls: 'EWFD', src: 'project' }), M.miniLaserClass(P, 'Other'));
+t('class order: no class (BS / none) → SFD', M.miniLaserClass({ standard: 'BS 5839-1 Category M/L' }, 'Floor').cls === 'SFD' && M.miniLaserClass(null).src === 'default SFD');
+const devV = d && M.deviceFromPl(d, 'Floor', { id: 'pl-x', name: 'minilaser.pl' }, undefined, P);
+t('Example Shaft with a VEWFD area: 8 × AF → AF 6 (8 × 0.12 = 0.96 ≤ 1.0), class src area', devV && devV.minilaser.alarmFactor === 6 && devV.minilaser.perfClass === 'VEWFD' && devV.minilaser.perfClassSrc === 'area', devV && devV.minilaser.derivation);
+const dsg = pc && M.designFromPl([pc], [{ id: 'pl-x', name: 'minilaser.pl' }], { standard: 'EWFD – NFPA 76' });
+t('designFromPl passes the project class: EWFD → AF 7 (8 × 0.18 = 1.44 ≤ 1.5)', dsg && dsg.devices[0].minilaser.alarmFactor === 7 && dsg.devices[0].minilaser.perfClassSrc === 'project', dsg && dsg.devices[0].minilaser.derivation);
 t('Remote recommended (fan 6 not DIP; 10 × 90°)', ml && ml.configMethod === 'Remote' && /Remote/.test(ml.advice), ml && ml.advice);
 // derivation rule
 const D = M.deriveAlarmFactor;
@@ -42,7 +51,10 @@ t('alarmFactorActivated true → imported as-is', M.miniLaserFromPl(act).alarmFa
 const A = M.miniLaserAdvice;
 t('fan 4 / AF 6 / 10 elbows → DIP (both DIP-settable)', A({ fan: 4, af: 6, bends90: 10 }).method === 'DIP');
 t('fan 7 / AF 5 → Remote (AF 5 Remote only)', A({ fan: 7, af: 5, bends90: 0 }).method === 'Remote');
-t('pre-engineered when ≤1 elbow', A({ fan: 4, af: 4, bends90: 1 }).preEngineered === true && A({ fan: 4, af: 4, bends90: 2 }).preEngineered === false);
+t('never pre-engineered from elbow/tee counts (Brent: .pl import is non-pre-engineered by default)', A({ fan: 4, af: 4, bends90: 1, tees: 0 }).preEngineered === false && A({ fan: 4, af: 4 }).preEngineered === false);
+t('non-pre-engineered: fan 6 / AF 8 → Remote; fan 7 / AF 2 → DIP', A({ fan: 6, af: 8 }).method === 'Remote' && A({ fan: 7, af: 2 }).method === 'DIP');
+t('user override preEngineered:true → DIP even with Remote-only fan/AF', A({ fan: 6, af: 5, preEngineered: true }).method === 'DIP' && A({ fan: 6, af: 5, preEngineered: true }).preEngineered === true);
+t('.pl import advice is non-pre-engineered regardless of fittings', (() => { const r = M.miniLaserFromPl({ fan: 4, pipe: { holes: [1,2,3,4], bends90Total: 0, tees: 0, afActivatedRaw: 'true', af: 8 } }, 'SFD'); return r.advice.preEngineered === false && r.configMethod === 'DIP'; })());
 // constants
 const ML = M.MINILASER;
 t('draw table 120…365 mA', JSON.stringify(Object.values(ML.fanMa)) === '[120,134,157,180,200,230,255,285,320,365]');
