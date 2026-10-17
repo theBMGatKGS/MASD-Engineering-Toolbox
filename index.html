@@ -2243,7 +2243,7 @@ body.v2 .model-cell{ font-size:10.5px; }
         </div>
         <div class="help-faq-item">
           <div class="q">What happens if my design needs more than one power supply?</div>
-          <p class="a">The calculator groups your clusters and balances them across the number of supplies required, showing an independent load/Ah/hardware calculation for each — as long as no Validation Error is showing, since that recommendation is withheld otherwise. The one exception is the <b>Disparate clusters must not share power pathways</b> warning, which appears for a sheet with two or more clusters on a third-party supply, where the AUX wiring per entry point isn't known. On Edwards A/BPS every entry point has its own AUX circuit and ribbons stay within a cluster, so it appears only if clusters actually share a pathway. The warning stays, but the arrangement is shown alongside it (it's the arrangement that tells you how to split the clusters). You can export the additional arrangements into their own location pages to document them separately.</p>
+          <p class="a">The calculator groups your clusters and balances them across the number of supplies required, showing an independent load/Ah/hardware calculation for each — as long as no Validation Error is showing, since that recommendation is withheld otherwise. The one exception is the <b>Disparate clusters must not share power pathways</b> warning, which appears for a sheet with two or more clusters on a third-party supply, where the AUX wiring per entry point isn't known. On Edwards A/BPS every entry point has its own AUX circuit and ribbons stay within a cluster, so clusters can't share a pathway and it never appears. It is a <b>warning only</b> (Brent): the sheet can still pass, and the power supply recommendation, arrangement, BOM and export are all shown alongside it (it's the arrangement that tells you how to split the clusters). You can export the additional arrangements into their own location pages to document them separately.</p>
         </div>
         <div class="help-faq-item">
           <div class="q">What's the difference between built-in and third-party power supply mode?</div>
@@ -2259,7 +2259,7 @@ body.v2 .model-cell{ font-size:10.5px; }
         </div>
         <div class="help-faq-item">
           <div class="q">Will Validation Error flags stop me from finishing?</div>
-          <p class="a">No — they don't stop you from editing, and you can keep working with flags showing. What they do withhold is the power supply/battery recommendation section, the multi-supply recommendation, the Recommended Power Supply Arrangement, and the Bill of Materials — all four stay blank until every flag clears (except that the <b>Disparate clusters</b> warning on its own doesn't withhold the Recommended Power Supply Arrangement). The INVALID CALCULATION banner works the same way but for its own three more severe conditions.</p>
+          <p class="a">No — they don't stop you from editing, and you can keep working with flags showing. What they do withhold is the power supply/battery recommendation section, the multi-supply recommendation, the Recommended Power Supply Arrangement, and the Bill of Materials — all four stay blank until every flag clears (except the <b>Disparate clusters</b> message, which is a warning only — labelled “Warning:” — and withholds nothing). The INVALID CALCULATION banner works the same way but for its own three more severe conditions.</p>
         </div>
       </div>
 
@@ -2620,7 +2620,7 @@ const AMENDMENTS = [
   { rev: "001", major: "00", minor: "01", date: "261014", desc: "Harmonized with Battery Calculator 02.00.003 (no engine change; MASD engine 1.0.0). <b>Needs-entry fix:</b> sheets showed the amber <i>Needs entry</i> status but the fields were not visibly marked, because the 1px soft-blue (#5b9bd5) outline blended into the dark theme. Needs-entry fields now use a 2px amber outline and tint matching the sidebar dot (inputs, custom dropdown buttons, radio groups), and the Live Results message has a <b>Show next \u203a</b> button that scrolls to and focuses each field in turn. Help, Quick Start, How Do I and FAQ wording changed from blue to amber. Status logic and math unchanged. Also: print label grey #747574 \u2192 #6b6c6b (WCAG AA). <b>Module table columns (harmonized with Battery Calculator 02.00.003, per Brent):</b> Module Type shows DISP-MIN / DISP-STD / DISP-CMD / DETECTOR (stored values unchanged); Cluster shows the 2-digit number only; Power shows Own circuit or Ribbon Path; fixed column widths with no truncation or wrap (sideways scroll when narrow); Print/Export and Word module tables add Model, Cluster and Power with the same labels. Help and Quick Start now give the live web / PWA address, https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ (installable; works offline after the first visit). **QA follow-up (2026-10-14):** cross-sheet Cluster hint clipped with ellipsis and full text on hover; 'No cluster display defined on any page' shows '—' on the button (full text on hover); needs-entry count and Show next skip CSS-hidden fields (a new sheet shows 18, not 19) and Show next starts from the first field on each sheet; Word export has an Arial 9 pt default font (styles.xml), fixed-layout tables and summary rows spanning the descriptive columns so nothing wraps or is clipped. Saved .html files keep their own code: re-open data via File \u2192 Import Calc. <b>Toolbox F1:</b> re-importing a file saved by this Toolbox no longer gives a false 'Older revision' warning (Toolbox-saved files are compared with the running Toolbox revision; 00.01.000 files still warn); calculator lineage is 02.00.003, also in .mlproj.json. Final (QA re-check): Word module table Standby mA / Alarm mA columns 1100 twips (header no longer wraps), summary row shows 'Status:' again; offline cache renamed." },
   { rev: "002", major: "00", minor: "01", date: "261015", desc: "Harmonized with Battery Calculator 02.00.004 (no engine change; MASD engine 1.0.0; shared modulaser-project.js bumped to 1.4.0 for per-device SenseNET networks). <b>Valid defaults are no longer amber-flagged</b> (Design Basis, Standby, Alarm, Ambient Temp., Module Type, Power, Addressing, supply mode, edition, margin); only empty required fields are flagged; Confirm defaults kept but no longer needed. <b>New calculator sheets start with no modules</b>, with an empty-state guide (Import .pl… or + Add Display / + Add Detector). <b>Standby / Alarm boxes</b> no longer cut values off on narrow screens. <b>Addressing per mode</b>: Networked sheets share an address pool per SenseNET network; a Standalone sheet is its own 1–9 pool (per sheet) and may reuse other sheets' addresses; duplicates within a Standalone sheet still flagged. <b>Mixed Networked/Standalone</b> projects show a banner with Make all Networked… / Make all Standalone… and optional re-addressing (confirm first). Imports keep addresses and list per-mode conflicts. <b>SenseNET networks</b>: up to 127 modules per network; each Networked sheet has a SenseNET network number (selector, SN tag, print/Word/Excel settings, saved per sheet; older files network 1); past 127, whole sheets move to SenseNET 2, 3… and are addressed from 1, with a notice to include the new network's infrastructure; duplicates checked per network. <b>Address change log + Undo</b>: unify / re-address, SenseNET moves and Standalone clears are logged (Edit → Address change log…) and undo in one step (Undo bar or Ctrl+Z); Make all Standalone lists and reports addresses above 9 it clears. Undo is disarmed by the next manual address/mode/network edit and ignored while a field/dropdown has focus; auto-move only when a network rises past 127, otherwise a Move overflow banner; Clear file clears the log. <b>Confirm Settings?</b> after a .pl import (Confirm marks imported items confirmed; Revise import rolls back to the review step with choices kept); Design Basis and Ambient Temperature start on <i>- Select -</i> (amber, INCOMPLETE until chosen; saved/legacy files keep values); sheets with no modules show Incomplete for battery Ah everywhere (card, Live Results, print, Word, Excel; .mlproj requiredAh null + incomplete) with no battery/PSU recommendation." },
   { rev: "003", major: "00", minor: "01", date: "261016", desc: "Harmonized with Battery Calculator 02.00.005 (engine 1.0.0 and modulaser-project.js 1.4.0 unchanged). <b>Auto addressing</b> in the Calculator (Brent 10-16, revised 5:27 PM): <b>new build</b> (first modules in an empty project) \u2014 Networked or Standalone?, then Auto address? Yes / No; <b>existing project</b> gaining modules (new .pl import, new sheet, modules on a sheet, Import Calc \u2192 Merge sheets) \u2014 Continue addressing per previous sheets (only the new modules, picking up after the last address; SenseNET 2 past 127; new Standalone sheets from 1), Manually address, or Re-auto address entire project. After a .pl import: Confirm Settings? \u2192 (mode) \u2192 address. Each automatic change is one address change log entry with one-step Undo. <b>Excel CAD Schedule</b>: each power supply table starts with that sheet's Standby time (h), Alarm time (min) and Safety margin (%). <b>Cluster Validation Report print</b> (Brent approved): KGS palette, Entry point / Ribbon Path / status chips, running header (CLUSTER VALIDATION REPORT · project · Network #) and footer (MASD Engineering Toolbox revision · Page n of N), repeated table headers, rows never split, no wrapping. <b>Incomplete in amber with ⚠</b>: every Incomplete indication (status, empty-sheet Ah / battery / PSU recommendation, sidebar, Live Results, print incl. legend, Word, withheld PSU recommendation, CVR pending chip) is amber with a warning symbol; Excel has no fills or colour (plain ⚠ text); .mlproj.json keeps the plain status." },
-  { rev: "000", major: "00", minor: "02", date: "261016", desc: "Harmonized with Battery Calculator 02.01.000 (Brent 10-16): <b>MiniLaser ASD (FHSD8075-ULF)</b> — Standalone ASDs table on each sheet (never addressed), dedicated AUX circuit per MiniLaser (35 mA overhead, 3.0 A limit; overflow recommends another power supply), I/O Expansion Modules 9-30521 0–2 with the 9-30520 housing added automatically, Pre-engineered picker (manual Tables 13–31) or Manual config, .pl SOLO import with alarm-factor derivation and DIP/Remote advice. <b>Config mode</b>: MiniLaser devices with R1 Fault relay (fixed, fail-safe), R2 Relay output 1 (Prealarm), R3 Relay output 2 (Fire Alarm), IN1 supervised input, expansion X1/X2 OUT1–5 and IN1–2; application (Table 35), alarm delay and flow-fault level/delay start blank; flow fault 40% on a UL/FM application warns. masd-engine.js 1.1.0, modulaser-project.js 1.5.0. <b>Arrangement with 2+ clusters (Brent 9:02 PM):</b> the disparate-clusters warning does not withhold the Recommended Power Supply Arrangement any more. The warning stays and the arrangement card shows alongside it. On Edwards A/BPS the warning fires only when clusters actually share a power pathway (QA F8). <b>QA delta:</b> MiniLaser manual p.66 pipe limits enforced (holes per class, pipe length, first hole when known); Current Draw Reference xlsx has an explicit black font." }
+  { rev: "000", major: "00", minor: "02", date: "261016", desc: "Harmonized with Battery Calculator 02.01.000 (Brent 10-16): <b>MiniLaser ASD (FHSD8075-ULF)</b> — Standalone ASDs table on each sheet (never addressed), dedicated AUX circuit per MiniLaser (35 mA overhead, 3.0 A limit; overflow recommends another power supply), I/O Expansion Modules 9-30521 0–2 with the 9-30520 housing added automatically, Pre-engineered picker (manual Tables 13–31) or Manual config, .pl SOLO import with alarm-factor derivation and DIP/Remote advice. <b>Config mode</b>: MiniLaser devices with R1 Fault relay (fixed, fail-safe), R2 Relay output 1 (Prealarm), R3 Relay output 2 (Fire Alarm), IN1 supervised input, expansion X1/X2 OUT1–5 and IN1–2; application (Table 35), alarm delay and flow-fault level/delay start blank; flow fault 40% on a UL/FM application warns. masd-engine.js 1.1.0, modulaser-project.js 1.5.1. <b>Arrangement with 2+ clusters (Brent 9:02 PM):</b> the disparate-clusters warning does not withhold the Recommended Power Supply Arrangement any more. The warning stays and the arrangement card shows alongside it. Final (Brent): it is a warning only — the sheet can pass and nothing is withheld (no “Recommendation withheld” banner; BOM and export shown). On Edwards A/BPS it never fires (AUX is unique per entry point; the unreachable shared-pathway check was removed). <b>QA delta:</b> MiniLaser manual p.66 pipe limits enforced (holes per class, pipe length, first hole when known); Current Draw Reference xlsx has an explicit black font. <b>Final:</b> the Disparate-clusters message is a warning only (the sheet can pass, nothing is withheld; never on Edwards A/BPS); modulaser-project.js 1.5.1." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -5035,20 +5035,10 @@ function recalcLocationInner(loc){
   if (clusterCount === 0 && unassignedDetectorCount > 0){
     flags.push(`Detector modules present with no Standard or Minimum Display and no cluster assigned — correlate detector modules to a cluster display module, local or on another page.`);
   }
-  // 02.01.000 (QA F8): Edwards A/BPS mode knows each entry point's AUX circuit (ribbon followers are limited to their own cluster), so the flag
-  // fires only when entry points of different clusters are on the same AUX circuit or a follower crosses clusters. Third-party mode doesn't
-  // track AUX per entry point, so it can't be determined there and the warning stays whenever there are 2+ clusters.
-  const __sharedPath = (() => {
-    if (mode !== 'builtin') return true;
-    const byAux = {}; let cross = false;
-    Object.keys(ribbonSegmentsByCluster).forEach(cn => ribbonSegmentsByCluster[cn].forEach(seg => {
-      seg.followerRows.forEach(fr => { const c = fr.querySelector('.cluster-select'); if (c && c.value && String(c.value) !== String(cn)) cross = true; });
-      const a = seg.entryRow.querySelector('.aux-circuit-num'); const n = a && !a.hidden ? parseInt(a.value, 10) : NaN;
-      if (n >= 1){ (byAux[n] = byAux[n] || new Set()).add(String(cn)); }
-    }));
-    return cross || Object.values(byAux).some(set => set.size > 1);
-  })();
-  if (clusterCount > 1 && __sharedPath){
+  // 02.01.000 (QA F8, final): in Edwards A/BPS mode recalc gives every entry point its own AUX circuit (a taken circuit is never offered
+  // again) and ribbon followers are limited to their own cluster, so clusters on an A/BPS sheet cannot share a power pathway: no warning there.
+  // A third-party supply doesn't track AUX per entry point, so the warning is shown — as an advisory WARNING only (Brent 10-16).
+  if (clusterCount > 1 && mode !== 'builtin'){
     flags.push(`Disparate clusters must not share power pathways — each cluster arrangement requires a dedicated AUX output per location, and disparate cluster modules must not be connected together via ribbon cable.`);
   }
   if (commandDisplayCount > MAX_COMMAND_DISPLAYS){
@@ -5408,7 +5398,7 @@ function recalcLocationInner(loc){
 
   let batteryExceedsMax = (mode === 'builtin') && !pickBatteryModel(requiredAh);
   let cabinetChoice = null;
-  const hasAnyValidationIssue = batteryExceedsMax || flags.length > 0;
+  const hasAnyValidationIssue = batteryExceedsMax || flags.some(f => !isAdvisoryFlag(f));   // 02.01.000: advisory warnings don't withhold
   locEl.classList.toggle('recommendations-withheld', hasAnyValidationIssue);
   if (mode === 'builtin'){
     const cabinetRow = locEl.querySelector('.battery-cabinet-row');
@@ -5555,7 +5545,7 @@ function recalcLocationInner(loc){
   // ---- multi-supply arrangement ----
   const arrangementBlock = locEl.querySelector('.arrangement-block');
   const rawGroups = (psRequired > 1 && clusterCount > 0) ? computeArrangementGroups(clusterInfo, psRequired).filter(g => g.clusterIdxs.length > 0) : [];
-  const arrWithhold = batteryExceedsMax || flags.some(x => !String(x).startsWith('Disparate clusters must not share power pathways'));   // 02.01.000 (Brent): the disparate-clusters warning stays but no longer withholds the arrangement
+  const arrWithhold = hasAnyValidationIssue;   // 02.01.000 (Brent): the disparate-clusters warning stays but no longer withholds the arrangement
   if (rawGroups.length > 1 && arrWithhold){
     arrangementBlock.querySelector('.arrangement-list').innerHTML = `<div class="note">Arrangement withheld until Network Validation issues are resolved (see flags above).</div>`;
     arrangementBlock.hidden = false;
@@ -6334,12 +6324,15 @@ function refreshAllClusterSummaries(){
   document.querySelectorAll('.location').forEach(refreshClusterSummary);
 }
 
+/* 02.01.000 (Brent 10-16): advisory warnings are listed with the flags but never withhold recommendations, BOM or export, and don't fail the sheet. */
+const ADVISORY_FLAG_PREFIXES = ['Disparate clusters must not share power pathways'];
+function isAdvisoryFlag(t){ return ADVISORY_FLAG_PREFIXES.some(p => String(t || '').trim().startsWith(p)); }
 function renderFlags(loc, flags){
   const panel = document.getElementById(`flags-${loc}`);
   if (!panel) return;
   if (flags.length === 0){ panel.hidden = true; panel.querySelector('.flags-list').innerHTML = ""; return; }
   panel.hidden = false;
-  panel.querySelector('.flags-list').innerHTML = flags.map(f => `<li>${f}</li>`).join("");
+  panel.querySelector('.flags-list').innerHTML = flags.map(f => isAdvisoryFlag(f) ? `<li class="flag-advisory">Warning: ${f}</li>` : `<li>${f}</li>`).join("");
 }
 
 document.getElementById("add-location-btn").addEventListener("click", addLocation);
@@ -8836,7 +8829,7 @@ function v2SheetModel(locEl){
   if (noModules && status === 'pass') status = 'incomplete';   // 02.00.004: an empty sheet is not a PASS
   const unselected = ['.design-basis-select', '.temperature-select'].some(q => { const e = locEl.querySelector(q); return e && e.value === ''; });
   if (unselected && status === 'pass') status = 'incomplete';   // '- Select -' Design Basis / Ambient Temp
-  const dot = (invalid || flags.length) ? 'error' : ((needs || noModules || unselected) ? 'needs' : 'complete');
+  const dot = (invalid || flags.some(f => !isAdvisoryFlag(f.replace(/^Warning: /, '')))) ? 'error' : ((needs || noModules || unselected) ? 'needs' : 'complete');
   const basisKey = v2Val(locEl, '.design-basis-select');
   const preset = DESIGN_BASIS_PRESETS[basisKey];
   const bs = !!(preset && preset.formula === 'bs5839');
@@ -9573,7 +9566,7 @@ wirePrintDialog();
 (function (root) {
 'use strict';
 const MLP = {};
-MLP.VERSION = '1.5.0';
+MLP.VERSION = '1.5.1';   // 1.5.1: MiniLaser pipe limits (M p.66) — miniLaserPipeLimits / miniLaserPipeCheck
 MLP.FORMAT = 'modulaser-project';
 MLP.SCHEMA_VERSION = 1;
 MLP.EXT = '.mlproj.json';
@@ -10198,7 +10191,9 @@ MLP.miniLaserPipeLimits = function (key){
   else { hk = 'SFD'; lk = 'NFPA'; }
   return { holesMax: P.maxHoles[hk], lenMax: P.maxLenFt[lk], holesKey: hk, lenKey: lk, firstHoleFt: P.firstHoleFt };
 };
-/* errors[] for holes over the class maximum, pipe longer than allowed, and (when known) first hole farther than 16 ft (M ch.5 / p.66). */
+/* errors[] for holes over the class maximum, pipe longer than allowed, and first hole farther than 16 ft (M ch.5 / p.66).
+   firstHoleFt is manual-entry only: the .pl hole records carry no position along the pipe, so no importer supplies it; callers pass it
+   only when a user has entered it. (Pre-engineered picker layouts satisfy it by construction.) */
 MLP.miniLaserPipeCheck = function (o){
   const L = MLP.miniLaserPipeLimits(o.key), errors = [];
   const h = Number(o.holes), len = Number(o.lengthFt), fh = Number(o.firstHoleFt);
@@ -10765,7 +10760,7 @@ function mlPlaceFromPl(created, files, settings, makeSheet){
   });
   return notices;
 }
-/* project file (.mlproj.json, modulaser-project 1.5.0): MiniLasers travel as design.devices[] kind 'minilaser' */
+/* project file (.mlproj.json, modulaser-project 1.5.1): MiniLasers travel as design.devices[] kind 'minilaser' */
 (function hookDesign(){
   if (typeof mlpBuildDesign !== 'function') return;
   const _d = mlpBuildDesign;
