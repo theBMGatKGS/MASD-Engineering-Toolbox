@@ -13,12 +13,18 @@ TB=os.environ['TOOLBOX_DIR'].rstrip('/')+'/'; _sib=os.path.dirname(TB.rstrip('/'
 CA=os.environ.get('CALC_DIR',os.path.join(_sib,'ModuLaser-Battery-Calculator')).rstrip('/')+'/'; RP=os.environ.get('REPORT_DIR',os.path.join(_sib,'ModuLaser-Commisioning-Report')).rstrip('/')+'/'
 MS=os.environ.get('MLP_SRC',TB+'modulaser-project.js'); ES=os.environ.get('ENGINE_SRC',TB+'masd-engine.js')   # reference = the Toolbox under test
 print('checking', TB, CA, RP)
+_need=[('Calculator (CALC_DIR)',CA+'modulaser_battery_calculator.html'),('Report (REPORT_DIR)',RP+'index.html'),('MLP reference (MLP_SRC)',MS),('engine reference (ENGINE_SRC)',ES)]
+_miss=[f'{n}: {p}' for n,p in _need if not os.path.exists(p)]
+if _miss:
+    sys.stderr.write('ERROR: mlp_sync_test cannot run; missing:\n  ' + '\n  '.join(_miss) + '\nCheck out the sibling repos next to the Toolbox, or set CALC_DIR / REPORT_DIR / MLP_SRC / ENGINE_SRC.\n'); sys.exit(2)
 def block(path, sid):
     s=open(path).read(); m=re.search(r'<script id="%s">\n(.*?)\n</script>'%sid, s, re.S); return m.group(1) if m else None
 mlp={ 'reference (MLP_SRC)': open(MS).read(),
   'toolbox file': open(TB+'modulaser-project.js').read(), 'toolbox index.html': block(TB+'index.html','mlp-shared'),
   'calculator file': open(CA+'modulaser-project.js').read(), 'calculator html': block(CA+'modulaser_battery_calculator.html','mlp-shared'),
   'report file': open(RP+'modulaser-project.js').read(), 'report index.html': block(RP+'index.html','mlp-shared') }
+if os.path.exists('/workspace/mlp/modulaser-project.js') and os.path.abspath(MS) != '/workspace/mlp/modulaser-project.js':
+    mlp['/workspace/mlp source'] = open('/workspace/mlp/modulaser-project.js').read()   # build source, when present
 eng={ 'source': open(ES).read(), 'toolbox file': open(TB+'masd-engine.js').read(),
   'toolbox index.html': block(TB+'index.html','masd-engine'), 'calculator file': open(CA+'masd-engine.js').read(), 'calculator html': block(CA+'modulaser_battery_calculator.html','masd-engine') }
 ok=True

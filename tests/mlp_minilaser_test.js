@@ -81,4 +81,5 @@ const doc = M.blank(); if (HAVE) doc.design = { devices: [Object.assign({}, dev,
 const back = HAVE && M.parse(M.stringify(doc, 'test', '0'));
 if (HAVE) t('save → load keeps MiniLaser fields', back.design.devices[0].ioModules === 2 && back.design.devices[0].minilaser.alarmFactor === 8 && back.design.devices[0].model === 'FHSD8075-ULF'); else tf('save → load keeps MiniLaser fields');
 if (HAVE) t('diff sees I/O module change', M.diffDesign(doc.design, { devices: [Object.assign({}, dev, { ioModules: 1 })], psus: [] }).devices.changed.some(c => c.fields.some(f => f.f === 'ioModules'))); else tf('diff sees I/O module change');
-console.log(`${pass}/${pass + fail}` + (skipped ? ` (${skipped} skipped: fixture absent)` : '')); process.exit(fail ? 1 : 0);
+const REQ = process.env.REQUIRE_FIXTURES === '1';
+console.log(`${pass}/${pass + fail} passed` + (skipped ? `, SKIPPED: ${skipped} (fixture absent${REQ ? ' — REQUIRE_FIXTURES=1, failing' : ''})` : '')); process.exit(fail || (skipped && REQ) ? 1 : 0);

@@ -125,7 +125,7 @@ In-app **How to use, How Do I…, Quick Start (offline), FAQ, Standards/Referenc
 - **Single file:** `index.html` also runs straight from disk.
 
 ## File formats
-### `.mlproj.json` (modulaser-project 1.5.0, schemaVersion 1)
+### `.mlproj.json` (modulaser-project 1.5.1, schemaVersion 1)
 | Key | Owner | Content |
 |---|---|---|
 | `project` | all | name, location, designer, company, building, network |
