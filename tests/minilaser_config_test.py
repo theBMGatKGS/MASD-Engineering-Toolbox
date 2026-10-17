@@ -28,7 +28,7 @@ async def main():
     await pg.select_option('[data-tb-ml=flowLevel]', '40'); await pg.wait_for_timeout(200)
     w = await pg.evaluate("document.querySelector('#tb-cfg-editor').textContent")
     ok('flow fault 40% on UL application warns', 'Flow fault 40% on a UL/FM application' in w)
-    await pg.screenshot(path=SHOTS + '/20-toolbox-config-minilaser.png', full_page=False)
+    await pg.locator('.tb-cfg-grid').scroll_into_view_if_needed(); await pg.locator('.tb-cfg-grid').screenshot(path=SHOTS + '/21-toolbox-config-minilaser-editor.png')
     await pg.evaluate("tbSel=tbDevices().find(d=>d.name==='ML blank').id; tbRenderConfig()")
     ok('blank fan → ⚠ Incomplete warning', '⚠ Incomplete' in await pg.evaluate("document.querySelector('#tb-cfg-editor').textContent"))
     st = await pg.evaluate("tbDevices().filter(d=>d.kind==='minilaser').map(tbCfgState)")
