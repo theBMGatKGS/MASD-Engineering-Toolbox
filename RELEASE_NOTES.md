@@ -7,6 +7,12 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ## v00.03.000 — Brands, ASD-160 and printable Quick Start (2026-10-19) · pre-release, released 2026-10-19
 
+### Download / Open
+- **Web / PWA (live):** https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.
+- **Windows installer:** **MASD-Engineering-Toolbox-Setup-00.03.000.exe** — Windows x64 NSIS installer (unsigned; SmartScreen may prompt: More info → Run anyway)
+  - Direct: https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/releases/download/v00.03.000/MASD-Engineering-Toolbox-Setup-00.03.000.exe
+  - SHA-256: `0e52dbca1fdf7c98fb4a0d32a9717e52a9db7d0215ce5fa577a5e4ec642686c9`
+
 ### Recent improvements
 - **Config: ASD-160 branch** — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers.
 - **Report band: brand logo and brand label**; Excel report header gets a Brand row (no fills).

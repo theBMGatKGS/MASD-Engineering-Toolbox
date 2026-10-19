@@ -8,6 +8,7 @@ It absorbs the **ModuLaser Battery Calculator** and adds device configuration, l
 the field-change approval loop with the **ModuLaser MASD Field (Commissioning) Report**.
 
 - **Web / PWA (live):** https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.
+- **Windows installer:** [MASD-Engineering-Toolbox-Setup-00.03.000.exe](https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/releases/download/v00.03.000/MASD-Engineering-Toolbox-Setup-00.03.000.exe) — pre-release [v00.03.000](https://github.com/theBMGatKGS/MASD-Engineering-Toolbox/releases/tag/v00.03.000) (x64 NSIS, unsigned; SmartScreen may prompt). SHA-256 `0e52dbca1fdf7c98fb4a0d32a9717e52a9db7d0215ce5fa577a5e4ec642686c9`.
 
 > **Version 00.03.000_261019 — pre-release, released 2026-10-19.** 01.00.000 is reserved for the refined first release.
 > Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
