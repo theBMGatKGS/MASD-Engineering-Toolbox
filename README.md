@@ -166,3 +166,7 @@ See [`docs/screenshots/`](docs/screenshots/) (copied from the Playwright run). P
 
 ## License
 GPL-3.0 · © The BMG
+
+## What's new in 00.03.000
+
+Edwards and Kidde Commercial brands, ASD-160 (Micra25 / Senator 25) support, AUX/ribbon rules (max 4 AUX per supply; max 4 detectors + 1 display per ribbon run), and a printable Quick Start (Help → Print Quick Start). See RELEASE_NOTES.md.

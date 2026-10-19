@@ -1,0 +1,42 @@
+"""Toolbox 00.03.000 — ASD-160 Config branch, UL opt-in, report-band logo + Brand row, src/ copies in sync with index.html."""
+import asyncio, os, re, sys
+from playwright.async_api import async_playwright
+D=os.environ.get('TOOLBOX_DIR', os.path.join(os.path.dirname(__file__), '..'))
+APP='file://'+os.path.abspath(os.path.join(D,'index.html'))
+R=[]
+def ok(n,c,i=''): R.append(bool(c)); print('PASS' if c else 'FAIL',n,str(i)[:300])
+s=open(os.path.join(D,'index.html')).read()
+ok('src/toolbox.js == inline <script id="toolbox">', open(os.path.join(D,'src/toolbox.js')).read()==re.search(r'<script id="toolbox">\n?(.*?)</script>',s,re.S).group(1))
+ok('src/tb-asd160.js == inline <script id="tb-asd160">', open(os.path.join(D,'src/tb-asd160.js')).read().strip()==re.search(r'<script id="tb-asd160">\n(.*?)\n</script>',s,re.S).group(1).strip())
+ok('tools/build.py is marked retired', 'RETIRED' in open(os.path.join(D,'tools/build.py')).read())
+async def main():
+  async with async_playwright() as p:
+    b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1440,'height':1000}); errs=[]
+    pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
+    await pg.goto(APP); await pg.evaluate('localStorage.clear()'); await pg.reload(); await pg.wait_for_timeout(900)
+    loc=await pg.evaluate("document.querySelector('.location').dataset.loc")
+    await pg.evaluate(f"asdUiAdd('{loc}')"); await pg.wait_for_timeout(200)
+    await pg.evaluate(f"(()=>{{const tr=document.querySelector('#location-{loc} tr[data-kind=asd160]'); tr.querySelector('.ml-zone').value='SERVER ROOM'; const a=tr.querySelector('.ml-af'); a.value='3'; a.dispatchEvent(new Event('change',{{bubbles:true}}));}})()")
+    d=await pg.evaluate("tbDevices().filter(d=>d.kind==='asd160').map(d=>[d.kind,d.type,d.name,d.af])")
+    ok('ASD-160 row is a Config device of kind asd160 (not minilaser)', d and d[0][0]=='asd160' and d[0][2]=='SERVER ROOM', d)
+    c=await pg.evaluate("(()=>{const d=tbDevices().find(d=>d.kind==='asd160'); const c=tbEnsureCfg(d); return [c.kind, c.values.fire1, c.src.fire1, c.values.fire2]})()")
+    ok('seeded from the Alarm Factor worksheet (AF 3 → Fire 0.03), Fire 2 blank', c[0]=='asd160' and float(c[1])==0.03 and c[2]=='typical' and c[3] is None, c)
+    iss=await pg.evaluate("(()=>{const d=tbDevices().find(d=>d.kind==='asd160'); return tbCfgIssues(d, tbEnsureCfg(d)).map(i=>[i.k,i.lvl,i.t])})()")
+    ok('Fire 2 missing → ⚠ Incomplete', any(i[0]=='fire2' and 'Incomplete' in i[2] for i in iss), iss)
+    iss=await pg.evaluate("(()=>{const d=tbDevices().find(d=>d.kind==='asd160'); const c=tbEnsureCfg(d); c.values.fire2='9'; c.values.action='0.5'; return tbCfgIssues(d,c).map(i=>[i.k,i.lvl,i.t])})()")
+    ok('Fire 2 outside 0.00914–7.62 → error', any(i[0]=='fire2' and i[1]=='err' and '7.62' in i[2] for i in iss), iss)
+    ok('Aux < Pre-Alarm < Fire ordering error', any(i[1]=='err' and 'must be above' in i[2] for i in iss), iss)
+    h=await pg.evaluate("(()=>{const d=tbDevices().find(d=>d.kind==='asd160'); return tbEditorHtml(d, tbFacuAddrs())})()")
+    ok('editor shows Remote configuration levels with data-tb-asd inputs', 'Remote configuration levels' in h and h.count('data-tb-asd=')==9 and 'Configuration: Remote' in h)
+    mlr=await pg.evaluate("tbDevices().filter(d=>d.kind==='minilaser').length")
+    ok('ASD-160 not listed as a MiniLaser', mlr==0, mlr)
+    note=await pg.evaluate("(()=>{const P=tbPerf(); P.standard='FM DS 5-32'; return tbStdNote(Object.assign({},P,{standard:(MLP.PERF_PRESETS.find(p=>p.family==='FM')||{}).id}),'')})()")
+    ok('FM standard note offers the UL 268 opt-in when an ASD-160 is present', 'data-tb-perf-k="ulOptIn"' in note and 'Apply UL 268 7th edition to ASD-160 units' in note)
+    nn=await pg.evaluate("tbStdNote({standard:(MLP.PERF_PRESETS.find(p=>p.family==='NFPA')||{}).id},'')")
+    ok('NFPA note has no opt-in', 'ulOptIn' not in nn)
+    rh=await pg.evaluate("tbReportHtml({title:'Config Schedule',H:{project:'Example',preparedBy:'QA',date:'2026-10-19',rev:'00.03.000'},secs:[]})")
+    ok('Toolbox report band: brand logo + brand label', 'class="band-logo"' in rh and 'Edwards' in rh)
+    ok('no page errors', not errs, errs[:3])
+    await b.close()
+asyncio.run(main())
+print(f'{sum(R)}/{len(R)} passed'); sys.exit(0 if all(R) else 1)

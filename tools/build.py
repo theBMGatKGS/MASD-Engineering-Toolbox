@@ -1,3 +1,13 @@
+"""RETIRED (documented 02.02.000 / Toolbox 00.03.000, 2026-10-19).
+This script built Toolbox 00.01.000 from the Battery Calculator HTML. Since 00.01.003 the Toolbox index.html is the source of
+truth and is patched in place (the shared blocks are injected by /workspace/mlp/inject_calc.py and minilaser/inject.py; the
+02.02.000 layers by the build0202 patch scripts). Running this file would rebuild 00.01.000 and drop later work — do not run it.
+src/toolbox.js is an exact copy of the inline <script id="toolbox"> and src/tb-asd160.js of <script id="tb-asd160">; they are
+kept for review and diffing only (the app does not load them). See README "Build".
+"""
+import sys
+if __name__ == '__main__' and '--force-legacy' not in sys.argv:
+    sys.exit('tools/build.py is retired (see docstring); index.html is the source of truth.')
 """Build the MASD Engineering Toolbox index.html from the Battery Calculator HTML.
 The Toolbox shares the calculator's UI and the byte-identical MASD engine block."""
 import re, json, shutil, os, sys

@@ -5,6 +5,30 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.03.000 — Brands, ASD-160 and printable Quick Start (2026-10-19) · not released
+
+### Recent improvements
+- **Config: ASD-160 branch** — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers.
+- **Report band: brand logo and brand label**; Excel report header gets a Brand row (no fills).
+- **Quick Start one-pager (quickstart.html) and in-app Toolbox Quick Start** carry current screenshots.
+- `tools/build.py` is marked retired (index.html is the source of truth); `src/toolbox.js` and `src/tb-asd160.js` are exact copies of the inline blocks (tested).
+- **Manual battery or capacity pick turns Auto Battery Sizing off** (with a toast); the controls stay selectable in Auto.
+- **Networked ASD-160s count toward the 127-module SenseNET limit** and share the network's addresses (duplicates flagged).
+- **Unidentified power source → ⚠ Incomplete** everywhere: sheet status and amber dot, side panel, print stamp and project file; the Report adds a blank “Power source identified” item to every power supply sheet and an amber banner.
+- **A manual alarm factor on an ASD-160 row is what gets validated** ("alarm factor N … exceeds … — lower the alarm factor").
+- **Excel Detail sheet: Brand row** under Project (no fills). **Brand logo in the KGS print band** (PDF / HTML / print preview).
+- Harmonized with Battery Calculator 02.02.000.
+- **UL opt-in for ASD-160** ("Apply UL 268 7th edition to ASD-160 units") in the FM and Custom standard notes, shown when the design has an ASD-160.
+- **Brand selector (Edwards | Kidde Commercial).** First field in Project Settings; part numbers, supply labels, BOM, logos and report titles follow the brand; the last choice is remembered for new projects.
+- **Per-sheet supply variant** (120 V / 220–230 V / ULC), tamper and seismic accessories, and **FACU powers these ASDs** with a power-source prompt (in-house / third-party / unidentified — unidentified keeps the sheet Incomplete).
+- **ASD-160 (Micra25 / Senator 25).** + Add ASD-160 and PipeCAD .pl import (MICRA25): 250 mA, dedicated AUX circuit, Remote configuration, networked address 1–127; UL scopes cap SFD/OAP at 1.28 %obs/ft with R-AF7.
+- **Battery 12V6A5 (7.2 Ah)** is manual-only, with a too-small advisory.
+- **AUX/ribbon rules.** Max 4 AUX per power supply; each ribbon run holds max 4 detectors + 1 display; a detector-started run counts that detector; hybrid clusters may use any number of runs; own-AUX modules are not runs. FAQ text no longer says "2-segment/4-follower".
+- **View menu check marks** for Project Settings bar, Sheet sidebar and Results panel.
+- **Help revised** with current screenshots, captured headless from the built app with example data (dark UI). New How Do I and FAQ topics: brand, ASD-160, Print Quick Start, ribbon/AUX limits, 12V6A5, 1.28 cap.
+- **Help ▸ Print Quick Start.** 2-page letter Quick Start with numbered steps and screenshots, KGS print palette, printed from its own document (no Help chrome).
+- Shared modules: modulaser-project.js 1.6.0, MASD engine 1.2.0. Hash policy: new fields at their defaults are stripped, so unchanged 02.01.000 files keep their hash.
+
 ## v00.02.000 — MiniLaser ASD support, harmonized with Battery Calculator 02.01.000 (2026-10-16) · pre-release, released 2026-10-17
 
 ### Recent improvements

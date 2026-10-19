@@ -3,7 +3,12 @@
    (same engine: masd-engine.js; same project file: modulaser-project.js)
    Modes · Config (design) · Legacy imports · Field-change loop · Reports
    ===================================================================== */
-const TB_CALC_LINEAGE = '02.00.002';          // Battery Calculator revision this Toolbox embeds (same engine)
+const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000' };
+let TB_LINEAGE_MISSING = false;   // QA D5: true when the lineage map has no entry for the running Toolbox revision (tests fail on it)
+const TB_CALC_LINEAGE = (() => { const l = AMENDMENTS[AMENDMENTS.length - 1], k = `${l.major}.${l.minor}.${l.rev}`; if (TB_LINEAGE_BY_REV[k]) return TB_LINEAGE_BY_REV[k];
+  TB_LINEAGE_MISSING = true; console.warn(`TB_LINEAGE_BY_REV has no entry for Toolbox ${k}; calculator lineage falls back to the last mapped revision — add the entry.`);
+  const ks = Object.keys(TB_LINEAGE_BY_REV).sort(); return TB_LINEAGE_BY_REV[ks[ks.length - 1]]; })();   // QA F1: derived from the running Toolbox revision          // Battery Calculator revision this Toolbox embeds (same engine)
+// Toolbox revision -> Battery Calculator revision it embedded (for comparing Toolbox-saved files)
 const TB_ROLES = MLP.APPROVAL_ROLES;
 const tbEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const tbNum = v => { if (v == null || String(v).trim() === '') return null; const n = Number(String(v).trim()); return isFinite(n) ? n : NaN; };
@@ -85,9 +90,10 @@ function tbStdSel(o, scope){
 function tbStdNote(o, scope){
   const p = MLP.perfPreset(o.standard); if (!p) return '';
   if (p.family === 'NFPA') return `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulConfirmed" data-scope="${tbEsc(scope || '')}"${o.ulConfirmed ? ' checked' : ''}> <b>Engineer confirms: ${MLP.UL_STATEMENT}</b></label> ${o.ulConfirmed ? '<span class="tb-ok">confirmed — printed</span>' : '<span class="tb-msg err">not confirmed — the UL 268 statement will not print</span>'}<br><small>${tbEsc(p.code)} preset: UL 268, 7th Ed. thresholds apply (Install Manual App. A, printed p.113): hole sensitivity at or below (≤) VEWFD 1.0 (Special Application Range 1) / EWFD 1.5 (Special Application Range 2; 1.5 from NFPA 76) / SFD-OAP 2.18 %obs/ft (Open Area), transport time no more than 60 / 43 / 43 s — plus the code's prescriptions below. Targets: VEWFD 1.0 / EWFD 1.5 / SFD 2.0 %obs/ft. UL range lower limits are enforced: VEWFD 0.05 %obs/ft, 3 s; EWFD 0.05, 3 s; SFD 1.70, 6 s.</small></div>`;
-  if (p.family === 'FM') return `<p class="tb-note">${tbEsc(p.code)}: FM requirements only — not UL, no UL 268 statement. Hole limits prefilled from FM Class 3230 per the Install Manual App. A p.113; confirm them and define the data-sheet prescriptions.</p>`;
+  const ulOpt = (p.family === 'FM' || p.family === 'Custom') && tbDevices().some(d => d.kind === 'asd160') ? `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulOptIn" data-scope="${tbEsc(scope || '')}"${o.ulOptIn ? ' checked' : ''}> Apply UL 268 7th edition to ASD-160 units (1.28 %obs/ft cap, UL limits)</label></div>` : '';   // 02.02.000 §7b (C1 #29)
+  if (p.family === 'FM') return ulOpt + `<p class="tb-note">${tbEsc(p.code)}: FM requirements only — not UL, no UL 268 statement. Hole limits prefilled from FM Class 3230 per the Install Manual App. A p.113; confirm them and define the data-sheet prescriptions.</p>`;
   if (p.family === 'BS') return `<p class="tb-note">${tbEsc(p.code)} (mirrors the Battery Calculator design basis). No cited ASD hole/transport values are on file — every value is engineer to define, with its reference (e.g. BS 5839-1 / EN 54-20 class).</p>`;
-  return '<p class="tb-note">Custom: name the standard; every value is engineer to define, with its reference.</p>';
+  return ulOpt + '<p class="tb-note">Custom: name the standard; every value is engineer to define, with its reference.</p>';
 }
 function tbPerfHtml(){
   const P = tbPerf(), iss = MLP.perfIssues(P);
@@ -229,7 +235,7 @@ async function tbImportPlConfig(files){
   for (const f of files){
     try { const text = await f.text(); const pc = MLP.parsePl(text, f.name); const sha = await MLP.sha256(text); const link = MLP.linkFromParsed(pc, sha, f.size, f.lastModified);
       MLP_PIPE_CACHE[f.name] = pc;
-      MLP.designFromPl([pc], [link]).devices.forEach(dv => { const i = st.cfgDevices.findIndex(x => x.id === dv.id); const rec = { id: dv.id, kind: dv.kind, type: dv.type, name: dv.name, area: dv.area, address: '', plName: dv.plName, pipe: dv.pipe, fan: dv.fan || '', pl: dv.pl };
+      MLP.designFromPl([pc], [link], tbPerf()).devices.forEach(dv => { const i = st.cfgDevices.findIndex(x => x.id === dv.id); const rec = { id: dv.id, kind: dv.kind, type: dv.type, name: dv.name, area: dv.area, address: '', plName: dv.plName, pipe: dv.pipe, fan: dv.fan || '', pl: dv.pl };
         if (i >= 0) st.cfgDevices[i] = rec; else { st.cfgDevices.push(rec); n++; } });
       tbVerifyAgainstPl(f.name, pc);
     } catch (e){ errs.push(f.name + ': ' + e.message); }
@@ -498,13 +504,13 @@ function tbReportModel(kind){
   return { title: 'Legacy Import — Migration Report', H, secs };
 }
 function tbReportHtml(m){
-  const css = `@page{size:letter;margin:.5in}body{font:10pt "IBM Plex Sans",Arial,sans-serif;color:#1d1d1f;margin:0}.band{background:#102645;color:#fff;padding:10px 14px;border-bottom:3px solid #0C77BC}.band h1{margin:0;font-size:16pt}.band div{font-size:9pt;opacity:.85}h2{font-size:10pt;text-transform:uppercase;color:#102645;border-bottom:2px solid #0C77BC;margin:14px 0 6px}table{border-collapse:collapse;width:100%;font-size:8pt}th,td{border:1px solid #BFC4CA;padding:3px 5px;text-align:left;vertical-align:top}th{background:#F2F2F2;color:#555}tr{page-break-inside:avoid}.note{font-size:8.5pt;color:#555;margin:8px 0}.foot{margin-top:16px;font-size:8pt;color:#6b6c6b}`;
-  const H = m.H; return `<!doctype html><html><head><meta charset="utf-8"><title>${tbEsc(m.title)} — ${tbEsc(H.project)}</title><style>${css}</style></head><body><div class="band"><h1>${tbEsc(m.title)}</h1><div>${tbEsc(H.project)}${H.network ? ' · ' + tbEsc(H.network) : ''}${H.building ? ' · ' + tbEsc(H.building) : ''} · Prepared by ${tbEsc(H.preparedBy || '—')} · ${tbEsc(H.date || '')} · MASD Engineering Toolbox ${tbEsc(H.rev)} · engine ${MASD_ENGINE_VERSION}</div></div>`
+  const css = `@page{size:letter;margin:.5in}body{font:10pt "IBM Plex Sans",Arial,sans-serif;color:#1d1d1f;margin:0}.band{background:#102645;color:#fff;padding:10px 14px;border-bottom:3px solid #0C77BC}.band h1{margin:0;font-size:16pt}.band div{font-size:9pt;opacity:.85}.band{display:flex;justify-content:space-between;align-items:center;gap:12px}.band .band-logo{height:28px;width:auto;background:#fff;padding:3px 6px;border-radius:3px;opacity:1}h2{font-size:10pt;text-transform:uppercase;color:#102645;border-bottom:2px solid #0C77BC;margin:14px 0 6px}table{border-collapse:collapse;width:100%;font-size:8pt}th,td{border:1px solid #BFC4CA;padding:3px 5px;text-align:left;vertical-align:top}th{background:#F2F2F2;color:#555}tr{page-break-inside:avoid}.note{font-size:8.5pt;color:#555;margin:8px 0}.foot{margin-top:16px;font-size:8pt;color:#6b6c6b}`;
+  const H = m.H; return `<!doctype html><html><head><meta charset="utf-8"><title>${tbEsc(m.title)} — ${tbEsc(H.project)}</title><style>${css}</style></head><body><div class="band"><section><h1>${tbEsc(m.title)}</h1><div>${typeof brInfo === 'function' ? tbEsc(brInfo().label) + ' · ' : ''}${tbEsc(H.project)}${H.network ? ' · ' + tbEsc(H.network) : ''}${H.building ? ' · ' + tbEsc(H.building) : ''} · Prepared by ${tbEsc(H.preparedBy || '—')} · ${tbEsc(H.date || '')} · MASD Engineering Toolbox ${tbEsc(H.rev)} · engine ${MASD_ENGINE_VERSION}</div></section>${typeof brLogoHtml === 'function' ? brLogoHtml(true).replace('class="br-logo"', 'class="band-logo"') : ''}</div>`
     + m.secs.map(s => s.note ? `<p class="note">${tbEsc(s.note)}</p>` : `<h2>${tbEsc(s.h)}</h2>` + (s.rows.length ? `<table><thead><tr>${s.head.map(h => `<th>${tbEsc(h)}</th>`).join('')}</tr></thead><tbody>${s.rows.map(r => `<tr>${r.map(c => `<td>${tbEsc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>` : '<p class="note">None.</p>')).join('')
     + `<div class="foot">Generated ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} ET</div></body></html>`;
 }
 function tbReportXlsx(m){
-  const rows = [{ style: 3, cells: [m.title, '', '', '', 'Rev ' + m.H.rev] }, { cells: ['Project', m.H.project] }, { cells: ['Prepared By', m.H.preparedBy] }, { cells: ['Date', m.H.date] }, { cells: [] }];
+  const rows = [{ style: 3, cells: [m.title, '', '', '', 'Rev ' + m.H.rev] }, { cells: ['Project', m.H.project] }, { cells: ['Brand', typeof brInfo === 'function' ? brInfo().label : 'Edwards'] }, { cells: ['Prepared By', m.H.preparedBy] }, { cells: ['Date', m.H.date] }, { cells: [] }];
   m.secs.forEach(s => { if (s.note){ rows.push({ cells: [s.note] }); return; } rows.push({ style: 3, cells: [s.h] }, { style: 2, cells: s.head }); s.rows.forEach(r => rows.push({ style: 1, cells: r })); rows.push({ cells: [] }); });
   const xml = v2SheetXml(rows, new Array(16).fill(16));
   const st = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color auto="1"/></left><right style="thin"><color auto="1"/></right><top style="thin"><color auto="1"/></top><bottom style="thin"><color auto="1"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/></cellXfs></styleSheet>`;
@@ -613,12 +619,19 @@ const TB_HOWDOI = [
 ];
 tbInit();
 
-// Toolbox-saved files carry the Toolbox revision (00.01.000); compare them against the Toolbox, not the calculator lineage.
+// Toolbox-saved files carry the Toolbox revision (00.MM.rrr); compare them against the running Toolbox, then map to the calculator lineage.
 (function(){
   const orig = parseImportedCalculatorHtml;
   parseImportedCalculatorHtml = function(htmlText){
     const r = orig.apply(this, arguments);
-    if (r && r.ok && /<title>[^<]*MASD Engineering Toolbox/i.test(htmlText) && r.revision && /^00\.01\.000/.test(r.revision)) r.revision = TB_CALC_LINEAGE + (r.revision.slice(9) || '');
+    if (r && r.ok && /<title>[^<]*MASD Engineering Toolbox/i.test(htmlText) && r.revision && /^00\.\d{2}\.\d{3}/.test(r.revision)){
+      const tbRev = r.revision.slice(0, 9), fileT = parseRevisionTuple(tbRev), runT = parseRevisionTuple(runningRevisionFull());
+      const older = fileT && runT && compareRevisionTuples(fileT, runT) < 0;
+      r.toolboxRevision = r.revision;
+      // same or newer Toolbox file: compare equal to the running lineage (no false "Older revision"); older: its own embedded lineage
+      r.revision = (older ? (TB_LINEAGE_BY_REV[tbRev] || '02.00.002') : TB_CALC_LINEAGE) + (r.revision.slice(9) || '');
+    }
     return r;
   };
 })();
+
