@@ -3,7 +3,7 @@
    (same engine: masd-engine.js; same project file: modulaser-project.js)
    Modes · Config (design) · Legacy imports · Field-change loop · Reports
    ===================================================================== */
-const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000' };
+const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000', '00.03.001': '02.02.001' };
 let TB_LINEAGE_MISSING = false;   // QA D5: true when the lineage map has no entry for the running Toolbox revision (tests fail on it)
 const TB_CALC_LINEAGE = (() => { const l = AMENDMENTS[AMENDMENTS.length - 1], k = `${l.major}.${l.minor}.${l.rev}`; if (TB_LINEAGE_BY_REV[k]) return TB_LINEAGE_BY_REV[k];
   TB_LINEAGE_MISSING = true; console.warn(`TB_LINEAGE_BY_REV has no entry for Toolbox ${k}; calculator lineage falls back to the last mapped revision — add the entry.`);

@@ -6,6 +6,10 @@ document owner; the revision counter increments per distinct change. Generated f
 
 ## 00.03 — 2026-10-19
 
+### 00.03.001 — 2026-10-19 (local build, not released)
+- Harmonized with Battery Calculator 02.02.001: **printed Quick Start** header with the larger white brand logo (Edwards or Kidde Commercial) and the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages.
+- Help: Quick Start step, How Do I and a new FAQ (import vs manual vs both). No calculation change (MLP 1.6.0, engine 1.2.0). Service-worker cache `masd-toolbox-00-03-001`.
+
 ### 00.03.000 — 2026-10-19 (released 2026-10-19; QA/Auditor GO on 7cd58c1)
 - **Config: ASD-160 branch** — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers.
 - **Report band: brand logo and brand label**; Excel report header gets a Brand row (no fills).

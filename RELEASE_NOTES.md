@@ -5,6 +5,15 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.03.001 — Printed Quick Start header and light screenshots (2026-10-19) · not released
+
+### Recent improvements
+- Harmonized with Battery Calculator 02.02.001. **Printed Quick Start:** larger white brand logo (Edwards or Kidde Commercial) with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages.
+- No calculation change.
+
+### QA audit
+- Pending: QA/Auditor review of 02.02.001 (Calculator) / 00.03.001 (Toolbox).
+
 ## v00.03.000 — Brands, ASD-160 and printable Quick Start (2026-10-19) · pre-release, released 2026-10-19
 
 ### Download / Open
