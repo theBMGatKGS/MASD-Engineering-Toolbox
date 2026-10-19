@@ -9,11 +9,11 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 - **Web / PWA (live):** https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.
 
-> **Version 00.03.000_261019 — pre-release (local build).** 01.00.000 is reserved for the refined first release.
+> **Version 00.03.000_261019 — pre-release, released 2026-10-19.** 01.00.000 is reserved for the refined first release.
 > Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.02.000**
 
-### What's new in 00.03.000 (pre-release, local build)
+### What's new in 00.03.000 (pre-release, released 2026-10-19)
 
 Edwards and Kidde Commercial brands, ASD-160 (Micra25 / Senator 25) support, AUX/ribbon rules (max 4 AUX per supply; max 4 detectors + 1 display per ribbon run), and a printable Quick Start (Help → Print Quick Start). See RELEASE_NOTES.md.
 

@@ -6,7 +6,7 @@ document owner; the revision counter increments per distinct change. Generated f
 
 ## 00.03 — 2026-10-19
 
-### 00.03.000 — 2026-10-19 (local build, not released)
+### 00.03.000 — 2026-10-19 (released 2026-10-19; QA/Auditor GO on 7cd58c1)
 - **Config: ASD-160 branch** — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers.
 - **Report band: brand logo and brand label**; Excel report header gets a Brand row (no fills).
 - **Quick Start one-pager (quickstart.html) and in-app Toolbox Quick Start** carry current screenshots.
