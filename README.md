@@ -9,9 +9,13 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 - **Web / PWA (live):** https://thebmgatkgs.github.io/MASD-Engineering-Toolbox/ — open in a browser, or install it (Chrome/Edge install icon; iPhone/iPad Safari → Share → Add to Home Screen). Works offline after the first visit.
 
-> **Version 00.02.000_261016 — pre-release.** 01.00.000 is reserved for the refined first release.
-> Calculation engine: **MASD engine 1.1.0** · Project file: **modulaser-project 1.5.1 (`.mlproj.json`)** ·
-> Calculator lineage: **Battery Calculator 02.01.000**
+> **Version 00.03.000_261019 — pre-release (local build).** 01.00.000 is reserved for the refined first release.
+> Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
+> Calculator lineage: **Battery Calculator 02.02.000**
+
+### What's new in 00.03.000 (pre-release, local build)
+
+Edwards and Kidde Commercial brands, ASD-160 (Micra25 / Senator 25) support, AUX/ribbon rules (max 4 AUX per supply; max 4 detectors + 1 display per ribbon run), and a printable Quick Start (Help → Print Quick Start). See RELEASE_NOTES.md.
 
 ### What's new in 00.02.000 (pre-release, released 2026-10-17)
 
@@ -143,6 +147,8 @@ See *Legacy imports* above.
 The battery math and `.pl` import live in one module, **`masd-engine.js`**, embedded byte-identically in the Toolbox and the Battery Calculator. **Any engine change bumps both apps' revisions with matching notes, and each app records the engine version** (Help → Revision Log → Calculation engine). `modulaser-project.js` is likewise identical in the Toolbox, the Battery Calculator and the Commissioning Report. Tests enforce both (see below).
 
 ## Build and test
+
+> **00.03.000:** `index.html` is the source of truth and is patched in place; `tools/build.py` is retired (it would rebuild 00.01.000 and exits unless given `--force-legacy`). `src/toolbox.js` and `src/tb-asd160.js` are exact copies of the inline `<script id="toolbox">` / `<script id="tb-asd160">` blocks, kept for review; `tests/asd160_config_test.py` checks they match. `tools/quickstart.py` regenerates `quickstart.html`, `docs/quickstart.html` and the in-app Quick Start.
 ```
 python3 tools/build.py        # builds index.html + quickstart.html from the calculator source, engine, project module and src/
 ```
@@ -166,7 +172,3 @@ See [`docs/screenshots/`](docs/screenshots/) (copied from the Playwright run). P
 
 ## License
 GPL-3.0 · © The BMG
-
-## What's new in 00.03.000
-
-Edwards and Kidde Commercial brands, ASD-160 (Micra25 / Senator 25) support, AUX/ribbon rules (max 4 AUX per supply; max 4 detectors + 1 display per ribbon run), and a printable Quick Start (Help → Print Quick Start). See RELEASE_NOTES.md.
