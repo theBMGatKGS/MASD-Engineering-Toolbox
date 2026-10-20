@@ -9,7 +9,7 @@ global.DOMParser = xd.DOMParser;
 const M = require(path.join(process.env.TOOLBOX_DIR || path.join(__dirname, '..'), 'modulaser-project.js'));
 const FX = process.env.ML_FIXTURE || '/workspace/qa/minilaser/minilaser.pl';
 let pass = 0, fail = 0; const t = (n, c, i) => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + n + (i !== undefined ? '  ' + JSON.stringify(i) : '')); };
-t('MLP 1.6.0', M.VERSION === '1.6.0', M.VERSION);
+t('MLP 1.6.1', M.VERSION === '1.6.1', M.VERSION);
 const HAVE = fs.existsSync(FX); let skipped = 0;   // Brent: the Example Shaft .pl stays off GitHub — fixture checks SKIP when it's absent
 const tf = (n, c, i) => { if (HAVE) t(n, c, i); else { skipped++; console.log('SKIP', n, '(fixture absent: ' + FX + ')'); } };
 let pc = null; if (HAVE) try { pc = M.parsePl(fs.readFileSync(FX, 'utf8'), 'minilaser.pl'); } catch (e) { t('Example Shaft .pl parses without throwing', false, e.message); }

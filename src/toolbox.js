@@ -19,7 +19,7 @@ let tbView = 'calc';
 let tbSel = null;      // selected device id in Config view
 let tbFilter = '';
 
-(function(){ const _ex = mlpExportProject; mlpExportProject = function(){ const iss = MLP.perfIssues(tbPerf()); if (iss.length){ plShowAux('Export project — blocked', `<p>Define the <b>Performance Criteria</b> first (Config view):</p><ul>${iss.map(i => `<li>${tbEsc(i)}</li>`).join('')}</ul>`, `<button class="btn btn-primary" data-tb="goto-perf">Open Performance Criteria</button>`); return null; } return _ex.apply(this, arguments); }; })();
+(function(){ const _ex = mlpExportProject; mlpExportProject = function(){ const iss = MLP.perfIssues(tbPerf(), { kinds: tbSfdKinds() }); if (iss.length){ plShowAux('Export project — blocked', `<p>Define the <b>Performance Criteria</b> first (Config view):</p><ul>${iss.map(i => `<li>${tbEsc(i)}</li>`).join('')}</ul>`, `<button class="btn btn-primary" data-tb="goto-perf">Open Performance Criteria</button>`); return null; } return _ex.apply(this, arguments); }; })();
 (function(){ const _st = MLP.stringify; MLP.stringify = function(d, a, r, u){ return _st(d, a === 'ModuLaser Battery Calculator' ? 'MASD Engineering Toolbox' : a, r, u); }; })();
 /* imported calc files compare against the calculator lineage, not the Toolbox's own 01.00 numbering */
 runningRevisionTuple = function(){ return parseRevisionTuple(TB_CALC_LINEAGE); };
@@ -61,7 +61,7 @@ function tbDevices(){
 function tbClassGuess(d){ const p = d.pipe; return (p && MLP.TT_TO_CLASS[p.maxTransit]) || ''; }
 function tbEnsureCfg(d){
   const st = tbCfgStore();
-  if (!st[d.id]) st[d.id] = MLP.configSeed(d.kind === 'display' ? '' : tbClassGuess(d), d.kind);
+  if (!st[d.id]) st[d.id] = MLP.configSeed(d.kind === 'display' ? '' : tbClassGuess(d), d.kind, tbPerf(), d.area);
   return st[d.id];
 }
 
@@ -73,7 +73,8 @@ function tbPerfLimTable(o, scope){
   const ul = MLP.perfIsUl(o.standard); const L = ul ? MLP.perfUlLimits(o.ulConfirmed) : (o.limits || {}); const pc = (MLP.perfPreset(o.standard) || {}).cls;
   return `<table class="tb-io"><thead><tr><th>Class</th><th>Target (%obs/ft)</th><th>Max hole sensitivity (%obs/ft, pass ≤)</th><th>Max transport (s, ≤)</th>${ul ? '<th>UL range (lower limit enforced)</th>' : ''}<th>Reference</th><th>Confirmed</th></tr></thead><tbody>${MLP.PERF_CLASSES.map(c => { const l = L[c] || {};
     const at = k => `data-tb-perf-lim="${c}" data-scope="${tbEsc(scope)}" data-k="${k}"`; const nm = `<b>${c === 'SFD' ? 'SFD / OAP' : c}</b>${pc === c ? ' <span class="tb-src tb-src-design">preset class</span>' : ''}`;
-    const tg = `<td>Target ${(l.target ?? MLP.SENS_TARGETS[c]).toFixed(1)}</td>`;
+    const T = c === 'SFD' ? MLP.sfdTarget(tbPerf(), scope) : null;
+    const tg = T ? `<td>Target ${MLP.fmtTarget(T.value)}${T.src !== 'default' ? ` <span class="tb-src tb-src-design" title="${tbEsc((T.ref || '') + (T.initials ? ' · ' + T.initials : ''))}">${T.src === 'area' ? 'Area/Group target' : 'project target'}</span>` : ''}</td>` : `<td>Target ${MLP.fmtTarget(l.target ?? MLP.SENS_TARGETS[c])}</td>`;
     return ul ? `<tr><td>${nm}</td>${tg}<td>≤${l.sens}</td><td>≤${l.tt}</td><td>${tbEsc(l.ulRange || '')}${l.provisional ? ' <span class="tb-src tb-src-manual" title="SFD range pending confirmation (Open Area vs Range 2)">provisional</span>' : ''}</td><td><small>${tbEsc(l.ref)}</small></td><td>${l.confirmed ? '✓ UL 268 confirmed' : 'confirm UL 268 above'}</td></tr>`
       : `<tr${l.confirmed ? '' : ' class="err"'}><td>${nm} ${l.src === 'prefill' ? '<span class="tb-src tb-src-manual" title="Prefilled from a cited source — confirm">cited prefill</span>' : (l.sens == null || l.tt == null ? TB_TBD : '')}</td>${tg}<td><input ${at('sens')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.sens ?? '')}"></td><td><input ${at('tt')} inputmode="decimal" placeholder="engineer to define" value="${tbEsc(l.tt ?? '')}"></td><td><input ${at('ref')} placeholder="Code/section or document" value="${tbEsc(l.ref || '')}"></td><td><input type="checkbox" ${at('confirmed')}${l.confirmed ? ' checked' : ''}></td></tr>`; }).join('')}</tbody></table>`;
 }
@@ -89,22 +90,49 @@ function tbStdSel(o, scope){
 }
 function tbStdNote(o, scope){
   const p = MLP.perfPreset(o.standard); if (!p) return '';
-  if (p.family === 'NFPA') return `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulConfirmed" data-scope="${tbEsc(scope || '')}"${o.ulConfirmed ? ' checked' : ''}> <b>Engineer confirms: ${MLP.UL_STATEMENT}</b></label> ${o.ulConfirmed ? '<span class="tb-ok">confirmed — printed</span>' : '<span class="tb-msg err">not confirmed — the UL 268 statement will not print</span>'}<br><small>${tbEsc(p.code)} preset: UL 268, 7th Ed. thresholds apply (Install Manual App. A, printed p.113): hole sensitivity at or below (≤) VEWFD 1.0 (Special Application Range 1) / EWFD 1.5 (Special Application Range 2; 1.5 from NFPA 76) / SFD-OAP 2.18 %obs/ft (Open Area), transport time no more than 60 / 43 / 43 s — plus the code's prescriptions below. Targets: VEWFD 1.0 / EWFD 1.5 / SFD 2.0 %obs/ft. UL range lower limits are enforced: VEWFD 0.05 %obs/ft, 3 s; EWFD 0.05, 3 s; SFD 1.70, 6 s.</small></div>`;
+  if (p.family === 'NFPA') return `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulConfirmed" data-scope="${tbEsc(scope || '')}"${o.ulConfirmed ? ' checked' : ''}> <b>Engineer confirms: ${MLP.UL_STATEMENT}</b></label> ${o.ulConfirmed ? '<span class="tb-ok">confirmed — printed</span>' : '<span class="tb-msg err">not confirmed — the UL 268 statement will not print</span>'}<br><small>${tbEsc(p.code)} preset: UL 268, 7th Ed. thresholds apply (Install Manual App. A, printed p.113): hole sensitivity at or below (≤) VEWFD 1.0 (Special Application Range 1) / EWFD 1.5 (Special Application Range 2; 1.5 from NFPA 76) / SFD-OAP 2.18 %obs/ft (Open Area), transport time no more than 60 / 43 / 43 s — plus the code's prescriptions below. Targets: VEWFD 1.0 / EWFD 1.5 / SFD/OAP 2.0 %obs/ft (design target, adjustable below within the published limits; pass/fail unchanged). UL range lower limits are enforced: VEWFD 0.05 %obs/ft, 3 s; EWFD 0.05, 3 s; SFD 1.70, 6 s.</small></div>`;
   const ulOpt = (p.family === 'FM' || p.family === 'Custom') && tbDevices().some(d => d.kind === 'asd160') ? `<div class="tb-ulstate"><label><input type="checkbox" data-tb-perf-k="ulOptIn" data-scope="${tbEsc(scope || '')}"${o.ulOptIn ? ' checked' : ''}> Apply UL 268 7th edition to ASD-160 units (1.28 %obs/ft cap, UL limits)</label></div>` : '';   // 02.02.000 §7b (C1 #29)
   if (p.family === 'FM') return ulOpt + `<p class="tb-note">${tbEsc(p.code)}: FM requirements only — not UL, no UL 268 statement. Hole limits prefilled from FM Class 3230 per the Install Manual App. A p.113; confirm them and define the data-sheet prescriptions.</p>`;
   if (p.family === 'BS') return `<p class="tb-note">${tbEsc(p.code)} (mirrors the Battery Calculator design basis). No cited ASD hole/transport values are on file — every value is engineer to define, with its reference (e.g. BS 5839-1 / EN 54-20 class).</p>`;
   return ulOpt + '<p class="tb-note">Custom: name the standard; every value is engineer to define, with its reference.</p>';
 }
+/* 02.02.001 (Brent 2026-10-20): SFD/OAP design target — project-wide, per-Area/Group overrides, published-limit validation, reject with a message */
+let tbSfdDraft = {}, tbSfdMsg = {};
+function tbSfdKinds(){ return tbDevices().map(d => d.kind); }
+function tbSfdRow(o, scope){
+  const P = tbPerf(), fam = MLP.sfdFamily(o), T = MLP.sfdTarget(P, scope), env = MLP.sfdEnvelope(fam, tbSfdKinds()), sc = tbEsc(scope || '');
+  if (!o.standard) return '';
+  if (!env) return `<div class="tb-sfd" data-scope="${sc}"><span class="lb">SFD/OAP design target</span> <b>${MLP.fmtTarget(T.value)} %obs/ft</b> <small>fixed for this referenced standard (engineer-defined limits apply)</small></div>`;
+  const D = tbSfdDraft[scope || ''] || {}, m = tbSfdMsg[scope || ''];
+  const v = D.value != null ? D.value : T.value.toFixed(2), ref = D.ref != null ? D.ref : (T.src !== 'default' ? T.ref : ''), ini = D.initials != null ? D.initials : (T.src !== 'default' ? T.initials : '');
+  const src = T.src === 'default' ? `default ${MLP.fmtTarget(T.def)} (${fam === 'UL' ? 'UL-driven' : 'FM'})` : T.src === 'project' && scope ? `inherited from the project · ${tbEsc(T.ref)} · ${tbEsc(T.initials)}` : `set · ${tbEsc(T.ref)} · ${tbEsc(T.initials)}`;
+  return `<div class="tb-sfd" data-scope="${sc}"><div class="tb-sfd-h"><b>SFD/OAP design target ${scope ? `— Area/Group ${tbEsc(scope)}` : '(project-wide)'}</b> <span class="tb-src ${T.src === 'default' ? 'tb-src-manual' : 'tb-src-design'}">${src}</span></div>
+    <div class="tb-row"><label class="tb-f"><span class="lb">Target (%obs/ft)</span><input data-tb-sfd="value" data-scope="${sc}" inputmode="decimal" value="${tbEsc(v)}" aria-label="SFD/OAP design target"></label>
+    <label class="tb-f"><span class="lb">Reference (required if not ${MLP.fmtTarget(T.def)})</span><input data-tb-sfd="ref" data-scope="${sc}" placeholder="Spec section, EOR letter or listing" value="${tbEsc(ref)}"></label>
+    <label class="tb-f tb-f-ini"><span class="lb">Engineer initials</span><input data-tb-sfd="initials" data-scope="${sc}" maxlength="6" placeholder="e.g. BW" value="${tbEsc(ini)}"></label>
+    <button class="btn" data-tb="sfd-apply" data-scope="${sc}">Apply</button><button class="btn" data-tb="sfd-reset" data-scope="${sc}">Reset to ${MLP.fmtTarget(T.def)}</button></div>
+    <small>Published ${fam} limits: ${tbEsc(env.text)}. Design target only — ${fam === 'UL' ? 'UL pass/fail stays at the Open Area range (1.70–2.18 %obs/ft, ≤43 s)' : 'FM pass/fail stays at FM Class 3230 (≤2.50 %obs/ft, ≤120 s)'}.${fam === 'UL' ? ' On this scope the SFD Fire 1 seed follows the target.' : ' SFD Fire 1 seed stays 2.5.'}</small>
+    ${m ? `<div class="tb-msg ${m.ok ? 'tb-ok' : 'err'}" role="${m.ok ? 'status' : 'alert'}">${tbEsc(m.msg)}</div>` : ''}</div>`;
+}
+function tbSfdApply(scope, reset){
+  const P = tbPerf(), k = scope || '', D = tbSfdDraft[k] || {}, T = MLP.sfdTarget(P, scope);
+  const r = reset ? (MLP.sfdTargetReset(P, scope), { ok: true, msg: 'SFD/OAP target reset to the default.' })
+    : MLP.sfdTargetSet(P, scope, D.value != null ? D.value : T.value, { ref: D.ref != null ? D.ref : T.ref, initials: D.initials != null ? D.initials : T.initials, kinds: tbSfdKinds() });
+  tbSfdMsg[k] = r; if (r.ok){ delete tbSfdDraft[k]; if (!P.narrativeEdited){ P.narrative = MLP.perfDraft(P, tbPerfClassesUsed()); P.narrativeDraft = P.narrative; } tbTouch(); }
+  tbRenderConfig();
+}
+function tbSfdNotice(P){ return P.sfdNotice ? `<div class="tb-sfd-notice" role="status">${tbEsc(MLP.SFD_NOTICE)} <button class="btn" data-tb="sfd-notice-ok">OK</button></div>` : ''; }
 function tbPerfHtml(){
-  const P = tbPerf(), iss = MLP.perfIssues(P);
+  const P = tbPerf(), iss = MLP.perfIssues(P, { kinds: tbSfdKinds() });
   if (!P.narrative && !P.narrativeEdited){ P.narrative = MLP.perfDraft(P, tbPerfClassesUsed()); P.narrativeDraft = P.narrative; }
   const areas = Array.from(new Set(tbDevices().map(d => d.area).filter(Boolean)));
-  const ov = areas.map(a => { const o = (P.areas || {})[a] || {}; return `<div class="tb-area-ov"><label><input type="checkbox" data-tb-perf-area="${tbEsc(a)}"${o.enabled ? ' checked' : ''}> Override for Area/Group <b>${tbEsc(a)}</b></label>${o.enabled ? `<div class="tb-row">${tbStdSel(o, a)}</div>${tbStdNote(o, a)}${o.standard ? tbPerfLimTable(o, a) + tbCodeReqTable(o, a) : ''}` : ''}</div>`; }).join('');
+  const ov = areas.map(a => { const o = (P.areas || {})[a] || {}; return `<div class="tb-area-ov"><label><input type="checkbox" data-tb-perf-area="${tbEsc(a)}"${o.enabled ? ' checked' : ''}> Override for Area/Group <b>${tbEsc(a)}</b></label>${o.enabled ? `<div class="tb-row">${tbStdSel(o, a)}</div>${tbStdNote(o, a)}${tbSfdRow(o, a)}${o.standard ? tbPerfLimTable(o, a) + tbCodeReqTable(o, a) : ''}` : ''}</div>`; }).join('');
   return `<section class="tb-perf" id="tb-perf"><div class="tb-sec">Performance Criteria ${iss.length ? `<span class="tb-msg err">— ${iss.length} item${iss.length === 1 ? '' : 's'} to define; Export project is blocked</span>` : '<span class="tb-ok">— defined</span>'}</div>
     <div class="tb-row">${tbStdSel(P, '')}
     <label class="tb-f"><span class="lb">Engineer of Record</span><input data-tb-perf-k="eorName" data-scope="" value="${tbEsc(P.eorName || '')}"></label>
     <label class="tb-f"><span class="lb">Specification reference</span><input data-tb-perf-k="specRef" data-scope="" placeholder="e.g. Section 28 31 00, 2.4.B" value="${tbEsc(P.specRef || '')}"></label></div>
-    ${tbStdNote(P, '')}
+    ${tbSfdNotice(P)}${tbStdNote(P, '')}
+    ${tbSfdRow(P, '')}
     ${tbPerfLimTable(P, '')}${tbCodeReqTable(P, '')}
     ${areas.length ? `<details${Object.values(P.areas || {}).some(o => o.enabled) ? ' open' : ''}><summary>Per-Area/Group overrides (optional)</summary>${ov}</details>` : ''}
     <label class="tb-f" style="margin-top:8px"><span class="lb">Performance narrative (auto-drafted from the selections and naming the referenced standard — edit to match the Engineer of Record's published intent; printed on the summary page)</span><textarea data-tb-perf-k="narrative" data-scope="" rows="4">${tbEsc(P.narrative || '')}</textarea></label>
@@ -113,6 +141,7 @@ function tbPerfHtml(){
 }
 function tbOnPerfInput(el){
   const P = tbPerf(); P.areas = P.areas || {};
+  if (el.dataset.tbSfd){ const k = el.dataset.scope || ''; (tbSfdDraft[k] = tbSfdDraft[k] || {})[el.dataset.tbSfd] = el.value; delete tbSfdMsg[k]; return; }
   const scope = el.dataset.scope || ''; const O = scope ? (P.areas[scope] = P.areas[scope] || { enabled: true }) : P;
   if (el.dataset.tbPerfArea != null){ const a = el.dataset.tbPerfArea; P.areas[a] = Object.assign(P.areas[a] || { standard: '', limits: {}, codeReqs: [] }, { enabled: el.checked }); }
   else if (el.dataset.tbPerfK){ const k = el.dataset.tbPerfK, v = el.type === 'checkbox' ? el.checked : el.value; O[k] = v;
@@ -226,7 +255,7 @@ function tbOnCfgInput(el){
   tbTouch();
 }
 function tbReseed(d, keepDesign){
-  const st = tbCfgStore(); const old = st[d.id]; const seed = MLP.configSeed(d.kind === 'display' ? '' : ((old && old.perfClass) || tbClassGuess(d)), d.kind);
+  const st = tbCfgStore(); const old = st[d.id]; const seed = MLP.configSeed(d.kind === 'display' ? '' : ((old && old.perfClass) || tbClassGuess(d)), d.kind, tbPerf(), d.area);
   if (old && keepDesign){ Object.entries(old.src || {}).forEach(([k, s]) => { if (s === 'design'){ if (k.startsWith('io.')){ seed.values.io = seed.values.io || {}; seed.values.io[k.slice(3)] = (old.values.io || {})[k.slice(3)]; } else seed.values[k] = old.values[k]; seed.src[k] = 'design'; } }); }
   st[d.id] = seed; tbTouch();
 }
@@ -482,7 +511,7 @@ function tbReportModel(kind){
     secs.push({ h: 'I/O assignments', head: ['Device', 'Port', 'Function', 'FACU address'], rows: io });
     secs.push({ note: 'Source key: manual = stated in the ModuLaser Install Manual 04-4001-501-0803-05 (flow limits 20% and flow-fault delay 120 s: Table 29, p.76). Fire 1 starts at the class hole-sensitivity limit (App. A, printed p.113) and is typical. typical – unverified = typical starting value with no manual citation yet; must be confirmed. design = set by the designer.' });
     const P = tbPerf(), PL = MLP.perfLimits(P) || {};
-    const lc = (L, c) => L && L[c] && L[c].sens != null && L[c].tt != null ? `<${L[c].sens} %obs/ft · ≤${L[c].tt} s` : 'engineer to define';
+    const lc = (L, c) => (L && L[c] && L[c].sens != null && L[c].tt != null ? `<${L[c].sens} %obs/ft · ≤${L[c].tt} s` : 'engineer to define') + (c === 'SFD' && L && L.SFD && L.SFD.target != null ? ` · target ${MLP.fmtTarget(L.SFD.target)}${L.SFD.targetSrc !== 'default' ? ` (${L.SFD.targetRef}; ${L.SFD.targetInitials})` : ' (default)'}` : '');
     const prow = [['Project', MLP.perfStatement(P), ...MLP.PERF_CLASSES.map(c => lc(PL, c))]].concat(Object.entries(P.areas || {}).filter(([, o]) => o && o.enabled).map(([a, o]) => ['Area/Group: ' + a, MLP.perfStatement(Object.assign({}, o, { areas: {} })), ...MLP.PERF_CLASSES.map(c => lc(MLP.perfLimits(P, a), c))]));
     const reqs = [['Project', P]].concat(Object.entries(P.areas || {}).filter(([, o]) => o && o.enabled)).flatMap(([a, o]) => (o.codeReqs || []).map(r => [a, r.item, r.value || 'engineer to define', r.ref || '—', r.confirmed ? 'confirmed' : 'NOT CONFIRMED']));
     secs.unshift({ h: 'Performance Criteria', head: ['Scope', 'Referenced standard / statement', 'VEWFD', 'EWFD', 'SFD/OAP'], rows: prow }, ...(reqs.length ? [{ h: 'Code prescriptions', head: ['Scope', 'Prescription', 'Requirement', 'Reference', 'Status'], rows: reqs }] : []), { note: `Engineer of Record: ${P.eorName || '—'} · Specification reference: ${P.specRef || '—'}` }, { note: 'Performance narrative: ' + (P.narrative || '[NOT DEFINED — required]') });
@@ -596,6 +625,8 @@ function tbInit(){
     else if (a === 'fc-checkpl') tbFilePick('.pl', true, async fs => { for (const f of fs){ try { tbVerifyAgainstPl(f.name, MLP.parsePl(await f.text(), f.name)); } catch (er){ tbToast(f.name + ': ' + er.message, 'err'); } } tbShowChanges(); });
     else if (a === 'rpt') tbShowReports(b.dataset.rpt);
     else if (a === 'rpt-out') tbReportOut(b.dataset.fmt);
+    else if (a === 'sfd-apply' || a === 'sfd-reset'){ tbSfdApply(b.dataset.scope || '', a === 'sfd-reset'); }
+    else if (a === 'sfd-notice-ok'){ const P = tbPerf(); P.sfdNotice = false; tbTouch(); tbRenderConfig(); }
     else if (a === 'perf-draft'){ const P = tbPerf(); P.narrative = MLP.perfDraft(P, tbPerfClassesUsed()); P.narrativeDraft = P.narrative; P.narrativeEdited = false; P.narrativeConfirmed = false; tbTouch(); tbRenderConfig(); }
     else if (a === 'goto-perf'){ closePlWizard(); if (tbMode() === 'calc') tbSetMode('both'); tbSetView('config'); const el = document.getElementById('tb-perf'); if (el) el.scrollIntoView({ block: 'start' }); }
     else if (a === 'export-project'){ const x = document.getElementById('export-project-btn'); if (x) x.click(); }

@@ -8,8 +8,9 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 ## v00.03.001 — Printed Quick Start header and light screenshots (2026-10-19) · not released
 
 ### Recent improvements
+- **SFD/OAP design target (Brent 2026-10-20).** 2.0 %obs/ft for UL-driven SFD/OAP, 2.5 %obs/ft for FM and other standards. Adjustable in Config ▸ Performance Criteria, project-wide and per Area/Group override (UL and FM), validated against each detector's published limits (UL: ModuLaser / MiniLaser 1.70–2.18; FM: ≤2.50, ASD-160 ≤3.5; ASD-160 UL 1.28 cap governs). Out-of-range entries are rejected with a message (never clamped); a non-default target needs a reference and the engineer's initials. On UL scopes the SFD Fire 1 seed follows the target; otherwise 2.5. UL and FM pass/fail unchanged. Older projects adopt the default with a one-time notice. Shared module modulaser-project.js 1.6.1. Brent's words are in the in-app Revision Log.
 - Harmonized with Battery Calculator 02.02.001. **Printed Quick Start:** larger white brand logo (Edwards or Kidde Commercial) with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages.
-- No calculation change.
+- No battery-calculation change. Hole pass/fail limits unchanged; SFD/OAP design target added (above).
 - **Step 1 is now a full-width row (Brent 6:28 PM)** in the printed Quick Start (shared block with the Calculator).
 - Calculator lineage reads **Battery Calculator 02.02.001** everywhere: About, README, Calculator-mode Help, Quick Start step 3 and the one-page quickstart.html.
 - The two Toolbox print-light images now live in a Toolbox-only script after the shared Quick Start block.

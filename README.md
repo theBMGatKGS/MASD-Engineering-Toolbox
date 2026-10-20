@@ -80,6 +80,8 @@ Validation: rising levels, ranges, FACU address format and duplicates, 16-charac
 These values travel in `design.devices[].config` and **replace the Commissioning Report's placeholder defaults**; values still marked typical stay flagged there.
 
 ### Performance Criteria (Config)
+
+**SFD/OAP design target (Brent 2026-10-20).** Default 2.0 %obs/ft for UL-driven scopes and 2.5 %obs/ft for FM and other standards; set it under **SFD/OAP design target**, project-wide or per Area/Group override. It must sit within each detector's published limit (UL: ModuLaser and MiniLaser 1.70–2.18; FM: ≤2.50; ASD-160 keeps its UL 1.28 cap), otherwise it is rejected with a message. A non-default value needs a reference and the engineer's initials. It is a design target only: pass/fail stays at the limits in the table below. On UL scopes the SFD Fire 1 seed follows the target.
 Set once per project (optional per-Area/Group overrides), carried in `.mlproj.json` (`design.performance`), printed on the Toolbox Configuration schedule and the Commissioning Report summary page. The Report checks each module against its Area/Group limits.
 
 **Referenced standard** presets:
