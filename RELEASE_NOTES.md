@@ -14,6 +14,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 - Calculator lineage reads **Battery Calculator 02.02.001** everywhere: About, README, Calculator-mode Help, Quick Start step 3 and the one-page quickstart.html.
 - The two Toolbox print-light images now live in a Toolbox-only script after the shared Quick Start block.
 - **Every printed step is a full-width row (Brent 7:07 PM):** text on the left, screenshot on the right, on every page; steps without a screenshot use the full width. Step numbers run continuously across pages (tested in both brands). Step 3's A/B/C sub-steps are lettered a, b, c so no list on the printout restarts at 1. Page count unchanged.
+- **Legible screenshots (QA bump delta 2).** The Config and Battery calc print screenshots were re-captured at 2× with tighter crops and now use the full image width, like the Calculator. Every printed screenshot is at most 1.9 source pixels per print pixel (tested in both brands). Page 1 now holds steps 1–2 and page 2 steps 3–5; still 2 pages.
 
 ### Brent's asks (shared with Calculator 02.02.001) (verbatim, CT, Mon 2026-10-19)
 - 1:12 PM, Brent's private chat with Builder: "Revise Help Menu with current screenshots of calculator to replace legacy visual entries. Also, allow for printing an intuitive Quick Start guide apart from the help menu"
