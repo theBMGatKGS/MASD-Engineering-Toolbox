@@ -10,6 +10,7 @@ document owner; the revision counter increments per distinct change. Generated f
 - Harmonized with Battery Calculator 02.02.001: **printed Quick Start** header with the larger white brand logo (Edwards or Kidde Commercial) and the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages.
 - Help: Quick Start step, How Do I and a new FAQ (import vs manual vs both). No calculation change (MLP 1.6.0, engine 1.2.0). Service-worker cache `masd-toolbox-00-03-001`.
 - Printed Quick Start Step 1 is a full-width row (Brent 6:28 PM). Calculator lineage reads 02.02.001 in About, README, Help and the Quick Start. Toolbox print-light images moved out of the shared block.
+- Every printed Quick Start step is a full-width row with its screenshot on the right (Brent 7:07 PM); numbering continuous across pages; Step 3 sub-steps lettered a, b, c.
 
 ### 00.03.000 — 2026-10-19 (released 2026-10-19; QA/Auditor GO on 7cd58c1)
 - **Config: ASD-160 branch** — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers.

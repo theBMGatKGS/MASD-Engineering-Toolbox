@@ -13,6 +13,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 - **Step 1 is now a full-width row (Brent 6:28 PM)** in the printed Quick Start (shared block with the Calculator).
 - Calculator lineage reads **Battery Calculator 02.02.001** everywhere: About, README, Calculator-mode Help, Quick Start step 3 and the one-page quickstart.html.
 - The two Toolbox print-light images now live in a Toolbox-only script after the shared Quick Start block.
+- **Every printed step is a full-width row (Brent 7:07 PM):** text on the left, screenshot on the right, on every page; steps without a screenshot use the full width. Step numbers run continuously across pages (tested in both brands). Step 3's A/B/C sub-steps are lettered a, b, c so no list on the printout restarts at 1. Page count unchanged.
 
 ### Brent's asks (shared with Calculator 02.02.001) (verbatim, CT, Mon 2026-10-19)
 - 1:12 PM, Brent's private chat with Builder: "Revise Help Menu with current screenshots of calculator to replace legacy visual entries. Also, allow for printing an intuitive Quick Start guide apart from the help menu"
@@ -21,6 +22,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 - 5:36 PM, Brent's private chat with Builder (widget pick): "Keep the full-width rows"
 - 5:56 PM, Brent's private chat with Builder (widget pick): "Looks good, bump it to 02.02.001"
 - 6:28 PM, QA's chat (QA-reported, verbatim): "Item 1 in Quick Start is truncated and illegible due to font size.  Expand to horizontal"
+- 7:07 PM, Brent's private chat with Builder: "Make all items on second page horizontally displayed. Also, why did the numbering on page 2 begin at 1?"
 
 ### QA audit
 - Pending: QA/Auditor review of 02.02.001 (Calculator) / 00.03.001 (Toolbox).
