@@ -17,7 +17,8 @@ def _latest_report_rev():
 SH=_od('toolbox-shots'); os.makedirs(SH,exist_ok=True)
 R=[]
 def chk(n,c,i=''): R.append((n,bool(c))); print('PASS' if c else 'FAIL', n, i)
-base=json.load(open('/workspace/mlpbuild/calc-export.mlproj.json'))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import make_calc_export_fixture as _mk
+base=json.load(open(os.environ.get('CALC_EXPORT_FIXTURE') or _mk.ensure()))   # synthetic calc export (no real data)
 doc=copy.deepcopy(base)
 doc['changes']=[{'id':'fc-qa-1','dev':doc['design']['devices'][1]['id'],'devName':doc['design']['devices'][1]['name'],'field':'cfg.fan','label':'Fan speed','design':'5','value':'6','by':'QA tech','at':'2026-10-13T12:00:00Z','why':'qa','photo':'','pipecad':True,'status':'verified','verify':{'by':'Designer','at':'2026-10-13T13:00:00Z','note':'ok'}}]
 doc['approvals']={'technician':{'name':'QA tech','date':'2026-10-13','status':'submitted'},'designer':{'name':'Designer','date':'2026-10-13','status':'approved'}}

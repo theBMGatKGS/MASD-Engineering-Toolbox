@@ -38,11 +38,11 @@ async def main():
     # ---- import real calc project
     await pg.click('#tb-mode [data-mode=calc]')
     await pg.evaluate("document.getElementById('import-project-btn').click()") if False else None
-    txt=open('/workspace/mlpbuild/calc-export.mlproj.json').read()
+    import make_calc_export_fixture as _mk; txt=open(os.environ.get('CALC_EXPORT_FIXTURE') or _mk.ensure()).read()   # synthetic calc export (no real data)
     await pg.evaluate('t=>mlpImportProjectText(t,"calc-export.mlproj.json")', txt); await pg.wait_for_timeout(400)
     btn=await pg.query_selector('#plw-overlay.open button.btn-primary, .pl-aux-foot .btn-primary')
     if btn: await btn.click(); await pg.wait_for_timeout(400)
-    n=await pg.evaluate('document.querySelectorAll(".location").length'); chk('real project imported: 4 sheets', n==4, n)
+    n=await pg.evaluate('document.querySelectorAll(".location").length'); chk('project imported: 4 sheets', n==4, n)
     await pg.screenshot(path=SH+'02-calc-imported.png')
     # ---- config
     await pg.click('#tb-mode [data-mode=both]'); await pg.click('#tb-viewtabs [data-view=config]'); await pg.wait_for_timeout(200)
@@ -199,7 +199,8 @@ async def main():
     await pg.evaluate('closePlWizard()')
     # PipeCAD verify: original (unchanged) .pl → mismatch; a .pl edited the way PipeCAD would save it → match
     fc=await pg.evaluate('(()=>{const c=tbChanges().find(c=>c.field==="cfg.fan"); const d=tbDevById(c.dev)||{}; const dd=mlpBuildDesign().devices.find(x=>x.id===c.dev); return [c.value, dd.pl.file, dd.pl.key, dd.plName]})()')
-    plf=[x for x in PL if os.path.basename(x)==fc[1]] or [x for x in PL if fc[3] and fc[3] in open(x,errors='ignore').read()]
+    PLX=PL+[x for x in _mk.PL_FILES if os.path.exists(x)]   # the .pl files behind the synthetic calc export
+    plf=[x for x in PLX if os.path.basename(x)==fc[1]] or [x for x in PLX if fc[3] and fc[3] in open(x,errors='ignore').read()]
     src=open(plf[0],errors='ignore').read()
     res=await pg.evaluate('([t,n])=>{const pc=MLP.parsePl(t,n); return tbVerifyAgainstPl(n,pc)}', [src, os.path.basename(plf[0])])
     s1=await pg.evaluate('tbChanges().find(c=>c.field==="cfg.fan").plCheck'); chk('old .pl → mismatch', s1 and s1['state']=='mismatch', s1)
