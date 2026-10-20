@@ -18,8 +18,10 @@ async def main():
     b=await p.chromium.launch(); ctx=await b.new_context(viewport={'width':1440,'height':900},device_scale_factor=2); pg=await ctx.new_page(); errs=[]
     pg.on('pageerror',lambda e: errs.append(str(e))); pg.on('dialog', lambda d: asyncio.ensure_future(d.accept()))
     await pg.goto(URL); await pg.evaluate('localStorage.clear()'); await pg.reload(); await pg.wait_for_function('typeof tbSetMode==="function"')
-    txt=open('/workspace/mlpbuild/calc-export.mlproj.json').read()
-    await pg.evaluate('t=>mlpImportProjectText(t,"calc-export.mlproj.json")', txt); await pg.wait_for_timeout(400)
+    # QA F2: synthetic example data only (no client names in screenshots)
+    PLF=os.environ.get('SFD_PL','/workspace/build0202/fixtures/Example-Tower.pl'); txt=open(PLF).read()
+    sys.path.insert(0, '/workspace/ModuLaser-Battery-Calculator/tests/regression'); import helpers as H
+    H.T = os.path.dirname(PLF) + '/'; await H.import_files(pg, [os.path.basename(PLF)])
     btn=await pg.query_selector('#plw-overlay.open button.btn-primary, .pl-aux-foot .btn-primary')
     if btn: await btn.click(); await pg.wait_for_timeout(400)
     await pg.click('#tb-mode [data-mode=both]'); await pg.click('#tb-viewtabs [data-view=config]'); await pg.wait_for_timeout(250)
@@ -56,7 +58,7 @@ async def main():
     chk('Configuration schedule SFD/OAP cell prints target 1.95 with reference and initials', 'target 1.95 (Spec 28 31 00 2.4.B; BW)' in sch, sch[sch.find('SFD/OAP'):][:200] if 'SFD/OAP' in sch else sch[:200])
     # Area/Group override
     areas=await pg.evaluate('Array.from(new Set(tbDevices().map(d=>d.area).filter(Boolean)))'); A=areas[0] if areas else None
-    chk('project has Areas/Groups', A is not None, areas)
+    chk('project has Areas/Groups (example data only)', A is not None and not any(('NDA' in x) for x in areas), areas)
     if A:
         await pg.evaluate('()=>{const d=document.querySelector("#tb-perf details"); if(d) d.open=true;}')
         await pg.check(f'#tb-perf [data-tb-perf-area="{A}"]'); await pg.wait_for_timeout(200)
