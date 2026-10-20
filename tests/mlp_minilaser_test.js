@@ -9,7 +9,7 @@ global.DOMParser = xd.DOMParser;
 const M = require(path.join(process.env.TOOLBOX_DIR || path.join(__dirname, '..'), 'modulaser-project.js'));
 const FX = process.env.ML_FIXTURE || '/workspace/qa/minilaser/minilaser.pl';
 let pass = 0, fail = 0; const t = (n, c, i) => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + n + (i !== undefined ? '  ' + JSON.stringify(i) : '')); };
-t('MLP 1.6.1', M.VERSION === '1.6.1', M.VERSION);
+t('MLP 1.6.2', M.VERSION === '1.6.2', M.VERSION);
 const HAVE = fs.existsSync(FX); let skipped = 0;   // Brent: the Example Shaft .pl stays off GitHub — fixture checks SKIP when it's absent
 const tf = (n, c, i) => { if (HAVE) t(n, c, i); else { skipped++; console.log('SKIP', n, '(fixture absent: ' + FX + ')'); } };
 let pc = null; if (HAVE) try { pc = M.parsePl(fs.readFileSync(FX, 'utf8'), 'minilaser.pl'); } catch (e) { t('Example Shaft .pl parses without throwing', false, e.message); }
@@ -42,7 +42,7 @@ tf('Remote recommended (fan 6 not DIP; 10 × 90°)', ml && ml.configMethod === '
 const D = M.deriveAlarmFactor;
 t('VEWFD 8 holes → AF6 (0.96)', D(8, 'VEWFD').af === 6 && D(8, 'VEWFD').avg === 0.96);
 t('EWFD 8 holes → AF7 (1.44)', D(8, 'EWFD').af === 7);
-t('OAP 8 holes → AF8 (2.00 ≤ 2.18)', D(8, 'OAP').af === 8);
+t('OAP 8 holes → AF8 (2.00 ≤ 2.0 default target)', D(8, 'OAP').af === 8);
 t('rounds toward more sensitive: SFD 9 holes → AF7 (0.25×9=2.25 > 2.0; 0.18×9=1.62)', D(9, 'SFD').af === 7);
 t('AF0 overflow → fail + recommendation', D(250, 'VEWFD').fail === true && D(250, 'VEWFD').af === 0 && /fewer holes or redesign/.test(D(250, 'VEWFD').msg));
 t('exactly at threshold passes (VEWFD 4 holes × 0.25 = 1.00 → AF8)', D(4, 'VEWFD').af === 8);

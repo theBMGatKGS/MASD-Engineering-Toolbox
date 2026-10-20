@@ -46,6 +46,8 @@ async def main():
     chk('Performance table shows Target 1.95 + project target chip, max still ≤2.18', 'Target 1.95' in tbl and 'project target' in tbl and '≤2.18' in tbl, tbl[:300])
     await (await pg.query_selector('#tb-perf .tb-sfd[data-scope=""]')).screenshot(path=os.path.join(SH,'sfd-04-saved.png'))
     nar=await pg.evaluate('MLP.perfDraft(tbPerf(),["SFD"])'); chk('narrative draft (SFD class) cites target 1.95', 'SFD/OAP: target 1.95 %obs/ft' in nar, nar[:200])
+    af=await pg.evaluate('(()=>{const c=MLP.miniLaserClass(tbPerf(),""); return [c.target, MLP.deriveAlarmFactor(8,"OAP",c).threshold, MLP.deriveAlarmFactor(8,"OAP",c).af]})()')
+    chk('MiniLaser OAP alarm factor follows the project target 1.95 (8 holes → AF7)', af==[1.95,1.95,7], af)
     # Fire 1 seed follows on a UL project
     seed=await pg.evaluate('(()=>{const d=tbDevices().find(x=>x.kind==="detector"); if(!d) return null; const c=MLP.configSeed("SFD",d.kind,tbPerf(),d.area); return c.values.fire1})()')
     chk('Fire 1 seed (UL project, SFD) = 1.95', seed==1.95, seed)
