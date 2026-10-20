@@ -1,4 +1,4 @@
-// MiniLaser FHSD8075-ULF (modulaser-project.js 1.5.1) — real fixture: Brent's Example Shaft .pl (qa/minilaser/minilaser.pl).
+// MiniLaser FHSD8075-ULF (modulaser-project.js 1.5.1) — fixture: synthetic Example-Shaft-MiniLaser.pl (make_synthetic_pl.py, generated at test time). ML_FIXTURE=<.pl> uses another file; checks SKIP when it is absent.
 // Run: node tests/mlp_minilaser_test.js  (needs @xmldom/xmldom: `cd electron && npm install` — it's an electron devDependency; or set XMLDOM_DIR)
 const path = require('path'), fs = require('fs');
 const xd = require(process.env.XMLDOM_DIR || require.resolve('@xmldom/xmldom', { paths: [path.join(__dirname, '..', 'electron'), path.join(__dirname, '..')] }));
@@ -7,14 +7,15 @@ const proto = Object.getPrototypeOf(new xd.DOMParser().parseFromString('<a/>', '
 if (!('children' in proto)) Object.defineProperty(proto, 'children', { get(){ return Array.from(this.childNodes).filter(n => n.nodeType === 1); } });
 global.DOMParser = xd.DOMParser;
 const M = require(path.join(process.env.TOOLBOX_DIR || path.join(__dirname, '..'), 'modulaser-project.js'));
-const FX = process.env.ML_FIXTURE || '/workspace/qa/minilaser/minilaser.pl';
+const SYN = process.env.SYNTH_DIR || '/workspace/plbuild/synth';
+const FX = process.env.ML_FIXTURE || require('child_process').execFileSync('python3', ['-c', 'import sys; sys.path.insert(0, sys.argv[1]); import make_synthetic_pl as m; print(m.ensure("shaft_ml", sys.argv[2]))', __dirname, SYN]).toString().trim();
 let pass = 0, fail = 0; const t = (n, c, i) => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + n + (i !== undefined ? '  ' + JSON.stringify(i) : '')); };
 t('MLP 1.6.3', M.VERSION === '1.6.3', M.VERSION);
-const HAVE = fs.existsSync(FX); let skipped = 0;   // Brent: the Example Shaft .pl stays off GitHub — fixture checks SKIP when it's absent
+const HAVE = fs.existsSync(FX); let skipped = 0;   // real fixtures stay off GitHub — fixture checks SKIP when it's absent
 const tf = (n, c, i) => { if (HAVE) t(n, c, i); else { skipped++; console.log('SKIP', n, '(fixture absent: ' + FX + ')'); } };
-let pc = null; if (HAVE) try { pc = M.parsePl(fs.readFileSync(FX, 'utf8'), 'minilaser.pl'); } catch (e) { t('Example Shaft .pl parses without throwing', false, e.message); }
+let pc = null; if (HAVE) try { pc = M.parsePl(fs.readFileSync(FX, 'utf8'), 'Example-Shaft-MiniLaser.pl'); } catch (e) { t('MiniLaser .pl parses without throwing', false, e.message); }
 const d = pc && pc.groups[0].detectors[0];
-tf('Example Shaft .pl parses without throwing', !!pc);
+tf('MiniLaser .pl parses without throwing', !!pc);
 tf('SOLO → MiniLaser kind', d && d.kind === 'minilaser' && d.type === 'MiniLaser', d && [d.kind, d.type]);
 tf('fan from aspiratorSpeed = 6', d && d.fan === 6);
 tf('address ignored', d && d.address === '');
@@ -22,7 +23,7 @@ tf('8 sampling holes + 1 test point (test point not counted)', d && d.pipe.holes
 tf('alarmFactorActivated false read raw', d && d.pipe.afActivatedRaw === 'false');
 tf('bends90 total 10 from .pl', d && d.pipe.bends90Total === 10, d && d.pipe.bends90Total);
 tf('expansionDatabase empty → no notice', d && d.pipe.expansionInPl === false);
-const dev = d && M.deviceFromPl(d, 'Floor', { id: 'pl-x', name: 'minilaser.pl' });
+const dev = d && M.deviceFromPl(d, 'Floor', { id: 'pl-x', name: 'Example-Shaft-MiniLaser.pl' });
 tf('deviceFromPl model FHSD8075-ULF, standalone, no address', dev && dev.model === 'FHSD8075-ULF' && dev.standalone === true && dev.address === '');
 tf('devNetwork → null (standalone; not counted on SenseNET)', dev && M.devNetwork(dev) === null && Object.keys(M.networkCounts([dev])).length === 0);
 const ml = dev && dev.minilaser;
@@ -33,9 +34,9 @@ const P = { standard: 'EWFD – NFPA 76', areas: { Floor: { enabled: true, stand
 t('class order: Area/Group override wins', JSON.stringify(M.miniLaserClass(P, 'Floor')) === JSON.stringify({ cls: 'VEWFD', src: 'area' }), M.miniLaserClass(P, 'Floor'));
 t('class order: disabled area → project class', JSON.stringify(M.miniLaserClass(P, 'Other')) === JSON.stringify({ cls: 'EWFD', src: 'project' }), M.miniLaserClass(P, 'Other'));
 t('class order: no class (BS / none) → SFD', M.miniLaserClass({ standard: 'BS 5839-1 Category M/L' }, 'Floor').cls === 'SFD' && M.miniLaserClass(null).src === 'default SFD');
-const devV = d && M.deviceFromPl(d, 'Floor', { id: 'pl-x', name: 'minilaser.pl' }, undefined, P);
-tf('Example Shaft with a VEWFD area: 8 × AF → AF 6 (8 × 0.12 = 0.96 ≤ 1.0), class src area', devV && devV.minilaser.alarmFactor === 6 && devV.minilaser.perfClass === 'VEWFD' && devV.minilaser.perfClassSrc === 'area', devV && devV.minilaser.derivation);
-const dsg = pc && M.designFromPl([pc], [{ id: 'pl-x', name: 'minilaser.pl' }], { standard: 'EWFD – NFPA 76' });
+const devV = d && M.deviceFromPl(d, 'Floor', { id: 'pl-x', name: 'Example-Shaft-MiniLaser.pl' }, undefined, P);
+tf('Shaft MiniLaser with a VEWFD area: 8 × AF → AF 6 (8 × 0.12 = 0.96 ≤ 1.0), class src area', devV && devV.minilaser.alarmFactor === 6 && devV.minilaser.perfClass === 'VEWFD' && devV.minilaser.perfClassSrc === 'area', devV && devV.minilaser.derivation);
+const dsg = pc && M.designFromPl([pc], [{ id: 'pl-x', name: 'Example-Shaft-MiniLaser.pl' }], { standard: 'EWFD – NFPA 76' });
 tf('designFromPl passes the project class: EWFD → AF 7 (8 × 0.18 = 1.44 ≤ 1.5)', dsg && dsg.devices[0].minilaser.alarmFactor === 7 && dsg.devices[0].minilaser.perfClassSrc === 'project', dsg && dsg.devices[0].minilaser.derivation);
 tf('Remote recommended (fan 6 not DIP; 10 × 90°)', ml && ml.configMethod === 'Remote' && /Remote/.test(ml.advice), ml && ml.advice);
 // derivation rule
@@ -67,7 +68,7 @@ t('F1: 10 holes VEWFD, 20 EWFD, 35 SFD pass; 36 SFD fails', M.miniLaserPipeCheck
 t('F1: UL OAP 24 holes / 300 ft; SA Range 2 200 ft; ULC 35 holes / 400 ft', M.miniLaserPipeCheck({ key: 'UL 268 Ed.7 OAP', holes: 24, lengthFt: 300 }).ok && !M.miniLaserPipeCheck({ key: 'UL 268 Ed.7 OAP', holes: 25 }).ok && !M.miniLaserPipeCheck({ key: 'UL 268 Ed.7 SA Range 2', lengthFt: 201 }).ok && M.miniLaserPipeCheck({ key: 'ULC-S529', holes: 35, lengthFt: 400 }).ok);
 t('F1: NFPA length 400 ft; 401 ft fails', M.miniLaserPipeCheck({ key: 'SFD', lengthFt: 400 }).ok && !M.miniLaserPipeCheck({ key: 'SFD', lengthFt: 401 }).ok);
 t('F1: first hole > 16 ft fails when known', !M.miniLaserPipeCheck({ key: 'SFD', firstHoleFt: 20 }).ok && M.miniLaserPipeCheck({ key: 'SFD', firstHoleFt: 16 }).ok);
-t('F1: .pl import carries pipeCheck (Example Shaft-like 8 holes SFD OK; 20 holes VEWFD fails)', M.miniLaserFromPl({ fan: 4, pipe: { holes: new Array(8).fill({}), lengthFt: 100 } }, 'SFD').pipeCheck.ok && !M.miniLaserFromPl({ fan: 4, pipe: { holes: new Array(20).fill({}) } }, { cls: 'VEWFD', src: 'area' }).pipeCheck.ok);
+t('F1: .pl import carries pipeCheck (shaft-like 8 holes SFD OK; 20 holes VEWFD fails)', M.miniLaserFromPl({ fan: 4, pipe: { holes: new Array(8).fill({}), lengthFt: 100 } }, 'SFD').pipeCheck.ok && !M.miniLaserFromPl({ fan: 4, pipe: { holes: new Array(20).fill({}) } }, { cls: 'VEWFD', src: 'area' }).pipeCheck.ok);
 t('pre-engineered: 9 tables, diameter counts match holes (T per branch)', ML.preEngineered.length === 9 && ML.preEngineered.every(tb => tb.rows.every(r => r.diameters.length === (tb.shape === 'T' ? r.holes / 2 : r.holes) && r.lengthFt > 0)));
 const lk = M.preEngLookup('I', 4, 4, 8);
 t('lookup I/fan 4/4 holes/AF8 → 34 s, 2.00 SFD|SA|OAP, 9/64 ×4, 80 ft (M Tables 23–24)', lk && lk.row.transport === 34 && lk.af.avg === 2 && lk.af.classes.join() === 'SFD,SA,OAP' && lk.row.diameters.every(x => x === '9/64') && lk.row.lengthFt === 80);

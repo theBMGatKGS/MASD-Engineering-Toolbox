@@ -1,4 +1,4 @@
-"""MASD Engineering Toolbox 00.01.000 — end-to-end on real data (pl-samples, legacy fixtures, real Report round trip)."""
+"""MASD Engineering Toolbox 00.01.000 — end-to-end (synthetic .pl fixtures from make_synthetic_pl.py, legacy fixtures, Report round trip)."""
 import asyncio, json, os, sys, glob, zipfile
 # QA D1: never run silently against the wrong checkout — TOOLBOX_DIR must be set explicitly.
 if not os.environ.get('TOOLBOX_DIR'):
@@ -11,7 +11,7 @@ def _od(*p):
     d=_os.path.join(MLP_OUT,*p); _os.makedirs(d,exist_ok=True); return d.rstrip('/')+'/'
 TBDIR=os.environ['TOOLBOX_DIR'].rstrip('/'); URL='file://'+TBDIR+'/index.html'; SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
 os.makedirs(SH,exist_ok=True); os.makedirs(OUT,exist_ok=True)
-FX='/workspace/tb/legacy/fixtures/'; PL=sorted(glob.glob('/workspace/pl-samples/*.pl'))
+FX='/workspace/tb/legacy/fixtures/'; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import make_synthetic_pl; PL=sorted(make_synthetic_pl.ensure_all(os.environ.get('SYNTH_DIR', '/workspace/plbuild/synth')).values())
 R=[]
 def chk(n,c,i=''): R.append((n,bool(c))); print('PASS' if c else 'FAIL', n, str(i)[:300])
 async def dl(pg, js):

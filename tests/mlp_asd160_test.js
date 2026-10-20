@@ -6,7 +6,9 @@ const proto = Object.getPrototypeOf(new xd.DOMParser().parseFromString('<a/>', '
 if (!('children' in proto)) Object.defineProperty(proto, 'children', { get(){ return Array.from(this.childNodes).filter(n => n.nodeType === 1); } });
 global.DOMParser = xd.DOMParser;
 const M = require(process.env.MLP_FILE || path.join(process.env.TOOLBOX_DIR || path.join(__dirname, '..'), 'modulaser-project.js'));
-const FX = process.env.ASD_FIXTURE || '/workspace/qa/micra25/asd160-hoistway-top.pl';
+// Fixture: synthetic Example-Shaft-ASD160.pl (make_synthetic_pl.py, generated at test time). ASD_FIXTURE=<.pl> uses another file; checks SKIP when it is absent.
+const SYN = process.env.SYNTH_DIR || '/workspace/plbuild/synth';
+const FX = process.env.ASD_FIXTURE || require('child_process').execFileSync('python3', ['-c', 'import sys; sys.path.insert(0, sys.argv[1]); import make_synthetic_pl as m; print(m.ensure("shaft_asd", sys.argv[2]))', __dirname, SYN]).toString().trim();
 let pass = 0, fail = 0, skipped = 0; const t = (n, c, i) => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + n + (i !== undefined && !c ? '  ' + JSON.stringify(i) : '')); };
 const HAVE = fs.existsSync(FX); const tf = (n, c, i) => { if (HAVE) t(n, c, i); else { skipped++; console.log('SKIP', n, '(fixture absent)'); } };
 t('MLP 1.6.3', M.VERSION === '1.6.3', M.VERSION);
