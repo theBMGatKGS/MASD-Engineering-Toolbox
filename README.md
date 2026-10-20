@@ -12,7 +12,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 > **Version 00.03.001_261019 — pre-release, local build (latest release: 00.03.000, 2026-10-19).** 01.00.000 is reserved for the refined first release.
 > Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
-> Calculator lineage: **Battery Calculator 02.02.000**
+> Calculator lineage: **Battery Calculator 02.02.001**
 
 ### What's new in 00.03.001 (pre-release, local build, not released)
 

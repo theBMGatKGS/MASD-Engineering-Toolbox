@@ -10,6 +10,17 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 ### Recent improvements
 - Harmonized with Battery Calculator 02.02.001. **Printed Quick Start:** larger white brand logo (Edwards or Kidde Commercial) with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages.
 - No calculation change.
+- **Step 1 is now a full-width row (Brent 6:28 PM)** in the printed Quick Start (shared block with the Calculator).
+- Calculator lineage reads **Battery Calculator 02.02.001** everywhere: About, README, Calculator-mode Help, Quick Start step 3 and the one-page quickstart.html.
+- The two Toolbox print-light images now live in a Toolbox-only script after the shared Quick Start block.
+
+### Brent's asks (shared with Calculator 02.02.001) (verbatim, CT, Mon 2026-10-19)
+- 1:12 PM, Brent's private chat with Builder: "Revise Help Menu with current screenshots of calculator to replace legacy visual entries. Also, allow for printing an intuitive Quick Start guide apart from the help menu"
+- 4:59 PM: not found. Builder has no transcript of Brent's private chat; the only trace is the earlier draft commit message "Brent 10-19 4:59/5:13/5:36 PM".
+- 5:13 PM, Brent's private chat with Builder: "Increase Edwards logo size and move revision wherever it fits.  For Step 3, create A, B, C horizontally so that their screenshots are afforded the maximum real estate and are legible.  Change all dark mode screenshots to a complimentary lite mode for printing while retaining the original look and feel."
+- 5:36 PM, Brent's private chat with Builder (widget pick): "Keep the full-width rows"
+- 5:56 PM, Brent's private chat with Builder (widget pick): "Looks good, bump it to 02.02.001"
+- 6:28 PM, QA's chat (QA-reported, verbatim): "Item 1 in Quick Start is truncated and illegible due to font size.  Expand to horizontal"
 
 ### QA audit
 - Pending: QA/Auditor review of 02.02.001 (Calculator) / 00.03.001 (Toolbox).
