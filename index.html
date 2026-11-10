@@ -1839,7 +1839,7 @@ body.v2 .model-cell{ font-size:10.5px; }
           <div class="qs-step-num">20</div>
           <div class="qs-step-body">
             <div class="qs-step-title" id="qs-step-import-pl">Import PipeCAD .pl files</div>
-            <p><b>File → Import .pl…</b> (or <b>Import .pl</b> in the quick row) opens a four-step wizard. <b>1 Battery settings</b> — set Design Basis, standby/alarm, ambient temperature, safety margin, NFPA 72 edition, power-supply capacity and supply mode <i>first</i>; they become the defaults on every new sheet and drive the 65 Ah check. <b>2 Pick files</b> — drop or choose one or more .pl files; each shows its project (the file name is used when ProjectName is blank), units (metric files are converted to feet), Areas/Groups, detectors, displays and PSU positions. Untick any Area/Group you don't want. Unknown detector types or display part numbers are listed and skipped. <b>3 Rename</b> — set a naming pattern from {project} {file} {area} {name} {##} (default <span class="mono-inline">{project}-{area}-Det{##}</span>, remembered for next time), edit any zone or Area/Group name, and watch the live character counter. The ModuLaser display shows 16 characters total, including spaces, so names over 16 are blocked until shortened — use the suggested short name or <b>Shorten all over 16</b>. Duplicate names are outlined in red. <b>4 Power supplies</b> — each Area/Group gets at least one supply, a supply never spans Areas/Groups, and each takes at most 4 detectors and 1 display with the required battery ≤ 65 Ah (display load included). Suggestions start from PSU positions in the file (nearest device first) and devices within 3 ft of each other in plan view (X/Y); oversize groups are split by distance. Any device that isn't near a file PSU or within 3 ft of another device is <i>not</i> auto-assigned — it waits in that Area/Group's <b>Unassigned — group these to a power supply</b> tray, and you're prompted to group it: drag it onto a supply card or use <i>Move to…</i>, and click <b>+ Add power supply</b> for more supplies (removing a supply sends its devices back to the tray). <b>Pack into fewest</b> is an optional shortcut that assigns the whole Area/Group to the fewest supplies. <b>Create sheets</b> stays disabled, showing how many detectors are still unassigned, until every device is on a supply and every rule passes. One sheet is created per supply, with type, zone name, fan speed and display model filled in, its Location set to the Area/Group (so the sidebar groups them), and addresses and anything the file doesn't provide highlighted for you to enter — the sidebar shows those sheets with an amber <i>needs entry</i> dot until you finish. Design Basis and Ambient Temp. must be chosen in step 1 (they start on <i>- Select -</i>). After <b>Create sheets</b> a <b>Confirm Settings?</b> prompt summarizes the settings applied: <b>Confirm</b> marks everything configured during the import as confirmed, so only genuinely empty fields (e.g. addresses) stay amber; <b>Revise import</b> undoes the import and returns you to the review step with your choices kept. After <b>Confirm</b> you're asked how to address the new modules (a new build: <b>Networked or Standalone?</b> then <b>Auto address?</b>; an existing project: Continue / Manually address / Re-auto address entire project — see Addressing).</p>
+            <p><b>File → Import .pl…</b> (or <b>Import .pl</b> in the quick row) opens a five-step wizard. <b>1 Battery settings</b> — set Design Basis, standby/alarm, ambient temperature, safety margin, NFPA 72 edition, power-supply capacity and supply mode <i>first</i>; they become the defaults on every new sheet and drive the 65 Ah check. <b>2 Pick files</b> — drop or choose one or more .pl files; each shows its project (the file name is used when ProjectName is blank), units (metric files are converted to feet), Areas/Groups, detectors, displays and PSU positions. Untick any Area/Group you don't want. Unknown detector types or display part numbers are listed and skipped. <b>3 Rename</b> — set a naming pattern from {project} {file} {area} {name} {##} (default <span class="mono-inline">{project}-{area}-Det{##}</span>, remembered for next time), edit any zone or Area/Group name, and watch the live character counter. The ModuLaser display shows 16 characters total, including spaces, so names over 16 are blocked until shortened — use the suggested short name or <b>Shorten all over 16</b>. Duplicate names are outlined in red. <b>4 Displays</b> — PipeCAD-first gate: Stop import or Continue without PipeCAD displays; assumed Standard/Minimum with Accept / Type / Skip; swimlane grouping when needed &gt; 1; SenseNET Command offer when 2+ clusters. <b>5 Power supplies</b> — each Area/Group gets at least one supply, a supply never spans Areas/Groups, and each takes at most 4 detectors and 1 display with the required battery ≤ 65 Ah (display load included). Suggestions start from PSU positions in the file (nearest device first) and devices within 3 ft of each other in plan view (X/Y); oversize groups are split by distance. Any device that isn't near a file PSU or within 3 ft of another device is <i>not</i> auto-assigned — it waits in that Area/Group's <b>Unassigned — group these to a power supply</b> tray, and you're prompted to group it: drag it onto a supply card or use <i>Move to…</i>, and click <b>+ Add power supply</b> for more supplies (removing a supply sends its devices back to the tray). <b>Pack into fewest</b> is an optional shortcut that assigns the whole Area/Group to the fewest supplies. <b>Create sheets</b> stays disabled, showing how many detectors are still unassigned, until every device is on a supply and every rule passes. One sheet is created per supply, with type, zone name, fan speed and display model filled in, its Location set to the Area/Group (so the sidebar groups them), and addresses and anything the file doesn't provide highlighted for you to enter — the sidebar shows those sheets with an amber <i>needs entry</i> dot until you finish. Design Basis and Ambient Temp. must be chosen in step 1 (they start on <i>- Select -</i>). After <b>Create sheets</b> a <b>Confirm Settings?</b> prompt summarizes the settings applied: <b>Confirm</b> marks everything configured during the import as confirmed, so only genuinely empty fields (e.g. addresses) stay amber; <b>Revise import</b> undoes the import and returns you to the review step with your choices kept. After <b>Confirm</b> you're asked how to address the new modules (a new build: <b>Networked or Standalone?</b> then <b>Auto address?</b>; an existing project: Continue / Manually address / Re-auto address entire project — see Addressing).</p>
           </div>
         </div>
         <div class="qs-step">
@@ -3020,7 +3020,10 @@ function buildStateObject(){
     backupCdmLocation: document.getElementById('backup-cdm-location-input').value,
     printBom: document.getElementById('print-bom-toggle') ? document.getElementById('print-bom-toggle').checked : true,
     locations: Array.from(document.querySelectorAll('.location')).map(serializeLocation),
-    addrLog: ADDR_LOG
+    addrLog: ADDR_LOG,
+    displayPlan: (typeof plWiz !== 'undefined' && plWiz.displayPlan) ? plWiz.displayPlan : (window.__displayPlan || {}),
+    rerunPipeCad: (typeof plWiz !== 'undefined') ? !!plWiz.rerunPipeCad : !!window.__rerunPipeCad,
+    displaysAssumed: !!((typeof plWiz !== 'undefined' && plWiz.rerunPipeCad) || window.__rerunPipeCad)
   };
 }
 
@@ -7940,6 +7943,26 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
   function plClusterDisplays(g){
     return (g.displays || []).filter(d => d.type === 'Standard Display' || d.type === 'Minimum Display');
   }
+  function plExistingCapacityByFloor(){
+    // H-a: count Std/Min already on Calculator sheets, keyed by Location (Area/Group)
+    const map = {};
+    try {
+      document.querySelectorAll('.location').forEach(loc => {
+        const area = (loc.querySelector('.ps-location') && loc.querySelector('.ps-location').value) || '';
+        if (!area) return;
+        let n = 0, dets = 0;
+        loc.querySelectorAll('[data-role="module"]').forEach(row => {
+          const t = (row.querySelector('.type-select') || {}).value || '';
+          if (t === 'Standard Display' || t === 'Minimum Display') n++;
+          if (t === 'Detector') dets++;
+        });
+        map[area] = map[area] || { nCluster: 0, nDet: 0 };
+        map[area].nCluster += n;
+        map[area].nDet += dets;
+      });
+    } catch (e){}
+    return map;
+  }
   function plBuildSuggest(){
     const groups = [];
     const meta = [];
@@ -7951,11 +7974,25 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
       linkId: (plWiz.files[0] && plWiz.files[0].linkId) || 'link',
       displayPlan: plWiz.displayPlan
     });
+    const existing = (plWiz.mode === 'update') ? plExistingCapacityByFloor() : {};
     raw.floors.forEach((fl, i) => {
       const m = meta[i] || {};
       fl.fi = m.fi; fl.g = m.g; fl.f = m.f;
       fl.floorKey = m.floorKey || fl.floorKey;
+      // H-a: combine .pl parse counts with sheets already in the Calculator for this Area
+      const ex = existing[fl.floorName] || existing[(m.g && (m.g.origName || m.g.name))] || null;
+      if (ex){
+        const nDet = Math.max(fl.nDet, ex.nDet);
+        const nCluster = Math.max(fl.nCluster, ex.nCluster);
+        const capacityNeed = Math.ceil(nDet / 8);
+        const needed = Math.max(0, capacityNeed - nCluster);
+        fl.nDet = nDet; fl.nCluster = nCluster; fl.needed = needed; fl.capacityNeed = capacityNeed;
+        if (needed === 0){ fl.status = 'ok'; fl.suggestion = null; }
+        else { fl.status = 'needed'; }
+      }
     });
+    raw.anyNeeded = raw.floors.some(f => f.status === 'needed');
+    raw.neededTotal = raw.floors.reduce((s, f) => s + (f.needed || 0), 0);
     plWiz.displaysSuggest = raw;
     return raw;
   }
@@ -8025,8 +8062,20 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     plWiz.rerunPipeCad = true;
   }
   function plCommandOfferNeeded(){
-    // After assumed applied: count clusters (Std/Min) across included groups on networked import
+    // H-c: SenseNET only; count clusters already in the project + this import; ignore standalone
+    const addr = (plWiz.settings && plWiz.settings.addrScheme) || 'networked';
+    if (addr === 'standalone') return false;
     let clusters = 0, cmds = 0;
+    // Existing sheets in the Calculator
+    try {
+      document.querySelectorAll('.location').forEach(loc => {
+        loc.querySelectorAll('[data-role="module"]').forEach(row => {
+          const t = (row.querySelector('.type-select') || {}).value || '';
+          if (t === 'Standard Display' || t === 'Minimum Display') clusters++;
+          if (t === 'Command Display') cmds++;
+        });
+      });
+    } catch (e){}
     plIncludedGroups().forEach(({ g }) => {
       clusters += plClusterDisplays(g).length;
       cmds += (g.displays || []).filter(d => d.type === 'Command Display').length;
@@ -8120,8 +8169,31 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
   window.plRenderDisplaysStep = function (body){
     const plan = plBuildSuggest();
     if (!plWiz.displaysPhase) plWiz.displaysPhase = plan.anyNeeded ? 'gate' : 'done';
-    if (plWiz.displaysPhase === 'done' || !plan.anyNeeded){
-      // Nothing to do — advance path handled by plNext
+    // B1: Command (S5B) must render even after assumed displays satisfy capacity
+    if (plWiz.displaysPhase === 'command'){
+      body.innerHTML = `
+        <div style="position:relative;min-height:280px">
+          <div style="opacity:.35;pointer-events:none"><div class="plw-note">Reviewing SenseNET Command display requirement…</div></div>
+          <div role="dialog" aria-modal="true" style="position:absolute;inset:10% 12%;background:var(--panel);border:1px solid var(--border);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);padding:18px;z-index:2">
+            <h3 style="margin:0 0 8px;font-size:16px">Add Command display?</h3>
+            <div class="plw-warn">This SenseNET network has 2+ clusters and no Command display.</div>
+            <ul style="font-size:12.5px;color:var(--text-dim);line-height:1.55;margin:0 0 14px;padding-left:18px">
+              <li>Command display draws <b class="mono">232 mA</b></li>
+              <li>Does <b>not</b> host a detector cluster</li>
+              <li>Counts toward max <b>2</b> Command displays per network</li>
+              <li>Needs its own address and usually its own PSU slot</li>
+            </ul>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+              <button type="button" class="btn btn-ghost" id="pl-cmd-no">Not now</button>
+              <button type="button" class="btn btn-primary" id="pl-cmd-yes">Add 1 Command display</button>
+            </div>
+          </div>
+        </div>`;
+      body.querySelector('#pl-cmd-yes').onclick = () => plCommandAccept();
+      body.querySelector('#pl-cmd-no').onclick = () => plCommandDismiss();
+      return;
+    }
+    if (plWiz.displaysPhase === 'done' || (!plan.anyNeeded && plWiz.displaysPhase !== 'fallback')){
       body.innerHTML = `<div class="plw-note">All included floors have enough Standard/Minimum cluster displays.</div>`;
       return;
     }
@@ -8155,30 +8227,6 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
       body.querySelector('#plw-back-proxy').onclick = () => { plWiz.step = 3; plWiz.displaysPhase = null; plRender(); };
       // Hide default foot Next while on gate
       const fin = document.getElementById('plw-finish'); if (fin) fin.hidden = true;
-      return;
-    }
-    if (plWiz.displaysPhase === 'command'){
-      // S5B — modal over wizard
-      body.innerHTML = `
-        <div style="position:relative;min-height:280px">
-          <div style="opacity:.35;pointer-events:none"><div class="plw-note">Reviewing SenseNET Command display requirement…</div></div>
-          <div role="dialog" aria-modal="true" style="position:absolute;inset:10% 12%;background:var(--panel);border:1px solid var(--border);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);padding:18px;z-index:2">
-            <h3 style="margin:0 0 8px;font-size:16px">Add Command display?</h3>
-            <div class="plw-warn">This SenseNET network has 2+ clusters and no Command display.</div>
-            <ul style="font-size:12.5px;color:var(--text-dim);line-height:1.55;margin:0 0 14px;padding-left:18px">
-              <li>Command display draws <b class="mono">232 mA</b></li>
-              <li>Does <b>not</b> host a detector cluster</li>
-              <li>Counts toward max <b>2</b> Command displays per network</li>
-              <li>Needs its own address and usually its own PSU slot</li>
-            </ul>
-            <div style="display:flex;gap:8px;justify-content:flex-end">
-              <button type="button" class="btn btn-ghost" id="pl-cmd-no">Not now</button>
-              <button type="button" class="btn btn-primary" id="pl-cmd-yes">Add 1 Command display</button>
-            </div>
-          </div>
-        </div>`;
-      body.querySelector('#pl-cmd-yes').onclick = () => plCommandAccept();
-      body.querySelector('#pl-cmd-no').onclick = () => plCommandDismiss();
       return;
     }
     // fallback phase — S2A / S3B
@@ -8225,12 +8273,14 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
           const n = (b.detectors || []).length;
           const pct = Math.min(100, (n / 8) * 100);
           const devices = (b.detectors || []).concat(b.existing ? [] : [{ kind: 'display', type: b.type || 'Standard Display' }]);
-          const ah = (typeof displayBucketAh === 'function' ? displayBucketAh(devices.concat(b.detectors||[]), plWiz.settings) : 0);
-          // rough: dets + 1 display
-          const ahDevs = (b.detectors || []).concat([{ kind: 'display', type: b.type || 'Standard Display' }]);
-          const ahV = typeof displayBucketAh === 'function' ? displayBucketAh(ahDevs, plWiz.settings) : 0;
+          // H-d: live readout is per-PSU under the 4+1 packing (not the whole 8-det bucket)
+          const dets = (b.detectors || []).slice();
           const psuN = typeof displayBucketPsuCount === 'function' ? displayBucketPsuCount(n, true) : Math.ceil(Math.max(n,1)/4);
+          const first4 = dets.slice(0, 4);
+          const ahDevs = first4.concat([{ kind: 'display', type: b.type || 'Standard Display' }]);
+          const ahV = typeof displayBucketAh === 'function' ? displayBucketAh(ahDevs, plWiz.settings) : 0;
           const over = ahV > 65;
+          const overflowNote = dets.length > 4 ? ` · +${Math.ceil((dets.length-4)/4)} overflow PSU(s)` : '';
           return `<div class="plw-psu" style="margin-bottom:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
               <b>${plEsc(b.existing ? 'Existing display' : 'Display cluster')} · ${plEsc(b.type || 'Standard Display')}</b>
@@ -8238,7 +8288,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
             </div>
             <div style="height:4px;background:var(--panel-3);border-radius:2px;margin:6px 0"><div style="height:100%;width:${pct}%;background:${n>8?'var(--danger)':'var(--accent)'}"></div></div>
             <div style="min-height:36px;font-size:11.5px;font-family:var(--mono);color:var(--text-dim)">${(b.detectors||[]).map(d=>plEsc(d.newName||d.origName||d.key)).join(', ') || '<i>Drop detectors here</i>'}</div>
-            <div class="plw-count">PSU ≈ ${psuN} · Ah ≈ ${ahV.toFixed(1)}${over ? ' <span class="plw-tag bad">over 65 Ah charger</span>' : ''}</div>
+            <div class="plw-count">PSU ≈ ${psuN}${overflowNote} · first PSU Ah ≈ ${ahV.toFixed(1)}${over ? ' <span class="plw-tag bad">over 65 Ah charger</span>' : ''}</div>
             <div style="margin-top:6px">${unassigned.map(d => `<button type="button" class="btn btn-ghost btn-sm" style="margin:2px" data-assign="${plEsc(fl.floorKey)}|${plEsc(b.id)}|${plEsc(d.key)}">+ ${plEsc(d.newName||d.origName||d.key)}</button>`).join('')}</div>
           </div>`;
         }).join('');
@@ -8291,6 +8341,12 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
   window.plDisplaysOnEnterFromRename = function (){
     const needed = plAnyDisplaysNeeded();
     if (!needed){
+      // H-c: still offer Command when SenseNET has 2+ clusters and no Command
+      if (plCommandOfferNeeded() && !(plWiz.commandOffer && plWiz.commandOffer.dismissed) && !plWiz.displayPlan.__commandDismissed){
+        plWiz.displaysPhase = 'command';
+        plWiz.step = 4;
+        return true;
+      }
       plWiz.displaysPhase = 'done';
       plWiz.step = 5; // skip straight to power supplies
       plWiz.suggested = false;
@@ -8328,12 +8384,16 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
       const used = new Set();
       const psus = [];
       assumed.forEach((disp, di) => {
-        const keys = disp._bucketDetKeys || [];
+        let keys = disp._bucketDetKeys || [];
+        // M-b: le8 Accept — assign all floor detectors to this display's PSUs
+        if (!keys.length && (disp.assumption && disp.assumption.rule === 'le8-floor')){
+          keys = (g.detectors || []).filter(d => !used.has(d.key)).map(d => d.key);
+        }
         const dets = (g.detectors || []).filter(d => keys.includes(d.key) && !used.has(d.key));
         dets.forEach(d => used.add(d.key));
         let remain = dets.slice();
         const first = remain.splice(0, 4);
-        psus.push({ id: 'a' + di + 'p0', devices: [disp].concat(first), fromAssumed: true });
+        psus.push({ id: 'a' + di + 'p0', devices: [disp].concat(first), fromAssumed: true, displayKey: disp.key });
         let pi = 1;
         while (remain.length){
           psus.push({ id: 'a' + di + 'p' + pi, devices: remain.splice(0, 4), fromAssumed: true, parentDisplayKey: disp.key });
@@ -8357,62 +8417,74 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
   };
 
   window.plAssignClusterRefs = function (createdLocs){
-    const byArea = {};
-    document.querySelectorAll('.location').forEach(locEl => {
-      const area = (locEl.querySelector('.ps-location') && locEl.querySelector('.ps-location').value) ||
-                   (locEl.querySelector('.ps-location-primary') && locEl.querySelector('.ps-location-primary').value) || '';
-      const locId = locEl.getAttribute('data-loc');
-      if (!byArea[area]) byArea[area] = [];
-      byArea[area].push({ locEl, locId });
+    // B3: .type-select; unpadded cluster nums; per-bucket display; only newly created sheets
+    const created = new Set();
+    (createdLocs || []).forEach(loc => {
+      if (loc == null) return;
+      if (typeof loc === 'object' && loc.getAttribute){ created.add(String(loc.getAttribute('data-loc'))); return; }
+      created.add(String(loc));
     });
-    Object.keys(byArea).forEach(area => {
-      const sheets = byArea[area];
-      let nextCluster = 1;
-      const displayHomes = [];
-      sheets.forEach(({ locEl, locId }) => {
-        locEl.querySelectorAll('[data-role="module"]').forEach(row => {
-          const typeSel = row.querySelector('.module-type, select.module-type, [data-role="module-type"]');
-          const type = typeSel ? typeSel.value : '';
-          if (type === 'Standard Display' || type === 'Minimum Display'){
-            const cSel = row.querySelector('.cluster-select, select.cluster, [data-role="cluster"]');
-            const num = String(nextCluster).padStart(2, '0');
-            if (cSel){
-              if (![...cSel.options].some(o => o.value === num)){
-                const opt = document.createElement('option'); opt.value = num; opt.textContent = num; cSel.appendChild(opt);
-              }
-              cSel.value = num;
-            }
-            displayHomes.push({ locId, clusterNum: num, row });
-            nextCluster++;
+    const byDisplay = {};
+    if (typeof plWiz !== 'undefined' && plWiz.psuByGroup){
+      let next = 1;
+      Object.keys(plWiz.psuByGroup).forEach(gk => {
+        (plWiz.psuByGroup[gk] || []).forEach(p => {
+          const disp = (p.devices || []).find(d => d.kind === 'display' && (d.type === 'Standard Display' || d.type === 'Minimum Display'));
+          if (disp){
+            const key = disp.key || ('disp-' + next);
+            byDisplay[key] = byDisplay[key] || { displayKey: key, clusterNum: String(next++), detKeys: new Set() };
+            (p.devices || []).filter(d => d.kind === 'detector').forEach(d => byDisplay[key].detKeys.add(d.key));
+          } else if (p.parentDisplayKey && byDisplay[p.parentDisplayKey]){
+            (p.devices || []).filter(d => d.kind === 'detector').forEach(d => byDisplay[p.parentDisplayKey].detKeys.add(d.key));
           }
         });
       });
-      if (!displayHomes.length) return;
-      sheets.forEach(({ locEl, locId }) => {
-        const localDisp = displayHomes.find(h => h.locId === locId);
-        locEl.querySelectorAll('[data-role="module"]').forEach(row => {
-          const typeSel = row.querySelector('.module-type, select.module-type, [data-role="module-type"]');
-          const type = typeSel ? typeSel.value : '';
-          if (type !== 'Detector') return;
-          const cSel = row.querySelector('.cluster-select, select.cluster, [data-role="cluster"]');
-          if (!cSel) return;
-          if (localDisp){
-            if (![...cSel.options].some(o => o.value === localDisp.clusterNum)){
-              const opt = document.createElement('option'); opt.value = localDisp.clusterNum; opt.textContent = localDisp.clusterNum; cSel.appendChild(opt);
-            }
-            cSel.value = localDisp.clusterNum;
-          } else {
-            const home = displayHomes[0];
-            const key = 'r:' + home.locId + ':' + home.clusterNum;
-            if (![...cSel.options].some(o => o.value === key)){
-              const opt = document.createElement('option'); opt.value = key; opt.textContent = key; cSel.appendChild(opt);
-            }
-            cSel.value = key;
-          }
-        });
+    }
+    const sheetMeta = [];
+    document.querySelectorAll('.location').forEach(locEl => {
+      const locId = locEl.getAttribute('data-loc');
+      if (created.size && !created.has(String(locId))) return;
+      const displays = [];
+      locEl.querySelectorAll('[data-role="module"]').forEach(row => {
+        const type = (row.querySelector('.type-select') || {}).value || '';
+        if (type !== 'Standard Display' && type !== 'Minimum Display') return;
+        const plKey = row.dataset.plKey || '';
+        const devKey = plKey.includes('|') ? plKey.slice(plKey.indexOf('|') + 1) : '';
+        let clusterNum = (devKey && byDisplay[devKey]) ? byDisplay[devKey].clusterNum : null;
+        if (!clusterNum){
+          const used = new Set(Object.values(byDisplay).map(d => d.clusterNum));
+          let n = 1; while (used.has(String(n))) n++;
+          clusterNum = String(n);
+          if (devKey){ byDisplay[devKey] = byDisplay[devKey] || { displayKey: devKey, clusterNum, detKeys: new Set() }; byDisplay[devKey].clusterNum = clusterNum; }
+        }
+        if (devKey && byDisplay[devKey]) byDisplay[devKey].homeLocId = locId;
+        const cSel = row.querySelector('.cluster-select');
+        if (cSel){
+          if (![...cSel.options].some(o => o.value === clusterNum)){ const opt = document.createElement('option'); opt.value = clusterNum; opt.textContent = clusterNum; cSel.appendChild(opt); }
+          cSel.value = clusterNum;
+        }
+        displays.push({ key: devKey, clusterNum });
+      });
+      sheetMeta.push({ locId, locEl, displays });
+    });
+    sheetMeta.forEach(({ locId, locEl, displays }) => {
+      locEl.querySelectorAll('[data-role="module"]').forEach(row => {
+        const type = (row.querySelector('.type-select') || {}).value || '';
+        if (type !== 'Detector') return;
+        const cSel = row.querySelector('.cluster-select'); if (!cSel) return;
+        const plKey = row.dataset.plKey || '';
+        const detKey = plKey.includes('|') ? plKey.slice(plKey.indexOf('|') + 1) : '';
+        let owner = null;
+        Object.keys(byDisplay).forEach(k => { if (byDisplay[k].detKeys && byDisplay[k].detKeys.has(detKey)) owner = byDisplay[k]; });
+        if (!owner && displays.length === 1) owner = { homeLocId: locId, clusterNum: displays[0].clusterNum };
+        if (!owner){ if (displays[0]) owner = { homeLocId: locId, clusterNum: displays[0].clusterNum }; else return; }
+        const val = (String(owner.homeLocId) === String(locId)) ? String(owner.clusterNum) : ('r:' + owner.homeLocId + ':' + owner.clusterNum);
+        if (![...cSel.options].some(o => o.value === val)){ const opt = document.createElement('option'); opt.value = val; opt.textContent = val; cSel.appendChild(opt); }
+        cSel.value = val;
       });
     });
   };
+
 
   const _adv = window.plDisplaysAdvanceFromFallback;
   window.plDisplaysAdvanceFromFallback = function (){
@@ -8822,7 +8894,16 @@ async function plFinish(){
       const modules = devs.map(d => ({ type: d.kind === 'display' ? d.type : 'Detector', zone: d.newName, address: '', fan: d.kind === 'detector' && d.fan ? String(d.fan) : '', cluster: '', power: '', origin: d.origin || undefined, assumption: d.assumption || undefined, circuitSource: '', auxCircuitNum: '', plKey: link.id + '|' + d.key }));
       const loc = restoreLocation(plSavedLocation(s, `PS-${psNum}`, g.name, `${f.project} · ${f.fileName}`, modules, sheetId));
       created.push(loc);
-      devs.forEach(d => { link.devices[d.key] = { fp: d.fp, kind: d.kind, origName: d.origName, type: d.kind === 'display' ? d.type : 'Detector', fan: d.fan || null, zone: d.newName, group: g.origName, sheetId }; });
+      devs.forEach(d => {
+        if (d.origin === 'assumed' || String(d.key || '').startsWith('assumed:')) return;
+        link.devices[d.key] = { fp: d.fp, kind: d.kind, origName: d.origName, type: d.kind === 'display' ? d.type : 'Detector', fan: d.fan || null, zone: d.newName, group: g.origName, sheetId };
+      });
+      link.displayPlan = Object.assign({}, link.displayPlan || {}, (plWiz && plWiz.displayPlan) || {});
+      link.rerunPipeCad = !!(plWiz && plWiz.rerunPipeCad);
+      link.assumedDisplays = link.assumedDisplays || {};
+      devs.filter(d => d.origin === 'assumed' || String(d.key||'').startsWith('assumed:')).forEach(d => {
+        link.assumedDisplays[d.key] = { type: d.type, zone: d.newName, assumption: d.assumption, origin: 'assumed' };
+      });
     });
   });
   // 02.01.000: MiniLasers from the .pl go into each Area/Group sheet's Standalone ASD table (a sheet is created when the group has no ModuLaser modules)
@@ -8834,6 +8915,7 @@ async function plFinish(){
   if (plWiz.linkUpdate && plWiz.newFile){ Object.assign(plWiz.linkUpdate, plWiz.newFile); }
   // Batch recalc: per-sheet inner pass with the cross-sheet cascade suspended, then one global pass
   // (calling recalcLocation per sheet is O(n²) and took >30 s for ~100 sheets).
+  if (typeof plWiz !== 'undefined'){ window.__displayPlan = plWiz.displayPlan; window.__rerunPipeCad = plWiz.rerunPipeCad; }
   if (typeof plAssignClusterRefs === 'function'){ try { plAssignClusterRefs(created); } catch (e){ console.warn('plAssignClusterRefs', e); } }
   window.__inCascade = true;
   try { created.forEach(loc => recalcLocationInner(loc)); } finally { window.__inCascade = false; }
@@ -8870,7 +8952,7 @@ async function plConfirmSettings(created, prevState){
     if (typeof refreshAllAmber === 'function') refreshAllAmber();
     scheduleSave();
     document.getElementById('plw-overlay').classList.add('open');
-    plWiz.step = 4; plRender();
+    plWiz.step = 5; plWiz.displaysPhase = 'done'; plRender();
     return 'revise';
   }
   if (v === 'confirm'){
@@ -8921,7 +9003,12 @@ async function plConfirmSettings(created, prevState){
     const locEl = document.getElementById('location-' + loc);
     if (locEl && saved.plSheetId) locEl.dataset.plSheetId = saved.plSheetId;
     const rows = locEl ? Array.from(locEl.querySelectorAll('[data-role="module"]')) : [];
-    (saved.modules || []).forEach((m, i) => { if (m.plKey && rows[i]) rows[i].dataset.plKey = m.plKey; });
+    (saved.modules || []).forEach((m, i) => {
+      if (!rows[i]) return;
+      if (m.plKey) rows[i].dataset.plKey = m.plKey;
+      if (m.origin) rows[i].dataset.origin = m.origin;
+      if (m.assumption){ try { rows[i].dataset.assumption = typeof m.assumption === 'string' ? m.assumption : JSON.stringify(m.assumption); } catch(e){} }
+    });
     return loc;
   };
   const _bso = buildStateObject;
@@ -8943,7 +9030,68 @@ function plRenderBanner(){
   b.querySelectorAll('[data-review]').forEach(btn => btn.addEventListener('click', () => plOpenDiff(btn.dataset.review)));
 }
 function plRowsForKey(plKey){ return Array.from(document.querySelectorAll('[data-role="module"]')).filter(r => r.dataset.plKey === plKey); }
+function plReplaceAssumedOnImport(link, parsedGroups){
+  if (typeof MLP === 'undefined' || !MLP.replaceAssumedWithReal) return;
+  const realByFloor = {};
+  (parsedGroups || []).forEach((g, fi) => {
+    const floor = g.origName || g.name || ('Floor '+fi);
+    (g.displays || []).filter(d => d.type === 'Standard Display' || d.type === 'Minimum Display').forEach(d => {
+      (realByFloor[floor] = realByFloor[floor] || []).push(Object.assign({}, d, { floor, group: floor, type: d.type }));
+    });
+  });
+  const consumed = new Set();
+  document.querySelectorAll('.location').forEach(locEl => {
+    const area = (locEl.querySelector('.ps-location') && locEl.querySelector('.ps-location').value) || '';
+    const reals = (realByFloor[area] || []).slice();
+    if (!reals.length) return;
+    locEl.querySelectorAll('[data-role="module"]').forEach(row => {
+      if (row.dataset.origin !== 'assumed') return;
+      const type = (row.querySelector('.type-select') || {}).value || '';
+      if (type !== 'Standard Display' && type !== 'Minimum Display') return;
+      const addr = (row.querySelector('.module-address')||{}).value;
+      const cluster = (row.querySelector('.cluster-select')||{}).value;
+      const oldKey = (row.dataset.plKey || '').split('|')[1] || '';
+      const assumed = { type, address: addr, cluster, assumption: { floor: area }, origin: 'assumed', key: oldKey };
+      const out = MLP.replaceAssumedWithReal([assumed], reals);
+      const replaced = out[0];
+      if (!replaced || replaced.origin === 'assumed') return;
+      row.dataset.origin = 'pl';
+      delete row.dataset.assumption;
+      if (replaced.origName || replaced.newName){
+        const zn = row.querySelector('.zone-name');
+        if (zn && !(zn.dataset.userEdited === '1')) zn.value = (replaced.newName || replaced.origName || zn.value).slice(0, 16);
+      }
+      const newKey = replaced.key || replaced.id || oldKey;
+      if (link && link.id && newKey){
+        row.dataset.plKey = link.id + '|' + newKey;
+        if (link.devices){
+          if (oldKey && link.devices[oldKey]) delete link.devices[oldKey];
+          link.devices[newKey] = Object.assign({}, link.devices[newKey] || {}, {
+            fp: replaced.fp, kind: 'display', origName: replaced.origName || replaced.newName,
+            type, fan: null, zone: (row.querySelector('.zone-name')||{}).value, group: area,
+            origin: 'pl'
+          });
+        }
+      }
+      const ri = reals.findIndex(r => r.type === type && !consumed.has(r.key));
+      if (ri >= 0){ consumed.add(reals[ri].key); reals.splice(ri, 1); }
+    });
+  });
+  // Drop assumed placeholders from link.devices so Check link never reports them removed
+  if (link && link.devices){
+    Object.keys(link.devices).forEach(k => {
+      if (String(k).startsWith('assumed:') || (link.devices[k] && link.devices[k].origin === 'assumed')) delete link.devices[k];
+    });
+  }
+}
 function plDiff(link, parsed){
+  // B4: assumed:* placeholders are never "removed" from the .pl
+  if (link && link.devices){
+    Object.keys(link.devices).forEach(k => {
+      if (String(k).startsWith('assumed:') || (link.devices[k] && link.devices[k].origin === 'assumed')) delete link.devices[k];
+    });
+  }
+  
   const now = {};
   parsed.groups.forEach(g => g.detectors.concat(g.displays).forEach(d => { now[d.key] = { d, g }; }));
   const added = [], removed = [], changed = [];
@@ -8970,6 +9118,9 @@ async function plCheckLinkWithFile(linkId, file){
   parsed.sha256 = sha; parsed.size = file.size; parsed.lastModified = file.lastModified; parsed.path = file.path || link.path || '';
   link.lastChecked = new Date().toISOString();
   if (sha === link.sha256){ link.pendingDiff = null; link.status = 'unchanged'; plRenderBanner(); plOpenLinks(); scheduleSave(); return; }
+  if (typeof plReplaceAssumedOnImport === 'function'){
+    try { plReplaceAssumedOnImport(link, parsed.groups || []); } catch (e){ console.warn('plReplaceAssumedOnImport', e); }
+  }
   const diff = plDiff(link, parsed);
   link.status = 'changed';
   link.pendingDiff = { added: diff.added.map(a => a.d.key), removed: diff.removed.map(r => r.key), changed: diff.changed.map(c => c.key) };
@@ -11464,21 +11615,34 @@ MLP.replaceAssumedWithReal = function (designDevices, realDisplays, matchFn){
   const out = (designDevices || []).slice();
   const reals = (realDisplays || []).slice();
   const assumed = out.filter(d => MLP.isAssumedDisplay(d) && (d.type === 'Standard Display' || d.type === 'Minimum Display'));
+  const defaultMatch = function (a, pool){
+    const floor = (a.assumption && a.assumption.floor) || a.floor || '';
+    const type = a.type;
+    const ix = pool.findIndex(r => {
+      if (!r || (r.type && r.type !== type && r.type !== 'Standard Display' && r.type !== 'Minimum Display')) return false;
+      if (type && r.type && r.type !== type) return false;
+      const rf = (r.assumption && r.assumption.floor) || r.floor || r.group || r.area || '';
+      if (floor && rf && String(rf) !== String(floor)) return false;
+      return (r.type === 'Standard Display' || r.type === 'Minimum Display' || !r.type);
+    });
+    return ix >= 0 ? pool[ix] : null;
+  };
   assumed.forEach((a, i) => {
-    const real = matchFn ? matchFn(a, reals, i) : reals[i];
+    const real = matchFn ? matchFn(a, reals, i) : defaultMatch(a, reals);
     if (!real) return;
+    if (a.type && real.type && a.type !== real.type) return; // type must match
     const idx = out.indexOf(a);
     if (idx < 0) return;
     const kept = { address: a.address, cluster: a.cluster, sheetId: a.sheetId, power: a.power, network: a.network };
     const merged = Object.assign({}, real, {
-      address: real.address != null && real.address !== '' ? real.address : kept.address,
-      cluster: real.cluster != null && real.cluster !== '' ? real.cluster : kept.cluster,
+      address: real.address != null && String(real.address) !== '' ? real.address : kept.address,
+      cluster: real.cluster != null && String(real.cluster) !== '' ? real.cluster : kept.cluster,
       sheetId: kept.sheetId || real.sheetId,
       power: kept.power || real.power,
       network: kept.network != null ? kept.network : real.network,
       origin: 'pl',
       assumption: null,
-      pl: real.pl != null ? real.pl : true
+      pl: real.pl != null ? real.pl : null
     });
     out[idx] = merged;
     const ri = reals.indexOf(real); if (ri >= 0) reals.splice(ri, 1);
@@ -11527,10 +11691,17 @@ MLP.formatInTimeZone = function (iso, timeZone){
   catch (e){ return new Date(iso).toLocaleString('en-US', { timeZone: 'UTC' }) + ' UTC'; }
 };
 
+MLP.stripAssumedDefaults = function (dev){
+  if (!dev || typeof dev !== 'object') return dev;
+  const d = Object.assign({}, dev);
+  if (d.origin === 'pl' || d.origin == null) delete d.origin;
+  if (d.assumption == null) delete d.assumption;
+  return d;
+};
+
 root.MLP = MLP;
 if (typeof module !== 'undefined' && module.exports) module.exports = MLP;
 })(typeof window !== 'undefined' ? window : globalThis);
-
 </script><script id="mlp-calc">
 /* ===================== 02.00.001 — ModuLaser project file (.mlproj.json) =====================
    File → Export project… / Import project…. The calculator owns the `design` section; the Field Report's
@@ -11611,7 +11782,10 @@ function mlpBuildDesign(){
       const [linkId, devKey] = plKey ? [plKey.slice(0, plKey.indexOf('|')), plKey.slice(plKey.indexOf('|') + 1)] : ['', ''];
       const link = linkById[linkId]; const ld = link && link.devices ? link.devices[devKey] : null;
       const kind = mod.kind === 'detector' ? 'detector' : 'display';
-      devices.push({ id: plKey || (psuId + ':' + (row && row.id || ri)), kind, type: mod.type, model: mod.model,
+      const _origin = (row && row.dataset.origin) || (mod && mod.origin) || undefined;
+      let _assumption = mod && mod.assumption;
+      if (row && row.dataset.assumption){ try { _assumption = JSON.parse(row.dataset.assumption); } catch(e){} }
+      devices.push({ id: plKey || (psuId + ':' + (row && row.id || ri)), kind, type: mod.type, model: mod.model, origin: _origin, assumption: _assumption,
         partNumber: kind === 'display' ? ({ 'Standard Display': '0', 'Minimum Display': '1', 'Command Display': '2' }[mod.type] || '') : '',
         name: mod.zone, plName: ld ? ld.origName : '', area, address: mod.addr || '', network: sa ? null : net, standalone: sa || undefined, psuId, fan: mod.fan ? +mod.fan : null,
         cluster: (mod.cluster || '').trim(), ma: mod.ma,

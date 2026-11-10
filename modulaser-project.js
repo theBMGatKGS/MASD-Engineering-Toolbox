@@ -1197,21 +1197,34 @@ MLP.replaceAssumedWithReal = function (designDevices, realDisplays, matchFn){
   const out = (designDevices || []).slice();
   const reals = (realDisplays || []).slice();
   const assumed = out.filter(d => MLP.isAssumedDisplay(d) && (d.type === 'Standard Display' || d.type === 'Minimum Display'));
+  const defaultMatch = function (a, pool){
+    const floor = (a.assumption && a.assumption.floor) || a.floor || '';
+    const type = a.type;
+    const ix = pool.findIndex(r => {
+      if (!r || (r.type && r.type !== type && r.type !== 'Standard Display' && r.type !== 'Minimum Display')) return false;
+      if (type && r.type && r.type !== type) return false;
+      const rf = (r.assumption && r.assumption.floor) || r.floor || r.group || r.area || '';
+      if (floor && rf && String(rf) !== String(floor)) return false;
+      return (r.type === 'Standard Display' || r.type === 'Minimum Display' || !r.type);
+    });
+    return ix >= 0 ? pool[ix] : null;
+  };
   assumed.forEach((a, i) => {
-    const real = matchFn ? matchFn(a, reals, i) : reals[i];
+    const real = matchFn ? matchFn(a, reals, i) : defaultMatch(a, reals);
     if (!real) return;
+    if (a.type && real.type && a.type !== real.type) return; // type must match
     const idx = out.indexOf(a);
     if (idx < 0) return;
     const kept = { address: a.address, cluster: a.cluster, sheetId: a.sheetId, power: a.power, network: a.network };
     const merged = Object.assign({}, real, {
-      address: real.address != null && real.address !== '' ? real.address : kept.address,
-      cluster: real.cluster != null && real.cluster !== '' ? real.cluster : kept.cluster,
+      address: real.address != null && String(real.address) !== '' ? real.address : kept.address,
+      cluster: real.cluster != null && String(real.cluster) !== '' ? real.cluster : kept.cluster,
       sheetId: kept.sheetId || real.sheetId,
       power: kept.power || real.power,
       network: kept.network != null ? kept.network : real.network,
       origin: 'pl',
       assumption: null,
-      pl: real.pl != null ? real.pl : true
+      pl: real.pl != null ? real.pl : null
     });
     out[idx] = merged;
     const ri = reals.indexOf(real); if (ri >= 0) reals.splice(ri, 1);
@@ -1258,6 +1271,14 @@ MLP.resolveTimeZone = function (project, runtimeTz){
 MLP.formatInTimeZone = function (iso, timeZone){
   try { return new Date(iso).toLocaleString('en-US', { timeZone: timeZone || 'UTC' }); }
   catch (e){ return new Date(iso).toLocaleString('en-US', { timeZone: 'UTC' }) + ' UTC'; }
+};
+
+MLP.stripAssumedDefaults = function (dev){
+  if (!dev || typeof dev !== 'object') return dev;
+  const d = Object.assign({}, dev);
+  if (d.origin === 'pl' || d.origin == null) delete d.origin;
+  if (d.assumption == null) delete d.assumption;
+  return d;
 };
 
 root.MLP = MLP;
