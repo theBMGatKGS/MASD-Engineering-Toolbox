@@ -12,6 +12,7 @@ Detectors sit 40 ft apart, so nothing clusters by the 3 ft rule; display placeme
   dup_area   two floors both named Zone Alpha (8 and 12 detectors), 0 displays      (per-floor keys inside one file)
   dup_area_v2  dup_area + a 9th detector on the first Zone Alpha                    (Check link: floor 1 SHORTAGE, not pooled)
   dup_disp   two floors both named Zone Alpha, 4 detectors + 1 Standard display each (distinct display keys)
+  dup_disp_v2  dup_disp + a 5th detector on the second Zone Alpha                  (Check link on a legacy project)
 """
 import atexit, os, shutil, tempfile
 from xml.sax.saxutils import escape
@@ -64,6 +65,7 @@ SPECS = {
     'dup_area':  [('Example Zone Alpha', 8, []), ('Example Zone Alpha', 12, [])],
     'dup_area_v2': [('Example Zone Alpha', 9, []), ('Example Zone Alpha', 12, [])],
     'dup_disp':  [('Example Zone Alpha', 4, [0]), ('Example Zone Alpha', 4, [0])],
+    'dup_disp_v2': [('Example Zone Alpha', 4, [0]), ('Example Zone Alpha', 5, [0])],
 }
 
 def write_all(folder=None):
@@ -74,7 +76,7 @@ def write_all(folder=None):
     out = {}
     for k, fl in SPECS.items():
         d = os.path.join(folder, k); os.makedirs(d, exist_ok=True)
-        name = 'Example-Display-Job.pl' if k in ('two_floor', 'v2', 'v4', 'v6') else 'Example-dup_area.pl' if k in ('dup_area', 'dup_area_v2') else f'Example-{k}.pl'
+        name = 'Example-Display-Job.pl' if k in ('two_floor', 'v2', 'v4', 'v6') else 'Example-dup_area.pl' if k in ('dup_area', 'dup_area_v2') else 'Example-dup_disp.pl' if k in ('dup_disp', 'dup_disp_v2') else f'Example-{k}.pl'
         p = os.path.join(d, name)
         with open(p, 'w') as f: f.write(pl_text(name, fl))
         out[k] = p

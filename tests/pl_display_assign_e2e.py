@@ -17,6 +17,8 @@ whitespace-only job zone is blank (L8).
 Fifth review: same-named floors are tracked separately end to end — Check link with a 9th detector on the first of two
 'Example Zone Alpha' floors is a floor-1 SHORTAGE with the Displays prompt and the detector joins a floor-1 display; two real
 displays on same-named floors get distinct keys (engine 1.3.1 / MLP 1.7.1); unique Area names keep their keys.
+Sixth review: projects saved at 855988e and at released 02.02.000 (tests/fixtures/legacy-*.mlproj.json, built by
+make_legacy_dup_fixtures.py) are re-keyed per floor on Check link, so the change gives the fresh-build result.
 Run: python3 tests/pl_display_assign_e2e.py        (APP= / RPT= / PL_FIXTURE_DIR= override the defaults)
 """
 import asyncio, json, os, sys
@@ -379,6 +381,104 @@ async def case_dup_real_displays(pg):
     pk = await pg.evaluate("[...document.querySelectorAll('[data-role=module]')].filter(r=>(r.dataset.plKey||'').includes('#disp')).map(r=>plRowArea(r, r.closest('.location')).key)")
     ok('Same-named floors: each display counts to its own floor', sorted(pk) == ['Example Zone Alpha', 'Example Zone Alpha #2'], pk)
 
+LEGACY = HERE / 'fixtures'
+
+async def open_project(pg, path):
+    await fresh(pg)
+    await pg.evaluate("([t,n])=>mlpImportProjectText(t,n)", [Path(path).read_text(), Path(path).name]); await pg.wait_for_timeout(500)
+    btn = await pg.query_selector('#plw-overlay.open button.btn-primary, .pl-aux-foot .btn-primary')
+    if btn: await btn.click(); await pg.wait_for_timeout(400)
+    await pg.evaluate("typeof closePlWizard==='function' && document.getElementById('plw-overlay').classList.contains('open') && closePlWizard()")
+
+ROWS_BY_KEY_JS = """()=>Object.fromEntries([...document.querySelectorAll('[data-role=module]')].filter(r=>r.dataset.plKey).map(r=>[r.dataset.plKey.slice(r.dataset.plKey.indexOf('|')+1),
+  [(r.querySelector('.module-address')||{}).value||'', (r.querySelector('.zone-name')||{}).value||'', (r.querySelector('.cluster-select')||{}).value||'', r.closest('.location').dataset.plSheetId||'']]))"""
+
+def design_totals(doc):
+    d = doc['design']; return [len(d['devices']), round(sum((p.get('requiredAh') or 0) for p in d['psus']), 2)]
+
+async def case_legacy_855988e(pg):
+    # QA sixth review (must-fix): a 1.7.0 project (855988e) with two 'Example Zone Alpha' floors, Check link with dup_area_v2
+    await open_project(pg, LEGACY / 'legacy-dup-area-855988e.mlproj.json')
+    before = await pg.evaluate(ROWS_BY_KEY_JS)
+    t0 = design_totals(json.loads(await export_text(pg)))
+    ok('Legacy 855988e: project opens unchanged (23 devices, 204.74 Ah; floor 2 keyed Example Zone Alpha#id2xx)', t0 == [23, 204.74] and 'Example Zone Alpha#id200' in before, [t0, list(before)[:3]])
+    await check_link(pg, F['dup_area_v2'])
+    pd = await pg.evaluate('PL_LINKS[0].pendingDiff')
+    ok('Legacy 855988e: Check link +1 added (floor 1), nothing removed or re-added', pd and pd['added'] == ['Example Zone Alpha#id108'] and not pd['removed'] and not pd['changed'], pd)
+    after = await pg.evaluate(ROWS_BY_KEY_JS)
+    f2 = [f'#id{200 + i}' for i in range(12)]
+    ok('Legacy 855988e: floor 2 rows re-keyed per floor; address, name, cluster, sheet kept', all(after.get('Example Zone Alpha #2' + k) == before.get('Example Zone Alpha' + k) for k in f2) and not any(('Example Zone Alpha' + k) in after for k in f2),
+       [(k, before.get('Example Zone Alpha' + k), after.get('Example Zone Alpha #2' + k)) for k in f2[:2]])
+    lk = await pg.evaluate("Object.keys(PL_LINKS[0].devices)")
+    ok('Legacy 855988e: link records re-keyed (12 floor-2 records, none left on the old keys)', sum(1 for k in lk if k.startswith('Example Zone Alpha #2#id')) == 12 and not any(k.startswith('Example Zone Alpha#id2') for k in lk), lk)
+    aa = await pg.evaluate("[...document.querySelectorAll('[data-role=module][data-origin=assumed]')].map(r=>[r.dataset.plKey.split(':area:')[1], plRowArea(r, r.closest('.location')).key])")
+    ok('Legacy 855988e: assumed displays count to their own floor', sorted(a[1] for a in aa) == ['Example Zone Alpha', 'Example Zone Alpha #2', 'Example Zone Alpha #2'], aa)
+    again = await pg.evaluate("t=>plMigrateLegacyKeys(PL_LINKS[0], plParse(t,'x.pl'))", Path(F['dup_area_v2']).read_text())
+    uniq = await pg.evaluate("t=>plMigrateLegacyKeys(PL_LINKS[0], plParse(t,'x.pl'))", Path(F['v2']).read_text())
+    ok('Legacy migration is idempotent and a no-op for unique Area names', again == 0 and uniq == 0, [again, uniq])
+    await pg.click('#pld-apply'); await pg.wait_for_timeout(300)
+    if await pg.locator('#plw-suggest-all').count(): await pg.click('#plw-suggest-all')
+    st = await click_next(pg)
+    fl = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>[f.area,f.nDet,f.nCluster,f.status,f.needed])")
+    ok('Legacy 855988e: per-floor prompt — floor 1 SHORTAGE 9 det / 1 cluster, needed 1', st == [4, 'gate'] and fl == [['Example Zone Alpha', 9, 1, 'needed', 1]], [st, fl])
+    await pg.click('#pl-disp-continue'); await pg.wait_for_timeout(200)
+    f1 = (await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>({k:f.floorKey,dets:f.detectors.map(d=>d.key)}))"))[0]
+    await pg.click(f'[data-assign="{f1["k"]}|new-0|{f1["dets"][0]}"] >> nth=0'); await pg.wait_for_timeout(100)
+    st = await click_next(pg)
+    if st[0] == 4 and await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await create_sheets(pg)
+    t1 = design_totals(json.loads(await export_text(pg)))
+    ok('Legacy 855988e: after the change = fresh build (25 devices, 223.28 Ah)', t1 == [25, 223.28], t1)
+    end = await pg.evaluate(ROWS_BY_KEY_JS)
+    ok('Legacy 855988e: no floor-2 address lost', all(end.get('Example Zone Alpha #2' + k, [''])[0] == before['Example Zone Alpha' + k][0] != '' for k in f2), [end.get('Example Zone Alpha #2' + k) for k in f2[:3]])
+    rd = await pg.evaluate(ROW_DISPLAY_JS, '|Example Zone Alpha#id108')
+    ok('Legacy 855988e: the new detector joins a floor-1 display', rd and rd['displays'] and all(d['area'] == 'Example Zone Alpha' for d in rd['displays']), rd)
+    await pg.evaluate('closePlWizard()')
+
+async def case_legacy_020200(pg):
+    # QA sixth review: a released 02.02.000 project (no Displays step) with the same two floors
+    await open_project(pg, LEGACY / 'legacy-dup-area-02.02.000.mlproj.json')
+    before = await pg.evaluate(ROWS_BY_KEY_JS)
+    doc0 = json.loads(await export_text(pg)); t0 = design_totals(doc0)
+    ok('Legacy 02.02.000: project opens unchanged (20 devices, 178.5 Ah)', t0 == [20, 178.5], t0)
+    await check_link(pg, F['dup_area_v2'])
+    pd = await pg.evaluate('PL_LINKS[0].pendingDiff')
+    ok('Legacy 02.02.000: Check link +1 added (floor 1), nothing removed or re-added', pd and pd['added'] == ['Example Zone Alpha#id108'] and not pd['removed'] and not pd['changed'], pd)
+    await pg.click('#pld-apply'); await pg.wait_for_timeout(300)
+    if await pg.locator('#plw-suggest-all').count(): await pg.click('#plw-suggest-all')
+    st = await click_next(pg)
+    fl = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>[f.area,f.nDet,f.nCluster,f.status,f.needed,f.floorKey])")
+    ok('Legacy 02.02.000: per-floor prompt — floor 1 only, 9 det / 0 displays, needed 2', st == [4, 'gate'] and len(fl) == 1 and fl[0][:5] == ['Example Zone Alpha', 9, 0, 'needed', 2], [st, fl])
+    await pg.click('#pl-disp-continue'); await pg.wait_for_timeout(200)
+    await pg.click(f'[data-skip="{fl[0][5]}"] >> nth=0'); await pg.wait_for_timeout(100)
+    st = await click_next(pg)
+    if st[0] == 4 and await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await pack_trays(pg)
+    await create_sheets(pg)
+    doc1 = json.loads(await export_text(pg)); t1 = design_totals(doc1)
+    old_ah = {p['id']: p.get('requiredAh') for p in doc0['design']['psus']}
+    kept = all(any(abs((q.get('requiredAh') or 0) - (a or 0)) < 0.005 and q['id'] == i for q in doc1['design']['psus']) for i, a in old_ah.items())
+    new = [p for p in doc1['design']['psus'] if p['id'] not in old_ah]
+    ok('Legacy 02.02.000: 21 devices; the 5 old supplies keep their Ah, one new supply for the new detector', t1[0] == 21 and kept and len(new) == 1 and abs(t1[1] - (178.5 + (new[0].get('requiredAh') or 0))) < 0.01, [t1, len(new), kept])
+    end = await pg.evaluate(ROWS_BY_KEY_JS)
+    f2 = [f'#id{200 + i}' for i in range(12)]
+    ok('Legacy 02.02.000: floor-2 addresses 9–20, names and clusters kept on the re-keyed rows', all(end.get('Example Zone Alpha #2' + k, [None])[:3] == before['Example Zone Alpha' + k][:3] for k in f2) and sorted(int(end['Example Zone Alpha #2' + k][0]) for k in f2) == list(range(9, 21)),
+       [end.get('Example Zone Alpha #2' + k) for k in f2[:2]])
+    await pg.evaluate('closePlWizard()')
+
+async def case_legacy_dup_displays(pg):
+    # Older files stored both floors' displays as 'Example Zone Alpha#disp0' (one link record): mapped by the sheet's floor
+    await open_project(pg, LEGACY / 'legacy-dup-disp-02.02.000.mlproj.json')
+    before = await pg.evaluate("[...document.querySelectorAll('[data-role=module]')].filter(r=>(r.dataset.plKey||'').includes('#disp')).map(r=>[r.dataset.plKey.split('|')[1], (r.querySelector('.module-address')||{}).value, (r.querySelector('.zone-name')||{}).value])")
+    ok('Legacy 02.02.000 displays: both rows share one key before Check link', [b[0] for b in before] == ['Example Zone Alpha#disp0'] * 2, before)
+    await check_link(pg, F['dup_disp_v2'])
+    pd = await pg.evaluate('PL_LINKS[0].pendingDiff')
+    ok('Legacy 02.02.000 displays: Check link +1 added (floor 2), nothing removed or re-added', pd and pd['added'] == ['Example Zone Alpha #2#id204'] and not pd['removed'] and not pd['changed'], pd)
+    after = await pg.evaluate("[...document.querySelectorAll('[data-role=module]')].filter(r=>(r.dataset.plKey||'').includes('#disp')).map(r=>[r.dataset.plKey.split('|')[1], (r.querySelector('.module-address')||{}).value, (r.querySelector('.zone-name')||{}).value])")
+    lk = await pg.evaluate("Object.keys(PL_LINKS[0].devices).filter(k=>k.includes('#disp')).sort()")
+    ok('Legacy 02.02.000 displays: each floor\'s display gets its own key and link record; address and name kept', [a[0] for a in after] == ['Example Zone Alpha#disp0', 'Example Zone Alpha #2#disp0'] and [a[1:] for a in after] == [b[1:] for b in before] and lk == ['Example Zone Alpha #2#disp0', 'Example Zone Alpha#disp0'], [after, lk])
+    await pg.evaluate('closePlWizard()')
+
 async def case_standalone_after_command(pg):
     # QA limit (b) safety net: Command accepted on Networked, then every sheet made Standalone
     await fresh(pg)
@@ -556,6 +656,9 @@ async def main():
         await case_dup_area(pg)
         await case_dup_area_check_link(pg)
         await case_dup_real_displays(pg)
+        await case_legacy_855988e(pg)
+        await case_legacy_020200(pg)
+        await case_legacy_dup_displays(pg)
         await case_standalone_after_command(pg)
         await case_skip_key(pg)
         await case_unique_names(pg)

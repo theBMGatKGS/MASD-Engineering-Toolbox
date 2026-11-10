@@ -9,7 +9,11 @@ import os as _os, tempfile as _tf
 MLP_OUT=_os.environ.get('MLP_TEST_OUT') or _tf.mkdtemp(prefix='mlp-test-')   # all generated output goes here (QA r3)
 def _od(*p):
     d=_os.path.join(MLP_OUT,*p); _os.makedirs(d,exist_ok=True); return d.rstrip('/')+'/'
-TBDIR=os.environ['TOOLBOX_DIR'].rstrip('/'); URL='file://'+TBDIR+'/index.html'; SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
+TBDIR=os.environ['TOOLBOX_DIR'].rstrip('/'); URL='file://'+TBDIR+'/index.html';
+# QA sixth review: test the commit under test, like mlp_sync_test — the engine reference defaults to this Toolbox's own
+# masd-engine.js and the Calculator to the sibling checkout; set ENGINE_SRC / CALC_DIR to point elsewhere.
+ENGINE_SRC=os.environ.get('ENGINE_SRC', os.path.join(TBDIR, 'masd-engine.js')); CALC_DIR=os.environ.get('CALC_DIR', os.path.join(os.path.dirname(TBDIR), 'ModuLaser-Battery-Calculator'))
+SH=_od('toolbox-shots'); OUT=_od('tb-out-tb')
 os.makedirs(SH,exist_ok=True); os.makedirs(OUT,exist_ok=True)
 FX='/workspace/tb/legacy/fixtures/'; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import make_synthetic_pl; PL=sorted(make_synthetic_pl.ensure_all(os.environ.get('SYNTH_DIR', '/workspace/plbuild/synth')).values())
 R=[]
@@ -25,8 +29,8 @@ async def main():
     info=await pg.evaluate('[runningRevisionFull(), MASD_ENGINE_VERSION, MLP.VERSION, document.querySelector("#about-amendments-body")!=null]')
     chk('revision 00.03.002, engine 1.3.1, MLP 1.7.1', info[0]=='00.03.002_261109' and info[1]=='1.3.1' and info[2]=='1.7.1', info)
     eng=await pg.evaluate('document.getElementById("masd-engine").textContent')
-    chk('engine block byte-identical to masd-engine.js', eng.strip()==open('/workspace/tb/engine/masd-engine.js').read().strip())
-    calc=open('/workspace/ModuLaser-Battery-Calculator/modulaser_battery_calculator.html').read()
+    chk('engine block byte-identical to masd-engine.js', eng.strip()==open(ENGINE_SRC).read().strip())
+    calc=open(os.path.join(CALC_DIR,'modulaser_battery_calculator.html')).read()
     chk('engine identical to calculator', eng.strip() in calc)
     chk('no CDN references', 'fonts.googleapis' not in open(TBDIR+'/index.html').read())
     # ---- modes

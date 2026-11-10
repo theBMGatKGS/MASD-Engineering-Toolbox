@@ -1,0 +1,1165 @@
+{
+ "format": "modulaser-project",
+ "schemaVersion": 1,
+ "savedAt": "2026-11-10T13:33:00.903Z",
+ "savedBy": {
+  "app": "ModuLaser Battery Calculator",
+  "rev": "02.02.000_261019",
+  "name": "Example Engineer"
+ },
+ "project": {
+  "location": "",
+  "designer": "",
+  "company": "",
+  "name": "Example Display Job",
+  "preparedBy": "Example Engineer",
+  "date": "2026-11-10",
+  "networkNumber": "",
+  "building": ""
+ },
+ "design": {
+  "owner": "battery-calculator",
+  "rev": "02.02.000_261019",
+  "engine": "1.2.0",
+  "updatedAt": "2026-11-10T13:33:00.902Z",
+  "plLinks": [
+   {
+    "id": "pl-e0b201309e28-0",
+    "name": "Example-dup_disp.pl",
+    "sha256": "e0b201309e282bdb7d274e28bb9fed011ecad12aac7a79c085acf927d6a311e9",
+    "size": 3155,
+    "lastModified": 1794317568677,
+    "version": "",
+    "unit": "Imperial (ft)",
+    "project": "Example Display Job",
+    "groups": [
+     "Example Zone Alpha"
+    ],
+    "importedAt": "2026-11-10T13:32:59.561Z",
+    "placement": [
+     {
+      "area": "Example Zone Alpha",
+      "psus": [],
+      "batteries": []
+     },
+     {
+      "area": "Example Zone Alpha",
+      "psus": [],
+      "batteries": []
+     }
+    ]
+   }
+  ],
+  "areas": [
+   "Example Zone Alpha"
+  ],
+  "psus": [
+   {
+    "id": "pls-mwaqcx7t-1",
+    "sheet": 1,
+    "name": "PS-1",
+    "area": "Example Zone Alpha",
+    "location": "Example Zone Alpha",
+    "model": "BPS6A",
+    "enclosure": "3-RCC7R",
+    "battery": {
+     "model": "12V50A (50 Ah)",
+     "ah": 50,
+     "qty": 2,
+     "part": "12V50A"
+    },
+    "requiredAh": 43.74,
+    "standbyHours": 24,
+    "alarmMinutes": 5,
+    "designBasis": "NFPA 72 Standard",
+    "totalMa": 1453,
+    "status": "PASS",
+    "flags": []
+   },
+   {
+    "id": "pls-mwaqcx7x-2",
+    "sheet": 2,
+    "name": "PS-2",
+    "area": "Example Zone Alpha",
+    "location": "Example Zone Alpha",
+    "model": "BPS6A",
+    "enclosure": "3-RCC7R",
+    "battery": {
+     "model": "12V50A (50 Ah)",
+     "ah": 50,
+     "qty": 2,
+     "part": "12V50A"
+    },
+    "requiredAh": 43.74,
+    "standbyHours": 24,
+    "alarmMinutes": 5,
+    "designBasis": "NFPA 72 Standard",
+    "totalMa": 1453,
+    "status": "PASS",
+    "flags": []
+   }
+  ],
+  "devices": [
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#disp0",
+    "kind": "display",
+    "type": "Standard Display",
+    "model": "FHSD8310-ULF",
+    "partNumber": "0",
+    "name": "EDJ-EZA-DSP1",
+    "plName": "Standard Display 1",
+    "area": "Example Zone Alpha",
+    "address": "1",
+    "network": 1,
+    "psuId": "pls-mwaqcx7t-1",
+    "fan": null,
+    "cluster": "01",
+    "ma": 232,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#disp0",
+     "fp": "03f27302"
+    },
+    "pipe": null
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id100",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "EDJ-EZA-D1",
+    "plName": "Det 01",
+    "area": "Example Zone Alpha",
+    "address": "2",
+    "network": 1,
+    "psuId": "pls-mwaqcx7t-1",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id100",
+     "fp": "3ef00384"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id101",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "EDJ-EZA-D2",
+    "plName": "Det 02",
+    "area": "Example Zone Alpha",
+    "address": "3",
+    "network": 1,
+    "psuId": "pls-mwaqcx7t-1",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id101",
+     "fp": "42e4da07"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id102",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "EDJ-EZA-D3",
+    "plName": "Det 03",
+    "area": "Example Zone Alpha",
+    "address": "4",
+    "network": 1,
+    "psuId": "pls-mwaqcx7t-1",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id102",
+     "fp": "82cc37d1"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id103",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "EDJ-EZA-D4",
+    "plName": "Det 04",
+    "area": "Example Zone Alpha",
+    "address": "5",
+    "network": 1,
+    "psuId": "pls-mwaqcx7t-1",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id103",
+     "fp": "6c456e64"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#disp0",
+    "kind": "display",
+    "type": "Standard Display",
+    "model": "FHSD8310-ULF",
+    "partNumber": "0",
+    "name": "ALPHB-DSP1",
+    "plName": "Standard Display 1",
+    "area": "Example Zone Alpha",
+    "address": "6",
+    "network": 1,
+    "psuId": "pls-mwaqcx7x-2",
+    "fan": null,
+    "cluster": "01",
+    "ma": 232,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#disp0",
+     "fp": "03f27302"
+    },
+    "pipe": null
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id200",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "ALPHB-D1",
+    "plName": "Det 01",
+    "area": "Example Zone Alpha",
+    "address": "7",
+    "network": 1,
+    "psuId": "pls-mwaqcx7x-2",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id200",
+     "fp": "7863fcab"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id201",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "ALPHB-D2",
+    "plName": "Det 02",
+    "area": "Example Zone Alpha",
+    "address": "8",
+    "network": 1,
+    "psuId": "pls-mwaqcx7x-2",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id201",
+     "fp": "76206f1c"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id202",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "ALPHB-D3",
+    "plName": "Det 03",
+    "area": "Example Zone Alpha",
+    "address": "9",
+    "network": 1,
+    "psuId": "pls-mwaqcx7x-2",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id202",
+     "fp": "7cbdaacc"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-e0b201309e28-0|Example Zone Alpha#id203",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "ALPHB-D4",
+    "plName": "Det 04",
+    "area": "Example Zone Alpha",
+    "address": "10",
+    "network": 1,
+    "psuId": "pls-mwaqcx7x-2",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-e0b201309e28-0",
+     "file": "Example-dup_disp.pl",
+     "key": "Example Zone Alpha#id203",
+     "fp": "7a57fcf5"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": null,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   }
+  ],
+  "calc": {
+   "state": {
+    "version": 1,
+    "autosaveActivated": false,
+    "autosaveEnabled": false,
+    "projectName": "Example Display Job",
+    "preparedBy": "Example Engineer",
+    "projectDate": "2026-11-10",
+    "networkNumber": "",
+    "building": "",
+    "primaryCdmLocation": "",
+    "backupCdmLocation": "",
+    "printBom": true,
+    "locations": [
+     {
+      "name": "Example Display Job \u00b7 Example-dup_disp.pl",
+      "psName": "PS-1",
+      "psLocation": "Example Zone Alpha",
+      "psCapacity": "6",
+      "batteryCabinet": "edwards",
+      "ribbonAssignMode": "auto",
+      "autoBatteryMode": "auto",
+      "tpAutoBatteryMode": "off",
+      "standbyHours": "24",
+      "alarmMinutes": "5",
+      "designBasis": "NFPA 72 Standard",
+      "temperature": "77",
+      "nfpa72Edition": "2022plus",
+      "derating": "1.75",
+      "showCalcDetail": false,
+      "addrScheme": "networked",
+      "senseNet": 1,
+      "mode": "builtin",
+      "submode": "custom",
+      "customQuiescent": "70",
+      "customAuxMa": "35",
+      "tpSupplyMakeModel": "",
+      "auxCircuits": "1",
+      "auxCircuitsCustom": "1",
+      "margin": "0.25",
+      "batterySize": "50",
+      "batterySizeCustom": "40",
+      "tpBatteryModel": "",
+      "tpBatteryAh": "40",
+      "tpBatteryVoltage": "12",
+      "exportMargin": "0.25",
+      "exportChargerAh": "65",
+      "modules": [
+       {
+        "type": "Standard Display",
+        "zone": "EDJ-EZA-DSP1",
+        "address": "1",
+        "fan": "",
+        "cluster": "1",
+        "power": "own",
+        "circuitSource": "PS-1 AUX-1",
+        "auxCircuitNum": "1",
+        "rowId": "mod-1-1",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#disp0"
+       },
+       {
+        "type": "Detector",
+        "zone": "EDJ-EZA-D1",
+        "address": "2",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-2",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id100"
+       },
+       {
+        "type": "Detector",
+        "zone": "EDJ-EZA-D2",
+        "address": "3",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-3",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id101"
+       },
+       {
+        "type": "Detector",
+        "zone": "EDJ-EZA-D3",
+        "address": "4",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-4",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id102"
+       },
+       {
+        "type": "Detector",
+        "zone": "EDJ-EZA-D4",
+        "address": "5",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-5",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id103"
+       }
+      ],
+      "plSheetId": "pls-mwaqcx7t-1"
+     },
+     {
+      "name": "Example Display Job \u00b7 Example-dup_disp.pl",
+      "psName": "PS-2",
+      "psLocation": "Example Zone Alpha",
+      "psCapacity": "6",
+      "batteryCabinet": "edwards",
+      "ribbonAssignMode": "auto",
+      "autoBatteryMode": "auto",
+      "tpAutoBatteryMode": "off",
+      "standbyHours": "24",
+      "alarmMinutes": "5",
+      "designBasis": "NFPA 72 Standard",
+      "temperature": "77",
+      "nfpa72Edition": "2022plus",
+      "derating": "1.75",
+      "showCalcDetail": false,
+      "addrScheme": "networked",
+      "senseNet": 1,
+      "mode": "builtin",
+      "submode": "custom",
+      "customQuiescent": "70",
+      "customAuxMa": "35",
+      "tpSupplyMakeModel": "",
+      "auxCircuits": "1",
+      "auxCircuitsCustom": "1",
+      "margin": "0.25",
+      "batterySize": "50",
+      "batterySizeCustom": "40",
+      "tpBatteryModel": "",
+      "tpBatteryAh": "40",
+      "tpBatteryVoltage": "12",
+      "exportMargin": "0.25",
+      "exportChargerAh": "65",
+      "modules": [
+       {
+        "type": "Standard Display",
+        "zone": "ALPHB-DSP1",
+        "address": "6",
+        "fan": "",
+        "cluster": "1",
+        "power": "own",
+        "circuitSource": "PS-2 AUX-1",
+        "auxCircuitNum": "1",
+        "rowId": "mod-2-1",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#disp0"
+       },
+       {
+        "type": "Detector",
+        "zone": "ALPHB-D1",
+        "address": "7",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-2-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-2-2",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id200"
+       },
+       {
+        "type": "Detector",
+        "zone": "ALPHB-D2",
+        "address": "8",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-2-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-2-3",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id201"
+       },
+       {
+        "type": "Detector",
+        "zone": "ALPHB-D3",
+        "address": "9",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-2-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-2-4",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id202"
+       },
+       {
+        "type": "Detector",
+        "zone": "ALPHB-D4",
+        "address": "10",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-2-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-2-5",
+        "plKey": "pl-e0b201309e28-0|Example Zone Alpha#id203"
+       }
+      ],
+      "plSheetId": "pls-mwaqcx7x-2"
+     }
+    ],
+    "addrLog": [
+     {
+      "at": "2026-11-10T13:33:00.614Z",
+      "by": "Example Engineer",
+      "action": "Auto-address entire project (after .pl import)",
+      "modeFrom": "networked",
+      "modeTo": "networked",
+      "rows": [
+       {
+        "sheet": "2",
+        "ps": "PS-1",
+        "row": 1,
+        "zone": "EDJ-EZA-DSP1",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "1",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "2",
+        "ps": "PS-1",
+        "row": 2,
+        "zone": "EDJ-EZA-D1",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "2",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "2",
+        "ps": "PS-1",
+        "row": 3,
+        "zone": "EDJ-EZA-D2",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "3",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "2",
+        "ps": "PS-1",
+        "row": 4,
+        "zone": "EDJ-EZA-D3",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "4",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "2",
+        "ps": "PS-1",
+        "row": 5,
+        "zone": "EDJ-EZA-D4",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "5",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "3",
+        "ps": "PS-2",
+        "row": 1,
+        "zone": "ALPHB-DSP1",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "6",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "3",
+        "ps": "PS-2",
+        "row": 2,
+        "zone": "ALPHB-D1",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "7",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "3",
+        "ps": "PS-2",
+        "row": 3,
+        "zone": "ALPHB-D2",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "8",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "3",
+        "ps": "PS-2",
+        "row": 4,
+        "zone": "ALPHB-D3",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "9",
+         "net": 1,
+         "scheme": "networked"
+        }
+       },
+       {
+        "sheet": "3",
+        "ps": "PS-2",
+        "row": 5,
+        "zone": "ALPHB-D4",
+        "before": {
+         "addr": "",
+         "net": 1,
+         "scheme": "networked"
+        },
+        "after": {
+         "addr": "10",
+         "net": 1,
+         "scheme": "networked"
+        }
+       }
+      ]
+     }
+    ],
+    "plLinks": [
+     {
+      "id": "pl-e0b201309e28-0",
+      "name": "Example-dup_disp.pl",
+      "path": "",
+      "size": 3155,
+      "lastModified": 1794317568677,
+      "sha256": "e0b201309e282bdb7d274e28bb9fed011ecad12aac7a79c085acf927d6a311e9",
+      "project": "Example Display Job",
+      "unit": "Imperial (ft)",
+      "importedAt": "2026-11-10T13:32:59.561Z",
+      "groups": [
+       "Example Zone Alpha"
+      ],
+      "devices": {
+       "Example Zone Alpha#disp0": {
+        "fp": "03f27302",
+        "kind": "display",
+        "origName": "Standard Display 1",
+        "type": "Standard Display",
+        "fan": null,
+        "zone": "ALPHB-DSP1",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7x-2"
+       },
+       "Example Zone Alpha#id100": {
+        "fp": "3ef00384",
+        "kind": "detector",
+        "origName": "Det 01",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "EDJ-EZA-D1",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7t-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Example Zone Alpha#id101": {
+        "fp": "42e4da07",
+        "kind": "detector",
+        "origName": "Det 02",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "EDJ-EZA-D2",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7t-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Example Zone Alpha#id102": {
+        "fp": "82cc37d1",
+        "kind": "detector",
+        "origName": "Det 03",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "EDJ-EZA-D3",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7t-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Example Zone Alpha#id103": {
+        "fp": "6c456e64",
+        "kind": "detector",
+        "origName": "Det 04",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "EDJ-EZA-D4",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7t-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Example Zone Alpha#id200": {
+        "fp": "7863fcab",
+        "kind": "detector",
+        "origName": "Det 01",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "ALPHB-D1",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7x-2",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Example Zone Alpha#id201": {
+        "fp": "76206f1c",
+        "kind": "detector",
+        "origName": "Det 02",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "ALPHB-D2",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7x-2",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Example Zone Alpha#id202": {
+        "fp": "7cbdaacc",
+        "kind": "detector",
+        "origName": "Det 03",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "ALPHB-D3",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7x-2",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Example Zone Alpha#id203": {
+        "fp": "7a57fcf5",
+        "kind": "detector",
+        "origName": "Det 04",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "ALPHB-D4",
+        "group": "Example Zone Alpha",
+        "sheetId": "pls-mwaqcx7x-2",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": null,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       }
+      },
+      "placement": [
+       {
+        "area": "Example Zone Alpha",
+        "psus": [],
+        "batteries": []
+       },
+       {
+        "area": "Example Zone Alpha",
+        "psus": [],
+        "batteries": []
+       }
+      ],
+      "meta": {
+       "name": "Example Display Job",
+       "location": "Example Display Job",
+       "designer": "Example Engineer",
+       "company": "Example Co."
+      },
+      "pipeType": {
+       "innerDiameter": null,
+       "outerDiameter": null,
+       "material": ""
+      }
+     }
+    ]
+   }
+  },
+  "hash": "sha256:0707063e8eb28a89cc14acf67dd02bfd21165031733f84fce76df77d59f212af",
+  "id": "032084e2"
+ },
+ "site": null,
+ "changes": [],
+ "approvals": {}
+}

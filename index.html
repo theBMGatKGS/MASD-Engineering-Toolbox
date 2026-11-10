@@ -2786,7 +2786,7 @@ const AMENDMENTS = [
   { rev: "000", major: "00", minor: "02", date: "261016", desc: "Harmonized with Battery Calculator 02.01.000 (Brent 10-16): <b>MiniLaser ASD (FHSD8075-ULF)</b> — Standalone ASDs table on each sheet (never addressed), dedicated AUX circuit per MiniLaser (35 mA overhead, 3.0 A limit; overflow recommends another power supply), I/O Expansion Modules 9-30521 0–2 with the 9-30520 housing added automatically, Pre-engineered picker (manual Tables 13–31) or Manual config, .pl SOLO import with alarm-factor derivation and DIP/Remote advice. <b>Config mode</b>: MiniLaser devices with R1 Fault relay (fixed, fail-safe), R2 Relay output 1 (Prealarm), R3 Relay output 2 (Fire Alarm), IN1 supervised input, expansion X1/X2 OUT1–5 and IN1–2; application (Table 35), alarm delay and flow-fault level/delay start blank; flow fault 40% on a UL/FM application warns. masd-engine.js 1.1.0, modulaser-project.js 1.5.1. <b>Arrangement with 2+ clusters (Brent 9:02 PM):</b> the disparate-clusters warning does not withhold the Recommended Power Supply Arrangement any more. The warning stays and the arrangement card shows alongside it. Final (Brent): it is a warning only — the sheet can pass and nothing is withheld (no “Recommendation withheld” banner; BOM and export shown). On Edwards A/BPS it never fires (AUX is unique per entry point; the unreachable shared-pathway check was removed). <b>QA delta:</b> MiniLaser manual p.66 pipe limits enforced (holes per class, pipe length, first hole when known); Current Draw Reference xlsx has an explicit black font. <b>Final:</b> the Disparate-clusters message is a warning only (the sheet can pass, nothing is withheld; never on Edwards A/BPS); modulaser-project.js 1.5.1. Side panel: validation flags are styled apart from the amber warning, and warnings are not counted; offline cache masd-toolbox-00-02-000-r2." },
   { rev: "000", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.000. <b>Brand selector (Edwards | Kidde Commercial)</b> — project-level, first in Project information; part numbers, supply labels, BOM, logos and report titles follow the brand; the remembered default seeds new projects. Per-sheet supply <b>variant</b> (120 V / 220–230 V / ULC), tamper and seismic accessories, and <b>FACU powers these ASDs</b> with a power-source prompt (in-house / third-party / unidentified; unidentified makes the sheet Incomplete). <b>ASD-160 (Micra25 / Senator 25)</b> rows in the ASD table: 250 mA, dedicated AUX circuit, networked address 1–127, PipeCAD .pl import (MICRA25), Remote configuration, UL/non-UL alarm-factor rules (1.28 cap on UL SFD/OAP, R-AF7). Battery 12V6A5 (7.2 Ah) is manual-only with a too-small advisory. AUX/ribbon rules: max 4 AUX per power supply; each ribbon run holds max 4 detectors + 1 display; a detector-started run counts that detector; hybrid clusters may have any number of runs; own-AUX modules are not runs. Help revised with current screenshots; new printable Quick Start (Help ▸ Print Quick Start). MLP 1.6.0, engine 1.2.0. Config: ASD-160 branch — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers. Report band: brand logo and brand label; Excel report header gets a Brand row (no fills). Quick Start one-pager (quickstart.html) and in-app Toolbox Quick Start carry current screenshots. `tools/build.py` is marked retired (index.html is the source of truth); `src/toolbox.js` and `src/tb-asd160.js` are exact copies of the inline blocks (tested). Manual battery or capacity pick turns Auto Battery Sizing off (with a toast); the controls stay selectable in Auto. Networked ASD-160s count toward the 127-module SenseNET limit and share the network's addresses (duplicates flagged). Unidentified power source → ⚠ Incomplete everywhere: sheet status and amber dot, side panel, print stamp and project file; the Report adds a blank “Power source identified” item to every power supply sheet and an amber banner. A manual alarm factor on an ASD-160 row is what gets validated (\"alarm factor N … exceeds … — lower the alarm factor\"). Excel Detail sheet: Brand row under Project (no fills). Brand logo in the KGS print band (PDF / HTML / print preview)." },
   { rev: "001", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.001 (Brent 10-19 5:56 PM). <b>Printed Quick Start</b> (Help ▸ Print Quick Start): larger white brand logo (Edwards or Kidde Commercial) in the header with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages. No battery-calculation change (MLP 1.6.3, engine 1.2.0). Printed Quick Start Step 1 is a full-width row (Brent 6:28 PM); Calculator lineage reads 02.02.001 in About, README, Help and the Quick Start. Every printed step is a full-width row with its screenshot on the right (Brent 7:07 PM); step numbers run continuously across pages; Step 3 sub-steps lettered a, b, c. Printed Toolbox Quick Start screenshots (Config, Battery calc) re-captured at 2× with tighter crops at full image width so they are legible (≤ 1.9 source px per print px); Toolbox print pages are now steps 1–2 and 3–5 (still 2 pages). <b>SFD/OAP design target</b> (Brent 2026-10-20 6:39–6:49 AM CT: “SFD/OAP for Engineering Toolbox must be revised from 2.5% obs/ft to 2.0% obs/ft. Make this the target for any UL-driven SFD or OAP requirement. FM and other non-UL targets can remain at 2.5% obs/ft. Allow toolbox a means of adjusting the default % obs/ft to different values for SFD for baseline configurations that apply project-wide but remain within the published limits of the respective detector.” · “UL limit is 1.71% to 2.18%. Target 2.0% for practical purposes.” · “Adjustable for FM too.” · “Allow per-Area/Group overrides too.” · “Yes, for projects requiring UL compliance. All others can remain at 2.5% by default.” · “Reject it with a message.” · “Yes, require a reference and initials.” · “Fold it into 02.02.001.”): the SFD/OAP design target is 2.0 %obs/ft for UL-driven scopes and 2.5 %obs/ft for FM and other standards; adjustable project-wide and per Area/Group (UL and FM), within each detector's published limits (UL: ModuLaser and MiniLaser 1.70–2.18; FM: ModuLaser and MiniLaser ≤2.50, ASD-160 ≤3.5; the ASD-160 UL 1.28 cap always governs). Out-of-range or non-numeric entries are rejected with a message, never clamped; a non-default target needs a reference and the engineer's initials. On UL scopes the SFD Fire 1 seed follows the target; otherwise it stays 2.5. Pass/fail is unchanged (UL Open Area 1.70–2.18 %obs/ft, ≤43 s; FM 3230 ≤2.50, ≤120 s). Older projects adopt the default with a one-time notice. modulaser-project.js 1.6.1. Then (Brent 2026-10-20 7:09 AM CT): “Keep 1.70, per the manual” (UL lower limit unchanged) and “Yes, follow the target”: the MiniLaser alarm-factor rule for SFD and OAP now uses the scope's SFD/OAP target (Area/Group override → project → default; UL default 2.0, FM default 2.5) instead of a fixed 2.18 (OAP) / 2.0 (SFD). FM targets accepted up to 2.50 inclusive. modulaser-project.js 1.6.2. QA SFD/OAP delta: a stored out-of-range target (hand-edited or imported) stays flagged and blocks export, but the Fire 1 seed and the MiniLaser alarm factor use the nearest published limit instead; the one-time notice also shows in the Calculator and the Report; the Report validates the target against the linked design's device kinds (an FM project with only ASD-160s may use up to 3.5 without a false deficiency). modulaser-project.js 1.6.3." },
-  { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.1, MASD engine 1.3.1 (same-named floors keyed ‘ #2’, ‘ #3’…; unique names unchanged); wizard region parity." }
+  { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.1, MASD engine 1.3.1 (same-named floors keyed ‘ #2’, ‘ #3’…; unique names unchanged; older projects re-keyed per floor on Check link, configuration and logged changes follow); wizard region parity." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -9368,6 +9368,103 @@ function plDiff(link, parsed){
   const repKeys = new Set(replaced.map(r => r.realKey));
   return { added: added.filter(a => !repKeys.has(a.d.key)), removed, changed, replaced };
 }
+/* QA sixth review: projects saved before engine 1.3.1 / MLP 1.7.1 (02.02.000 – 855988e) keyed every floor of an Area/Group
+   name repeated in one .pl as `<Area>#…`; the new parse keys the 2nd, 3rd… floor `<Area> #2#…`. Before Check link diffs,
+   re-key those rows and link records to the new per-floor keys: detectors by their PipeCAD id (unique per file; else by
+   fingerprint, else by the floor the row's sheet belongs to), displays by the sheet's floor, else by order within the
+   same-named floors. Assumed-display areas, Toolbox configuration and logged changes follow. Addresses, names, clusters
+   and edits stay on the rows. Idempotent; a file whose Area names are unique is left untouched. Returns the keys moved. */
+function plMigrateLegacyKeys(link, parsed){
+  if (!link || !parsed || !Array.isArray(parsed.groups)) return 0;
+  const byName = {};
+  parsed.groups.forEach(g => { const nm = g.origName || g.name || ''; (byName[nm] = byName[nm] || []).push(g); });
+  const names = Object.keys(byName).filter(nm => byName[nm].length > 1).sort((a, b) => b.length - a.length);
+  if (!names.length) return 0;
+  const pre = link.id + '|';
+  const ak = g => g.areaKey || g.origName || g.name || '';
+  const devsOf = g => (g.detectors || []).concat(g.miniLasers || [], g.displays || []);
+  const legacyName = k => names.find(nm => k.startsWith(nm + '#')) || null;
+  const ownersOf = (nm, sfx) => byName[nm].map(g => ({ g, d: devsOf(g).find(d => d.key === ak(g) + sfx) })).filter(o => o.d);
+  const recs = link.devices || (link.devices = {});
+  const rows = Array.from(document.querySelectorAll('.location [data-role="module"]')).filter(r => (r.dataset.plKey || '').startsWith(pre));
+  const sheetOf = r => { const l = r.closest('.location'); return l ? (l.dataset.plSheetId || l.getAttribute('data-loc') || '') : ''; };
+  const vote = {}, plan = [], pending = [];
+  rows.forEach(r => {
+    const k = r.dataset.plKey.slice(pre.length);
+    if (k.startsWith('assumed:')) return;
+    const nm = legacyName(k); if (!nm) return;
+    const sfx = k.slice(nm.length), own = ownersOf(nm, sfx);
+    if (own.length === 1){
+      plan.push({ r, k, nk: ak(own[0].g) + sfx, d: own[0].d, nm });
+      if (own[0].d.kind !== 'display'){ const s = sheetOf(r); vote[s] = vote[s] || {}; vote[s][ak(own[0].g)] = (vote[s][ak(own[0].g)] || 0) + 1; }
+    } else if (own.length > 1) pending.push({ r, k, sfx, own, nm });
+  });
+  const used = {};
+  pending.forEach(p => {
+    const u = used[p.k] = used[p.k] || new Set();
+    const rec = recs[p.k];
+    const v = vote[sheetOf(p.r)] || {};
+    const byVote = p.own.filter(o => !u.has(ak(o.g))).sort((a, b) => (v[ak(b.g)] || 0) - (v[ak(a.g)] || 0))[0];
+    let pick = (byVote && (v[ak(byVote.g)] || 0) > 0) ? byVote : null;
+    if (!pick && p.own.filter(o => !u.has(ak(o.g))).length && rec && p.r.dataset.plKey && p.own.some(o => o.d.fp === rec.fp && !u.has(ak(o.g)))) pick = p.own.find(o => o.d.fp === rec.fp && !u.has(ak(o.g)));
+    if (!pick) pick = p.own.find(o => !u.has(ak(o.g))) || p.own[0];
+    u.add(ak(pick.g));
+    plan.push({ r: p.r, k: p.k, nk: ak(pick.g) + p.sfx, d: pick.d, nm: p.nm, shared: true });
+  });
+  // link records: a key held by one row moves with it; a key two rows shared (older files kept one record) goes to the
+  // row whose new device has the record's fingerprint, and the other row gets a record from the new parse
+  const byOld = {};
+  plan.forEach(p => { (byOld[p.k] = byOld[p.k] || []).push(p); });
+  let moved = 0;
+  const idMap = {};
+  Object.entries(byOld).forEach(([k, ps]) => {
+    const rec = recs[k];
+    const owner = rec ? (ps.find(p => p.d.fp === rec.fp) || ps.find(p => p.nk === k) || ps[0]) : null;
+    const next = {};
+    ps.forEach(p => {
+      const zone = (p.r.querySelector('.zone-name') || {}).value || '';
+      next[p.nk] = (p === owner) ? rec : (recs[p.nk] && p.nk !== k ? recs[p.nk] : { fp: p.d.fp, kind: p.d.kind, origName: p.d.origName, type: p.d.type, fan: p.d.fan == null ? null : p.d.fan,
+        zone, group: p.nm, sheetId: sheetOf(p.r) });
+      if (p.nk !== k){ p.r.dataset.plKey = pre + p.nk; moved++; if (ps.length === 1) idMap[pre + k] = pre + p.nk; }
+    });
+    if (!ps.some(p => p.nk === k)) delete recs[k];
+    Object.entries(next).forEach(([nk, r]) => { if (r) recs[nk] = r; });
+  });
+  // records whose row is gone: move by id when one same-named floor owns it
+  Object.keys(recs).forEach(k => {
+    if (byOld[k] || k.startsWith('assumed:')) return;
+    const nm = legacyName(k); if (!nm) return;
+    const own = ownersOf(nm, k.slice(nm.length));
+    if (own.length === 1){ const nk = ak(own[0].g) + k.slice(nm.length); if (nk !== k && !recs[nk]){ recs[nk] = recs[k]; delete recs[k]; idMap[pre + k] = pre + nk; moved++; } }
+  });
+  // assumed displays: the floor is in their key (…:area:<Area> #2:<bucket>); the area recorded before 1.3.1 was the bare name
+  const fixA = (key, a) => {
+    if (!a || !names.includes(a.area)) return false;
+    const i = key.indexOf(':area:'), j = key.lastIndexOf(':');
+    const fk = i >= 0 && j > i + 6 ? key.slice(i + 6, j) : '';
+    if (!fk || fk === a.area || !byName[a.area].some(g => ak(g) === fk)) return false;
+    a.area = fk; return true;
+  };
+  rows.forEach(r => {
+    const k = r.dataset.plKey.slice(pre.length);
+    if (!k.startsWith('assumed:') || !r.dataset.assumption) return;
+    try { const a = JSON.parse(r.dataset.assumption); if (fixA(k, a)){ r.dataset.assumption = JSON.stringify(a); moved++; } } catch (e){}
+  });
+  Object.entries(link.assumedDisplays || {}).forEach(([k, rec]) => { if (rec && fixA(k, rec.assumption)) moved++; });
+  // Toolbox configuration and logged field changes follow a device id that moved
+  try {
+    const carry = (typeof MLP_CARRY !== 'undefined' && MLP_CARRY) || null;
+    if (carry){
+      const cfg = carry.config || null;
+      Object.entries(idMap).forEach(([o, n]) => {
+        if (cfg && cfg[o] && !cfg[n]){ cfg[n] = cfg[o]; delete cfg[o]; }
+        (carry.changes || []).forEach(c => { if (c && c.dev === o) c.dev = n; });
+      });
+    }
+  } catch (e){}
+  if (moved){ link.keysMigrated = (link.keysMigrated || 0) + moved; }
+  return moved;
+}
 async function plCheckLinkWithFile(linkId, file){
   const link = PL_LINKS.find(l => l.id === linkId); if (!link || !file) return;
   const text = await file.text();
@@ -9375,6 +9472,7 @@ async function plCheckLinkWithFile(linkId, file){
   let parsed; try { parsed = plParse(text, file.name); } catch (e){ alert(`${file.name}: ${e.message}`); return; }
   parsed.sha256 = sha; parsed.size = file.size; parsed.lastModified = file.lastModified; parsed.path = file.path || link.path || '';
   link.lastChecked = new Date().toISOString();
+  plMigrateLegacyKeys(link, parsed);   // QA 6th review: older same-named-floor keys → per-floor keys before any diff
   if (sha === link.sha256){ link.pendingDiff = null; link.status = 'unchanged'; plRenderBanner(); plOpenLinks(); scheduleSave(); return; }
   const diff = plDiff(link, parsed);
   link.status = 'changed';
