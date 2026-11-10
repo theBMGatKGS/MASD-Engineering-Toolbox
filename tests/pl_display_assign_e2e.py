@@ -6,6 +6,10 @@ Covers QA re-review RB2 (Command accept through Create sheets), 2-floor grouping
 RH1 (update adds to existing counts), RH2 (reopen keeps overrides, flag and Command "Not now"; flag shown),
 RH3 (Standalone: no Command offer), RM2 (no default display keys in calc state), Check link replace on Apply only
 (address, cluster and zone name kept), and the Field Report S4B badge from a real Calculator export.
+Third review: new builds ask Networked / Standalone before the Command offer (limit b) and are not asked again after
+Create sheets; Make all Standalone with an assumed Command display warns and offers removal; a skipped floor stays
+skipped on Check link (stable link + Area key, limit c); assumed names never repeat; the job time zone is validated
+and exported as project.timeZone only when set, and the Field Report picks it up.
 Run: python3 tests/pl_display_assign_e2e.py        (APP= / RPT= / PL_FIXTURE_DIR= override the defaults)
 """
 import asyncio, json, os, sys
@@ -53,10 +57,12 @@ async def click_next(pg, wait=300):
     await pg.click('#plw-next'); await pg.wait_for_timeout(wait)
     return await pg.evaluate('[plWiz.step, plWiz.displaysPhase]')
 
+SEEN = []
 async def handle_post_create(pg, scheme='networked'):
     for _ in range(8):
         await pg.wait_for_timeout(250)
         title = await pg.evaluate("document.getElementById('prompt-overlay')?.classList.contains('open')?document.getElementById('prompt-title')?.textContent:''")
+        if title: SEEN.append(title)
         if title == 'Confirm Settings?': await pg.click('#prompt-actions button[data-value="confirm"]')
         elif title == 'Networked or Standalone?': await pg.click(f'#prompt-actions button[data-value="{scheme}"]')
         elif title == 'Auto address?': await pg.click('#prompt-actions button[data-value="yes"]')
@@ -102,6 +108,12 @@ async def export_text(pg):
       if (mlpExportProject() === null){ v2Download = _d; closePlWizard(); const doc = MLP.blank(); doc.project = mlpProjectInfo(); doc.design = mlpBuildDesign(); doc.site = MLP_SITE;
         res(MLP.stringify(doc, 'ModuLaser Battery Calculator', mlpCalcRev(), '')); } })""")
 
+async def pick_scheme(pg, scheme='networked'):
+    st = await pg.evaluate('[plWiz.step, plWiz.displaysPhase]')
+    if st == [4, 'scheme']:
+        await pg.click('#pl-scheme-net' if scheme == 'networked' else '#pl-scheme-sa'); await pg.wait_for_timeout(300)
+    return st
+
 async def check_link(pg, pl_path):
     txt = Path(pl_path).read_text()
     await pg.evaluate("""([t,n])=>{ const l = PL_LINKS[0]; return plCheckLinkWithFile(l.id, new File([t], n)); }""", [txt, Path(pl_path).name])
@@ -112,7 +124,11 @@ async def case_command_accept(pg):
     alpha, delta = await two_floor_to_fallback(pg)
     await group_alpha_accept_delta(pg, alpha, delta)
     st = await click_next(pg)
-    ok('S5B: 3 clusters on SenseNET 1, no Command → offer shown', st == [4, 'command'] and await pg.locator('#pl-cmd-yes').count() == 1, st)
+    body = await pg.inner_text('#plw-body')
+    ok('Limit b: new build asks Networked or Standalone before any Command offer', st == [4, 'scheme'] and 'Networked or Standalone?' in body and await pg.locator('#pl-cmd-yes').count() == 0, [st, body[:200]])
+    await pick_scheme(pg, 'networked')
+    st = await pg.evaluate('[plWiz.step, plWiz.displaysPhase]')
+    ok('S5B: Networked → 3 clusters on SenseNET 1, no Command → offer shown', st == [4, 'command'] and await pg.locator('#pl-cmd-yes').count() == 1, st)
     await pg.click('#pl-cmd-yes'); await pg.wait_for_timeout(300)
     st = await pg.evaluate('[plWiz.step, plWiz.displaysPhase]')
     ok('S5B Add 1 Command → Power supplies', st[0] == 5, st)
@@ -120,7 +136,10 @@ async def case_command_accept(pg):
     ok('RB2: accepted Command display is on its own power supply', cmd_psu == [1], cmd_psu)
     tray = await pg.evaluate("Object.values(plWiz.unassignedByGroup).flat().length")
     ok('2-floor: every device placed (tray empty)', tray == 0, tray)
+    SEEN.clear()
     await create_sheets(pg)
+    ok('Limit b: Networked / Standalone is not asked again after Create sheets', 'Networked or Standalone?' not in SEEN and 'Auto address?' in SEEN, SEEN)
+    ok('Limit b: every new sheet is Networked', await pg.evaluate("[...document.querySelectorAll('.location')].every(l=>addrSchemeOf(l)==='networked')"))
     sheets = await sheet_rows(pg)
     rows = [r for s in sheets for r in s['rows']]
     cmds = [r for r in rows if r['type'] == 'Command Display']
@@ -206,6 +225,7 @@ async def case_command_dismiss_and_reopen(pg):
     alpha, delta = await two_floor_to_fallback(pg)
     await group_alpha_accept_delta(pg, alpha, delta)
     st = await click_next(pg)
+    await pick_scheme(pg, 'networked')
     await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
     await create_sheets(pg)
     text = await export_text(pg)
@@ -222,13 +242,104 @@ async def case_standalone(pg):
     alpha, delta = await two_floor_to_fallback(pg)
     await group_alpha_accept_delta(pg, alpha, delta)
     await click_next(pg)
-    await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
-    await create_sheets(pg, scheme='standalone')
+    await pick_scheme(pg, 'standalone')
+    st = await pg.evaluate('[plWiz.step, plWiz.displaysPhase]')
+    ok('Limit b: Standalone first → no Command offer, straight to Power supplies', st[0] == 5 and await pg.locator('#pl-cmd-yes').count() == 0, st)
+    ok('Limit b: Standalone → no assumed Command display planned', await pg.evaluate("!plIncludedGroups().some(({g})=>(g.displays||[]).some(d=>d.type==='Command Display'))"))
+    SEEN.clear()
+    await create_sheets(pg, scheme='networked')   # the prompt must not appear; if it did, answering Networked would fail the checks below
     n_sa = await pg.evaluate("[...document.querySelectorAll('.location')].filter(l=>addrSchemeOf(l)==='standalone').length")
+    n_all = await pg.evaluate("document.querySelectorAll('.location').length")
+    ok('Limit b: Standalone answer applied to every sheet, not asked twice', n_sa == n_all and n_all >= 1 and 'Networked or Standalone?' not in SEEN, [n_sa, n_all, SEEN])
+    ok('Limit b: no Command display rows', await pg.evaluate("![...document.querySelectorAll('.type-select')].some(s=>s.value==='Command Display')"))
     await pg.evaluate("openPlWizard({})")
     r = await pg.evaluate("[plCommandOfferNeeded(), plWiz.settings.addrScheme]")
     ok('RH3: Standalone project → addrScheme standalone, no Command offer', n_sa >= 1 and r == [False, 'standalone'], [n_sa, r])
     await pg.evaluate('closePlWizard()')
+
+async def wait_prompt(pg, title, ms=4000):
+    for _ in range(ms // 100):
+        t = await pg.evaluate("document.getElementById('prompt-overlay').classList.contains('open')?document.getElementById('prompt-title').textContent:''")
+        if t == title: return True
+        await pg.wait_for_timeout(100)
+    return False
+
+async def case_standalone_after_command(pg):
+    # QA limit (b) safety net: Command accepted on Networked, then every sheet made Standalone
+    await fresh(pg)
+    alpha, delta = await two_floor_to_fallback(pg)
+    await group_alpha_accept_delta(pg, alpha, delta)
+    await click_next(pg); await pick_scheme(pg, 'networked')
+    await pg.click('#pl-cmd-yes'); await pg.wait_for_timeout(300)
+    await create_sheets(pg)
+    n_sheets = await pg.evaluate("document.querySelectorAll('.location').length")
+    await pg.evaluate("applyUnifiedAddressing('standalone', false)")
+    shown = await wait_prompt(pg, 'Remove the assumed Command display?')
+    desc = await pg.evaluate("document.getElementById('prompt-overlay').innerText")
+    ok('Limit b: all sheets Standalone + assumed Command → warning offers removal', shown and 'Standalone' in desc and 'CMD' in desc, desc[:300])
+    await pg.click('#prompt-actions button[data-value="remove"]'); await pg.wait_for_timeout(400)
+    left = await pg.evaluate("[...document.querySelectorAll('.type-select')].filter(s=>s.value==='Command Display').length")
+    n2 = await pg.evaluate("document.querySelectorAll('.location').length")
+    ok('Limit b: Remove takes out the Command display and its own sheet', left == 0 and n2 == n_sheets - 1, [left, n_sheets, n2])
+    ok('Limit b: other assumed displays and the re-run flag stay', await pg.evaluate("document.querySelectorAll('[data-role=module][data-origin=assumed]').length") == 3 and await pg.evaluate('!!window.__rerunPipeCad'))
+    links = await pg.evaluate("PL_LINKS.map(l=>Object.keys(l.assumedDisplays||{}).filter(k=>k.startsWith('assumed:cmd')).length)")
+    ok('Limit b: removed Command is dropped from the link record', links == [0], links)
+    await pg.evaluate("applyUnifiedAddressing('networked', false)"); await pg.evaluate("applyUnifiedAddressing('standalone', false)")
+    ok('Limit b: no warning when no assumed Command is left', not await wait_prompt(pg, 'Remove the assumed Command display?', 1500))
+
+async def case_skip_key(pg):
+    # QA limit (c): skip is keyed by link id + Area (not position); a skipped floor stays skipped while its need does not grow
+    await fresh(pg)
+    alpha, delta = await two_floor_to_fallback(pg)
+    await pg.click(f'[data-acc="{delta["k"]}"]'); await pg.wait_for_timeout(80)
+    await pg.click(f'[data-skip="{alpha["k"]}"] >> nth=0'); await pg.wait_for_timeout(100)
+    await click_next(pg); await pick_scheme(pg, 'networked')
+    if await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await pack_trays(pg)   # a skipped floor has no display, so its detectors wait in the tray until packed
+    await create_sheets(pg)
+    key = await pg.evaluate("PL_LINKS[0].id + ':area:Example Zone Alpha'")
+    dp = await pg.evaluate("window.__displayPlan")
+    ok('Limit c: skip saved under link id + Area name (no index)', (dp.get(key) or {}).get('decision') == 'skip' and (dp.get(key) or {}).get('needed') == 2 and not any(k[:2] in ('0:', '1:') for k in dp), dp)
+    await check_link(pg, F['v6'])   # + a 13th detector on Alpha: 13 det / 0 displays still needs 2
+    pd = await pg.evaluate('PL_LINKS[0].pendingDiff')
+    ok('Check link v6: +1 added (detector on Alpha)', pd and len(pd['added']) == 1, pd)
+    await pg.click('#pld-apply'); await pg.wait_for_timeout(300)
+    if await pg.locator('#plw-suggest-all').count(): await pg.click('#plw-suggest-all')
+    st = await click_next(pg)
+    fl = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>[f.floorName,f.nDet,f.status,f.floorKey])")
+    ok('Limit c: skipped Alpha (13 det, still needs 2) is not re-prompted on Check link', st[0] == 5 and any('Alpha' in f[0] and f[1] == 13 and f[2] == 'skipped' and f[3] == key for f in fl), [st, fl])
+    await pg.evaluate('closePlWizard()')
+
+async def case_unique_names(pg):
+    await fresh(pg)
+    await to_rename(pg, F['same_abbr'])
+    # the detectors' suggested names collide too (same abbreviation); give Dock's detectors their own names, as a user would
+    await pg.evaluate("plWiz.files[0].groups[1].detectors.forEach((d,i)=>{ d.newName='DOCK-D'+(i+1); d.userNamed=true; }); plRender()")
+    await click_next(pg)
+    await pg.click('#pl-disp-continue'); await pg.wait_for_timeout(200)
+    for k in await pg.evaluate("plWiz.displaysSuggest.floors.filter(f=>f.status==='needed').map(f=>f.floorKey)"):
+        await pg.click(f'[data-acc="{k}"]'); await pg.wait_for_timeout(80)
+    await click_next(pg); await pick_scheme(pg, 'networked')
+    if await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await create_sheets(pg)
+    names = [r['zone'] for s in await sheet_rows(pg) for r in s['rows'] if r['origin'] == 'assumed']
+    ok('Assumed names never repeat (Delta / Dock share an abbreviation)', len(names) == 2 and len(set(names)) == 2, names)
+
+async def case_job_tz(pg):
+    await fresh(pg)
+    await pg.fill('#job-tz-input', 'Mars/Olympus'); await pg.dispatch_event('#job-tz-input', 'change'); await pg.wait_for_timeout(150)
+    ok('Job TZ: an invalid zone is refused (field cleared, nothing stored)', await pg.evaluate("document.getElementById('job-tz-input').value === '' && !MLP_PROJECT_EXTRA.timeZone"))
+    await pg.fill('#job-tz-input', 'america/chicago'); await pg.dispatch_event('#job-tz-input', 'change'); await pg.wait_for_timeout(150)
+    ok('Job TZ: valid zone is normalized (america/chicago → America/Chicago)', await pg.evaluate("document.getElementById('job-tz-input').value") == 'America/Chicago')
+    ok('Job TZ: carried as project.timeZone', await pg.evaluate('mlpProjectInfo().timeZone') == 'America/Chicago')
+    st = await pg.evaluate('buildStateObject()')
+    await fresh(pg)
+    await pg.evaluate('s=>applyLoadedState(s)', st); await pg.wait_for_timeout(200)
+    ok('Job TZ: saved with the project and restored on reopen', await pg.evaluate("document.getElementById('job-tz-input').value") == 'America/Chicago')
+
+async def pack_trays(pg):
+    await pg.evaluate("""()=>{ Object.keys(plWiz.unassignedByGroup||{}).forEach(gk=>{ const b=document.querySelector('[data-pack="'+gk+'"]'); if(b) b.click(); }); }""")
+    await pg.wait_for_timeout(150)
 
 async def case_no_defaults(pg):
     await fresh(pg)
@@ -239,6 +350,7 @@ async def case_no_defaults(pg):
     await create_sheets(pg)
     doc = json.loads(await export_text(pg))
     cs = doc['design']['calc']['state']
+    ok('Job TZ: blank → project.timeZone omitted from the export', 'timeZone' not in doc['project'], doc['project'])
     ok('RM2: export omits displayPlan / rerunPipeCad / displaysAssumed at defaults', not any(k in cs for k in ('displayPlan', 'rerunPipeCad', 'displaysAssumed')), [k for k in ('displayPlan', 'rerunPipeCad', 'displaysAssumed') if k in cs])
     links = cs.get('plLinks') or []
     ok('RM2: linked file carries no default display keys', links and not any(k in links[0] for k in ('displayPlan', 'rerunPipeCad', 'assumedDisplays')), list(links[0].keys()) if links else links)
@@ -274,6 +386,8 @@ async def case_report_s4b(pg, text):
     await pg.wait_for_timeout(300)
     html = await pg.evaluate("document.getElementById('app').innerHTML")
     ok('Report S4B: badge + actions menu on the module sheet', 'Assumed display (not in PipeCAD)' in html and 'Confirm installed' in html)
+    z = await pg.evaluate('rpJobTimeZone()')
+    ok('Report: job time zone comes from the Calculator export (America/Chicago, source project)', z.get('timeZone') == 'America/Chicago' and z.get('source') == 'project', z)
 
 async def main():
     async with async_playwright() as p:
@@ -287,15 +401,21 @@ async def main():
         await case_command_accept(pg)
         await case_command_dismiss_and_reopen(pg)
         await case_standalone(pg)
+        await case_standalone_after_command(pg)
+        await case_skip_key(pg)
+        await case_unique_names(pg)
+        await case_job_tz(pg)
         await case_no_defaults(pg)
         ok('App: no page errors', not errs, errs[:3])
         # Report S4B from a real export of the accepted-Command project
         await fresh(pg)
         alpha, delta = await two_floor_to_fallback(pg)
         await group_alpha_accept_delta(pg, alpha, delta)
-        await click_next(pg); await pg.click('#pl-cmd-yes'); await pg.wait_for_timeout(300)
+        await click_next(pg); await pick_scheme(pg, 'networked'); await pg.click('#pl-cmd-yes'); await pg.wait_for_timeout(300)
         await create_sheets(pg)
+        await pg.fill('#job-tz-input', 'America/Chicago'); await pg.dispatch_event('#job-tz-input', 'change')
         text = await export_text(pg)
+        ok('Export: project.timeZone = America/Chicago', json.loads(text)['project'].get('timeZone') == 'America/Chicago')
         errs.clear()
         await case_report_s4b(pg, text)
         ok('Report: no page errors', not errs, errs[:3])

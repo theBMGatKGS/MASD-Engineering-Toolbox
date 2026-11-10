@@ -1473,6 +1473,11 @@ body.v2 .model-cell{ font-size:10.5px; }
       <input type="text" id="building-input" placeholder="Building name / #" style="width:150px;">
     </div>
     <div class="pf">
+      <label for="job-tz-input">Job time zone</label>
+      <input type="text" id="job-tz-input" list="job-tz-list" placeholder="e.g. America/Chicago" style="width:160px;" autocomplete="off" title="IANA time zone of the job site (optional). Export project carries it so the Field Report prints As-Built times in the job's local time.">
+      <datalist id="job-tz-list"></datalist>
+    </div>
+    <div class="pf">
       <label>Primary Command Display Location</label>
       <input type="text" id="primary-cdm-location-input" placeholder="e.g. Main FACP room" style="width:180px;">
     </div>
@@ -6288,7 +6293,8 @@ async function promptAutoAddress(kind, preIds){
   const note = '<p class="plw-note">Module order, ribbon, AUX and cluster assignments never change. Any automatic change is logged (Edit → Address change log) and undoes in one step (Undo, or Ctrl+Z).</p>';
   if (!preIds.size){
     // NEW BUILD
-    const mode = await showPromptModal({ title: 'Networked or Standalone?', desc: `<p>This is the first time modules are added to this project. How are the sheets connected?</p>
+    const preset = window.__plPresetScheme; window.__plPresetScheme = null;   // answered in the .pl Displays step (limit b)
+    const mode = (preset === 'networked' || preset === 'standalone') ? preset : await showPromptModal({ title: 'Networked or Standalone?', desc: `<p>This is the first time modules are added to this project. How are the sheets connected?</p>
       <ul class="aa-list"><li><b>Networked</b>: the sheets share a SenseNET network — addresses 1–127, unique across all sheets (a second network starts past 127).</li><li><b>Standalone</b>: no SenseNET pathway — each sheet is its own pool, addresses 1–9.</li></ul><p class="plw-note">Sets the addressing mode on every sheet; you can change a sheet later on its Addressing row.</p>`,
       buttons: [{ label: 'Standalone', value: 'standalone' }, { label: 'Networked', value: 'networked', primary: true }] });
     if (mode !== 'networked' && mode !== 'standalone') return null;
@@ -7949,8 +7955,12 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     plWiz.commandOffer = null;
     plWiz.assumedScratch = {};
     plWiz.settings = plWiz.settings || {};
+    delete plWiz.settings.addrSchemeChosen;
     plWiz.settings.addrScheme = plProjectAddrScheme();
   };
+  // Limit (b): a new build (no modules in the project yet) has no addressing mode until the user picks one.
+  function plIsNewBuild(){ return !document.querySelector('.location [data-role="module"]'); }
+  window.plIsNewBuild = plIsNewBuild;
   // RH3: the import joins the project's addressing mode (new builds default to Networked, like the new sheets).
   function plProjectAddrScheme(){
     const locs = Array.from(document.querySelectorAll('.location')).filter(l => l.querySelector('[data-role="module"]'));
@@ -7968,9 +7978,13 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     return { key: ((locEl && locEl.querySelector('.ps-location')) || {}).value || '', byText: true, link: pk ? pk.slice(0, pk.indexOf('|')) : '' };
   }
   window.plRowArea = plRowArea;
-  function plFloorKey(fi, g, floorIdx){
-    return String(fi) + ':' + floorIdx + ':' + (g.origName || g.name || '');
+  // (c) Skip/accept decisions are keyed by the linked file id + the PipeCAD Area/Group name: stable across re-imports
+  // and Check link (same link id), not tied to the floor's position, and never shared with another file's Area.
+  function plFloorKey(f, g){
+    const linkId = (plWiz.linkUpdate && plWiz.linkUpdate.id) || (f && f.linkId) || 'link';
+    return linkId + ':area:' + (g.origName || g.name || '');
   }
+  window.plFloorKey = plFloorKey;
   function plModuLaserDets(g){
     return (g.detectors || []).filter(d => d.kind === 'detector');
   }
@@ -8023,11 +8037,18 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     const meta = [];
     plIncludedGroups().forEach(({ f, fi, g }, idx) => {
       groups.push(g);
-      meta.push({ f, fi, g, floorIdx: idx, floorKey: plFloorKey(fi, g, idx) });
+      meta.push({ f, fi, g, floorIdx: idx, floorKey: plFloorKey(f, g) });
+    });
+    // (c) hand the engine the saved decisions under the key it looks up (linkId:index:name, for this call only)
+    const engLink = (plWiz.files[0] && plWiz.files[0].linkId) || 'link';
+    const engPlan = {};
+    meta.forEach(m => {
+      const d = plWiz.displayPlan[m.floorKey];
+      if (d) engPlan[engLink + ':' + m.floorIdx + ':' + (m.g.name || m.g.origName || ('Floor ' + (m.floorIdx + 1)))] = d;
     });
     const raw = (typeof suggestDisplays === 'function' ? suggestDisplays : MASD_ENGINE.suggestDisplays)(groups, {
-      linkId: (plWiz.files[0] && plWiz.files[0].linkId) || 'link',
-      displayPlan: plWiz.displayPlan
+      linkId: engLink,
+      displayPlan: engPlan
     });
     const existing = (plWiz.mode === 'update') ? plExistingCapacityByFloor() : { byArea: {}, byText: {} };
     raw.floors.forEach((fl, i) => {
@@ -8044,6 +8065,12 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
       fl.existingDet = exDet; fl.existingCluster = exCl;
       plReplanFloor(fl, fl.nDet + exDet, fl.nCluster + exCl);
     });
+    // (c) a floor the user skipped stays skipped until it needs more displays than when it was skipped
+    raw.floors.forEach(fl => {
+      const pr = plWiz.displayPlan[fl.floorKey];
+      if (fl.status === 'needed' && pr && pr.decision === 'skip' && (pr.needed || 0) >= fl.needed){ fl.status = 'skipped'; fl.suggestion = null; fl.buckets = []; }
+    });
+    plAssignAbbrs(raw.floors);
     raw.anyNeeded = raw.floors.some(f => f.status === 'needed');
     raw.neededTotal = raw.floors.reduce((s, f) => s + (f.needed || 0), 0);
     plWiz.displaysSuggest = raw;
@@ -8053,8 +8080,25 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     const p = plBuildSuggest();
     return !!(p && p.anyNeeded);
   }
-  function plAssumedName(floorName, bucketIdx){
-    const abbr = (typeof plAbbr === 'function' ? plAbbr(floorName) : String(floorName || 'F').replace(/\s+/g, '').slice(0, 6));
+  function plAbbrOf(floorName){
+    return (typeof plAbbr === 'function' ? plAbbr(floorName) : String(floorName || 'F').replace(/\s+/g, '').slice(0, 6)) || 'F';
+  }
+  // Assumed names stay unique: a floor whose abbreviation another floor (or an existing assumed name) already uses gets a numbered one
+  function plAssignAbbrs(floors){
+    const used = new Set(Array.from(document.querySelectorAll('.location [data-role="module"] .zone-name')).map(z => String(z.value || '').split('-DSP')[0]).filter(Boolean));
+    const taken = new Set();
+    (floors || []).forEach((fl, i) => {
+      let ab = plAbbrOf(fl.floorName);
+      if (taken.has(ab) || (fl.status === 'needed' && used.has(ab))){
+        const base = ab.slice(0, 4); let k = i + 1, cand = base + k;
+        while (taken.has(cand) || used.has(cand)){ k++; cand = base + k; }
+        ab = cand;
+      }
+      taken.add(ab); fl.abbr = ab;
+    });
+  }
+  function plAssumedName(floor, bucketIdx){
+    const abbr = (floor && typeof floor === 'object') ? (floor.abbr || plAbbrOf(floor.floorName)) : plAbbrOf(floor);
     const tail = 'DSP' + String(bucketIdx + 1).padStart(2, '0');
     let n = abbr + '-' + tail;
     if (n.length > PL_NAME_MAX) n = ('F' + (bucketIdx + 1) + '-' + tail).slice(0, PL_NAME_MAX);
@@ -8067,7 +8111,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     }
     const type = (plWiz.assumedScratch[floor.floorKey] && plWiz.assumedScratch[floor.floorKey].type) || (floor.suggestion && floor.suggestion.type) || 'Standard Display';
     if (floor.suggestion && floor.suggestion.rule === 'le8-floor'){
-      const name = plAssumedName(floor.floorName, 0);
+      const name = plAssumedName(floor, 0);
       const disp = {
         key: 'assumed:' + floor.floorKey + ':0',
         kind: 'display', type, origName: name, newName: name, suggest: name, userNamed: true,
@@ -8086,7 +8130,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
       if (b.existing) return;
       const assigned = b.detectors || [];
       if (!assigned.length) return;
-      const name = plAssumedName(floor.floorName, bi);
+      const name = plAssumedName(floor, bi);
       const disp = {
         key: 'assumed:' + floor.floorKey + ':' + bi,
         kind: 'display', type: b.type || 'Standard Display', origName: name, newName: name, suggest: name, userNamed: true,
@@ -8119,7 +8163,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     // Standalone sheets never count; networked sheets count per SenseNET network; the import joins the
     // project's addressing mode and lands on the last networked SenseNET network (new builds: Networked, SenseNET 1).
     plWiz.settings = plWiz.settings || {};
-    plWiz.settings.addrScheme = plProjectAddrScheme();
+    plWiz.settings.addrScheme = plWiz.settings.addrSchemeChosen || plProjectAddrScheme();
     if (plWiz.settings.addrScheme === 'standalone') return false;
     const perNet = {};
     let targetNet = 1;
@@ -8224,6 +8268,23 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     plWiz.suggested = false;
     plRender();
   };
+  // Limit (b): on a new build the Command offer depends on the addressing mode, so ask it first (once per import).
+  function plSchemeFirst(){ return plIsNewBuild() && plWiz.mode !== 'update' && !(plWiz.settings && plWiz.settings.addrSchemeChosen); }
+  window.plDisplaysPickScheme = function (mode){
+    if (mode !== 'networked' && mode !== 'standalone') return;
+    plWiz.settings = plWiz.settings || {};
+    plWiz.settings.addrSchemeChosen = mode;
+    plWiz.settings.addrScheme = mode;
+    if (mode === 'networked' && plCommandOfferNeeded() && !(plWiz.commandOffer && plWiz.commandOffer.dismissed) && !plWiz.displayPlan.__commandDismissed){
+      plWiz.displaysPhase = 'command';
+      plRender();
+      return;
+    }
+    plWiz.displaysPhase = 'done';
+    plWiz.step = 5;
+    plWiz.suggested = false;
+    plRender();
+  };
   window.plCommandDismiss = function (){
     plWiz.commandOffer = { show: false, accepted: false, dismissed: true };
     plWiz.displayPlan.__commandDismissed = true;
@@ -8233,9 +8294,86 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     plRender();
   };
 
+  // Limit (b) safety net: every sheet Standalone (no SenseNET) but an assumed Command display is still in the design.
+  // Warn once per set of rows and offer to remove it (its own sheet goes too when nothing else is on it).
+  function plStandaloneAssumedCommands(){
+    const locs = Array.from(document.querySelectorAll('.location')).filter(l => l.querySelector('[data-role="module"]'));
+    if (!locs.length) return [];
+    const of = l => (typeof addrSchemeOf === 'function') ? addrSchemeOf(l) : ((l.querySelector('.addr-scheme-radio:checked') || {}).value === 'standalone' ? 'standalone' : 'networked');
+    if (!locs.every(l => of(l) === 'standalone')) return [];
+    return Array.from(document.querySelectorAll('.location [data-role="module"][data-origin="assumed"]'))
+      .filter(r => ((r.querySelector('.type-select') || {}).value || '') === 'Command Display');
+  }
+  window.plStandaloneAssumedCommands = plStandaloneAssumedCommands;
+  window.plRemoveAssumedCommands = function (rows){
+    (rows || plStandaloneAssumedCommands()).forEach(r => {
+      const l = r.closest('.location'); if (!l) return;
+      const loc = l.getAttribute('data-loc');
+      const pk = r.dataset.plKey || '';
+      if (pk && typeof PL_LINKS !== 'undefined'){
+        const link = PL_LINKS.find(x => x.id === pk.slice(0, pk.indexOf('|'))); const k = pk.slice(pk.indexOf('|') + 1);
+        if (link && link.assumedDisplays){ delete link.assumedDisplays[k]; if (!Object.keys(link.assumedDisplays).length) delete link.assumedDisplays; }
+      }
+      if (typeof removeModuleRow === 'function') removeModuleRow(loc, r.id); else r.remove();
+      if (!l.querySelector('[data-role="module"], [data-role="minilaser"]') && document.querySelectorAll('.location').length > 1) l.remove();
+    });
+    if (!document.querySelector('[data-role="module"][data-origin="assumed"]')) window.__rerunPipeCad = false;
+    if (typeof aaRecalcAll === 'function') aaRecalcAll();
+    if (typeof refreshAllClusterSummaries === 'function') refreshAllClusterSummaries();
+    if (typeof scheduleSave === 'function') scheduleSave();
+    if (typeof plRenderBanner === 'function') plRenderBanner();
+  };
+  let plSaCmdTimer = null, plSaCmdSig = '';
+  window.plCheckStandaloneCommand = function (){
+    clearTimeout(plSaCmdTimer);
+    plSaCmdTimer = setTimeout(async function tryCheck(){
+      const ov = document.getElementById('prompt-overlay'), wz = document.getElementById('plw-overlay');
+      if ((ov && ov.classList.contains('open')) || (wz && wz.classList.contains('open'))){ plSaCmdTimer = setTimeout(tryCheck, 400); return; }
+      plSaCmdTimer = null;
+      const rows = plStandaloneAssumedCommands();
+      if (!rows.length){ plSaCmdSig = ''; return; }
+      const sig = rows.map(r => r.id).join(',');
+      if (sig === plSaCmdSig) return;   // already asked about this exact set
+      plSaCmdSig = sig;
+      const list = rows.map(r => {
+        const l = r.closest('.location');
+        const ps = ((l && l.querySelector('.ps-name')) || {}).value || 'its sheet';
+        const z = ((r.querySelector('.zone-name') || {}).value || '').trim() || 'Command display';
+        const a = ((r.querySelector('.module-address') || {}).value || '').trim();
+        return `<li><b>${plEsc(z)}</b> on <b>${plEsc(ps)}</b>${a ? ' (address ' + plEsc(a) + ')' : ''}</li>`;
+      }).join('');
+      const v = (typeof showPromptModal === 'function') ? await showPromptModal({ title: 'Remove the assumed Command display?',
+        desc: `<p>Every sheet is now <b>Standalone</b> (no SenseNET), so the clusters do not need a Command display. This assumed Command display is still in the design, with its own power supply and battery:</p><ul class="aa-list">${list}</ul><p class="plw-note">Remove takes it out (and its sheet when nothing else is on it). Keep leaves it as an assumed display to confirm in PipeCAD.</p>`,
+        buttons: [{ label: 'Keep', value: 'keep' }, { label: 'Remove', value: 'remove', primary: true }] }) : 'keep';
+      if (v === 'remove') plRemoveAssumedCommands(rows);
+    }, 300);
+  };
+
   window.plRenderDisplaysStep = function (body){
     const plan = plBuildSuggest();
     if (!plWiz.displaysPhase) plWiz.displaysPhase = plan.anyNeeded ? 'gate' : 'done';
+    if (plWiz.displaysPhase === 'scheme'){
+      body.innerHTML = `
+        <div style="position:relative;min-height:280px">
+          <div style="opacity:.35;pointer-events:none"><div class="plw-note">Checking how the sheets connect…</div></div>
+          <div role="dialog" aria-modal="true" aria-labelledby="pl-scheme-h" style="position:absolute;inset:10% 12%;background:var(--panel);border:1px solid var(--border);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);padding:18px;z-index:2">
+            <h3 id="pl-scheme-h" style="margin:0 0 8px;font-size:16px">Networked or Standalone?</h3>
+            <p class="plw-note" style="margin:0 0 8px">This is the first time modules are added to this project. How are the sheets connected? This decides whether the clusters need a Command display.</p>
+            <ul style="font-size:12.5px;color:var(--text-dim);line-height:1.55;margin:0 0 14px;padding-left:18px">
+              <li><b>Networked</b>: the sheets share a SenseNET network (addresses 1–127). 2+ clusters on a network need a Command display.</li>
+              <li><b>Standalone</b>: no SenseNET pathway; each sheet is its own pool (addresses 1–9). No Command display is needed.</li>
+            </ul>
+            <p class="plw-note" style="margin:0 0 12px">Sets the addressing mode on every sheet after the import; you can change a sheet later on its Addressing row.</p>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+              <button type="button" class="btn btn-ghost" id="pl-scheme-sa">Standalone</button>
+              <button type="button" class="btn btn-primary" id="pl-scheme-net">Networked</button>
+            </div>
+          </div>
+        </div>`;
+      body.querySelector('#pl-scheme-sa').onclick = () => plDisplaysPickScheme('standalone');
+      body.querySelector('#pl-scheme-net').onclick = () => plDisplaysPickScheme('networked');
+      return;
+    }
     // B1: Command (S5B) must render even after assumed displays satisfy capacity
     if (plWiz.displaysPhase === 'command'){
       body.innerHTML = `
@@ -8316,7 +8454,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
         parts.push(`<div class="plw-area">
           <h4>${plEsc(fl.floorName)} <span class="plw-count">${fl.nDet} ModuLaser detectors · 0 Std/Min</span></h4>
           <div style="padding:10px 12px">
-            <div class="plw-note">Suggested: <b>1 × ${plEsc(type)}</b> (${type === 'Minimum Display' ? 'FHSD8300' : 'FHSD8310'}) named <span class="mono">${plEsc(plAssumedName(fl.floorName, 0))}</span> <span class="plw-count">${plAssumedName(fl.floorName, 0).length}/${PL_NAME_MAX}</span></div>
+            <div class="plw-note">Suggested: <b>1 × ${plEsc(type)}</b> (${type === 'Minimum Display' ? 'FHSD8300' : 'FHSD8310'}) named <span class="mono">${plEsc(plAssumedName(fl, 0))}</span> <span class="plw-count">${plAssumedName(fl, 0).length}/${PL_NAME_MAX}</span></div>
             ${skipped ? '<div class="plw-warn">Skipped — detectors will have no cluster display (assumed none). Existing unassigned-cluster warnings still apply.</div>' : `
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
               <button type="button" class="btn btn-primary" data-acc="${plEsc(fl.floorKey)}">Accept</button>
@@ -8411,7 +8549,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     if (!needed){
       // H-c: still offer Command when SenseNET has 2+ clusters and no Command
       if (plCommandOfferNeeded() && !(plWiz.commandOffer && plWiz.commandOffer.dismissed) && !plWiz.displayPlan.__commandDismissed){
-        plWiz.displaysPhase = 'command';
+        plWiz.displaysPhase = plSchemeFirst() ? 'scheme' : 'command';
         plWiz.step = 4;
         return true;
       }
@@ -8430,7 +8568,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     if (err) return err;
     plApplyAllAssumed();
     if (plCommandOfferNeeded() && !(plWiz.commandOffer && plWiz.commandOffer.dismissed) && !plWiz.displayPlan.__commandDismissed){
-      plWiz.displaysPhase = 'command';
+      plWiz.displaysPhase = plSchemeFirst() ? 'scheme' : 'command';
       plRender();
       return '';
     }
@@ -8568,6 +8706,8 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
   };
   const _cmdA = window.plCommandAccept;
   window.plCommandAccept = function (){ _cmdA(); if (plWiz.step === 5){ plSeedPsusFromAssumed(); plRender(); } };
+  const _pick = window.plDisplaysPickScheme;
+  window.plDisplaysPickScheme = function (m){ _pick(m); if (plWiz.step === 5){ plSeedPsusFromAssumed(); plRender(); } };
   const _cmdD = window.plCommandDismiss;
   window.plCommandDismiss = function (){ _cmdD(); if (plWiz.step === 5){ plSeedPsusFromAssumed(); plRender(); } };
 
@@ -8629,7 +8769,7 @@ function plRenderStep1(body){
   const s = plWiz.settings;
   const bases = Object.keys(DESIGN_BASIS_PRESETS).concat(['Custom']);
   body.innerHTML = `
-    <p class="plw-warn"><b>Set these before importing.</b> Standby, alarm, ambient temperature, safety margin and the other battery factors drive the 65 Ah check that the power-supply suggestions in step 4 use. They're applied as the defaults on every new sheet the import creates; you can still change any sheet afterwards.</p>
+    <p class="plw-warn"><b>Set these before importing.</b> Standby, alarm, ambient temperature, safety margin and the other battery factors drive the 65 Ah check that the power-supply suggestions in step 5 use. They're applied as the defaults on every new sheet the import creates; you can still change any sheet afterwards.</p>
     <div class="plw-grid">
       <label>Design Basis<select id="plw-basis"><option value="" ${s.designBasis ? '' : 'selected'}>- Select -</option>${bases.map(b => `<option ${b === s.designBasis ? 'selected' : ''}>${plEsc(b)}</option>`).join('')}</select></label>
       <label>Standby (h)<input type="number" id="plw-standby" min="0" step="1" value="${plEsc(s.standbyHours)}"></label>
@@ -9006,7 +9146,9 @@ async function plFinish(){
   closePlWizard();
   // 02.00.005: Confirm Settings? first (it can roll the import back), then the auto-addressing prompts on the kept import.
   if (mlNotices.length) await showPromptModal({ title: 'MiniLaser import notice', desc: '<ul>' + mlNotices.map(n => '<li>' + v2Esc(n) + '</li>').join('') + '</ul>', buttons: [{ label: 'OK', value: 'ok', primary: true }] });
-  if (confirmable && created.length){ const cs = await plConfirmSettings(created, prevState); if (cs === 'confirm') await promptAutoAddress('import', aaPre); }
+  if (confirmable && created.length){ const cs = await plConfirmSettings(created, prevState);
+    if (cs === 'confirm'){ window.__plPresetScheme = (plWiz.settings && plWiz.settings.addrSchemeChosen) || null; await promptAutoAddress('import', aaPre); window.__plPresetScheme = null; } }
+  if (typeof plCheckStandaloneCommand === 'function') plCheckStandaloneCommand();   // limit (b) safety net
 }
 // 02.00.004 (Brent 10-16): after a .pl import, summarize the settings applied and ask to confirm them.
 // Confirm → every configured item on the imported sheets is marked confirmed (only genuinely empty fields stay amber).
@@ -11831,6 +11973,38 @@ let MLP_CARRY = {};             // Toolbox-owned parts carried through unchanged
   if (!st){ try { st = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {} }
   if (st){ MLP_SITE = st.mlpSite || null; MLP_PROJECT_EXTRA = st.mlpProject || {}; MLP_CARRY = st.mlpCarry || {}; }
 })();
+/* Job time zone (IANA), 02.02.002: optional; kept with the project fields the calculator carries (saved with the project,
+   left out of the design hash) and written as project.timeZone by Export project only when set, so the Field Report
+   prints As-Built times in the job's local time without the technician typing it. Blank = not written (schema v1). */
+function jobTzCanon(z){
+  z = String(z == null ? '' : z).trim(); if (!z) return '';
+  try { return new Intl.DateTimeFormat('en-US', { timeZone: z }).resolvedOptions().timeZone; } catch (e){ return null; }
+}
+function jobTzSync(){ const i = document.getElementById('job-tz-input'); if (i) i.value = (MLP_PROJECT_EXTRA && MLP_PROJECT_EXTRA.timeZone) || ''; }
+(function jobTzInit(){
+  const i = document.getElementById('job-tz-input'); if (!i) return;
+  const dl = document.getElementById('job-tz-list');
+  try { if (dl && Intl.supportedValuesOf) dl.innerHTML = Intl.supportedValuesOf('timeZone').map(z => `<option value="${z}">`).join(''); } catch (e){}
+  jobTzSync();
+  i.addEventListener('change', () => {
+    const c = jobTzCanon(i.value);
+    if (c === null){
+      alert(`"${i.value.trim()}" is not a time zone this browser recognises. Use an IANA name such as America/Chicago. The job time zone was left blank.`);
+      delete MLP_PROJECT_EXTRA.timeZone; i.value = '';
+    } else if (c){ MLP_PROJECT_EXTRA.timeZone = c; i.value = c; }
+    else delete MLP_PROJECT_EXTRA.timeZone;
+    scheduleSave();
+  });
+  const _a = applyLoadedState; applyLoadedState = function(state){ const r = _a(state); jobTzSync(); return r; };
+  const _c = clearEntireDocument; clearEntireDocument = function(o){ const r = _c(o); jobTzSync(); return r; };
+})();
+/* Limit (b) safety net: whenever every sheet ends up Standalone while an assumed Command display exists, warn and offer removal. */
+(function hookStandaloneCommand(){
+  if (typeof plCheckStandaloneCommand !== 'function') return;
+  document.addEventListener('change', ev => { if (ev.target && ev.target.matches && ev.target.matches('.addr-scheme-radio')) plCheckStandaloneCommand(); });
+  const _u = applyUnifiedAddressing; applyUnifiedAddressing = function(){ const r = _u.apply(this, arguments); plCheckStandaloneCommand(); return r; };
+  const _aa = promptAutoAddress; promptAutoAddress = async function(){ const r = await _aa.apply(this, arguments); plCheckStandaloneCommand(); return r; };
+})();
 /* Copy pipe/hole results and placement from freshly parsed files into the saved links (keeps them in the calc file). */
 function mlpAttachPipe(){
   (PL_LINKS || []).forEach(link => {
@@ -11935,7 +12109,7 @@ function mlpImportProjectText(text, name){
   const pristine = plIsPristineDoc();
   const diff = pristine ? null : MLP.diffDesign(mlpBuildDesign(), doc.design);
   const carry = () => { const c = {}; (doc.design.devices || []).forEach(d => { if (d.config) (c.config = c.config || {})[d.id] = d.config; }); if (doc.changes) c.changes = doc.changes; if (doc.approvals) c.approvals = doc.approvals; if (doc.design.toolbox) c.toolbox = doc.design.toolbox; if (doc.design.performance) c.performance = doc.design.performance; const known = Object.keys(MLP.blank()).concat(['format', 'schemaVersion', 'savedAt', 'savedBy']); Object.keys(doc).forEach(k => { if (!known.includes(k)) (c.extra = c.extra || {})[k] = doc[k]; }); return c; };
-  const apply = () => { applyLoadedState(calcState); MLP_CARRY = carry(); MLP_SITE = doc.site || null; MLP_PROJECT_EXTRA = Object.assign({}, MLP_PROJECT_EXTRA, { location: doc.project.location || '', designer: doc.project.designer || '', company: doc.project.company || '' }); scheduleSave(); closePlWizard(); };
+  const apply = () => { applyLoadedState(calcState); MLP_CARRY = carry(); MLP_SITE = doc.site || null; MLP_PROJECT_EXTRA = Object.assign({}, MLP_PROJECT_EXTRA, { location: doc.project.location || '', designer: doc.project.designer || '', company: doc.project.company || '' }); { const tz = jobTzCanon(doc.project.timeZone); if (tz) MLP_PROJECT_EXTRA.timeZone = tz; else delete MLP_PROJECT_EXTRA.timeZone; } jobTzSync(); scheduleSave(); closePlWizard(); };
   if (pristine || !diff.count){ apply(); return; }
   window.__mlpApply = apply;
   plShowAux('Import project — review changes', `<p>Opening <b>${mlpEsc(name)}</b> replaces the sheets on screen with the design in the file. Differences from what's on screen now:</p><div class="mlp-diff">${MLP.diffHtml(diff, mlpEsc)}</div><p class="plw-note">Field Report results in the file are kept and written back unchanged on the next Export project.</p>`,

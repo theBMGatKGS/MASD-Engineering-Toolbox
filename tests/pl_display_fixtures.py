@@ -6,9 +6,11 @@ Detectors sit 40 ft apart, so nothing clusters by the 3 ft rule; display placeme
   two_floor  Zone Alpha 12 detectors + Zone Delta 8 detectors, 0 displays           (QA re-review base file)
   v2         two_floor + 1 real Standard display on Zone Delta                      (Check link replace)
   v4         v2 + a 9th detector on Zone Delta                                      (update: 9 det / 1 cluster = SHORTAGE)
+  v6         two_floor + a 13th detector on Zone Alpha                              (update: skipped Alpha still needs 2 → stays skipped)
   ok_one     Zone Echo 4 detectors + 1 Standard display                             (no Displays prompt)
+  same_abbr  Zone Delta 4 detectors + Zone Dock 4 detectors, 0 displays             (assumed names must not repeat)
 """
-import os, tempfile
+import atexit, os, shutil, tempfile
 from xml.sax.saxutils import escape
 
 def _floor(name, n_det, displays, id0, x0):
@@ -53,16 +55,20 @@ SPECS = {
     'two_floor': [('Example Zone Alpha', 12, []), ('Example Zone Delta', 8, [])],
     'v2':        [('Example Zone Alpha', 12, []), ('Example Zone Delta', 8, [0])],
     'v4':        [('Example Zone Alpha', 12, []), ('Example Zone Delta', 9, [0])],
+    'v6':        [('Example Zone Alpha', 13, []), ('Example Zone Delta', 8, [])],
     'ok_one':    [('Example Zone Echo', 4, [0])],
+    'same_abbr': [('Example Zone Delta', 4, []), ('Example Zone Dock', 4, [])],
 }
 
 def write_all(folder=None):
     """Write every fixture (same file name for the linked series, so Check link sees one file) and return {key: path}."""
-    folder = folder or tempfile.mkdtemp(prefix='pl-disp-fx-')
+    if not folder:
+        folder = tempfile.mkdtemp(prefix='pl-disp-fx-')
+        atexit.register(shutil.rmtree, folder, True)   # temp fixtures are removed when the test exits
     out = {}
     for k, fl in SPECS.items():
         d = os.path.join(folder, k); os.makedirs(d, exist_ok=True)
-        name = 'Example-Display-Job.pl' if k in ('two_floor', 'v2', 'v4') else f'Example-{k}.pl'
+        name = 'Example-Display-Job.pl' if k in ('two_floor', 'v2', 'v4', 'v6') else f'Example-{k}.pl'
         p = os.path.join(d, name)
         with open(p, 'w') as f: f.write(pl_text(name, fl))
         out[k] = p

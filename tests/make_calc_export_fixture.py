@@ -1,7 +1,14 @@
 # Synthetic stand-in for the Calculator project export (no real project data).
 # Drives the Battery Calculator (sibling checkout) to import the synthetic NFPA318-Fab-Ceiling.pl + Example-Campus-PSU.pl
 # (4 sheets, 10 devices), address every module and export a .mlproj.json with the app's own File > Export project.
-# Usage: python3 make_calc_export_fixture.py [out]   (default: $CALC_EXPORT or /workspace/mlpbuild/synthetic-calc-export.mlproj.json)
+# Usage: python3 make_calc_export_fixture.py [out]   (default out: $CALC_EXPORT, else OUT below)
+#
+# Pinned fixture: tests/fixtures/synthetic-calc-export.mlproj.json is a committed copy of this script's output from
+# Calculator 02.02.001_261019 (MLP schema v1; fictional names; 4 sheets, 10 devices, 4 battery models).  ensure() returns
+# that pinned file so toolbox_test / report_audit_test give the same counts on a clean checkout with no cached exports.
+# Regenerating from today's Calculator gives different counts on purpose (02.02.002's Displays step adds an assumed
+# Standard display on Campus: 11 devices, and the sheet/battery split can change), so only set CALC_EXPORT (to build or
+# use a fresh export) when you also update the expectations in those tests.
 import asyncio, os, sys
 CALC_DIR=os.environ.get('CALC_DIR', os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..','ModuLaser-Battery-Calculator'))
 sys.path.insert(0, os.path.join(CALC_DIR,'tests','regression'))
@@ -32,7 +39,11 @@ async def build(out=OUT):
   walk(doc)
   open(out,'w').write(json.dumps(doc,indent=1))
   return out
-def ensure(out=OUT):
+PINNED=os.path.join(os.path.dirname(os.path.abspath(__file__)),'fixtures','synthetic-calc-export.mlproj.json')
+def ensure(out=None):
+  if out is None:
+    if not os.environ.get('CALC_EXPORT'): return PINNED
+    out=OUT
   if not os.path.exists(out):
     import concurrent.futures   # safe to call from inside a running event loop (runs the build in its own thread)
     with concurrent.futures.ThreadPoolExecutor(1) as ex: ex.submit(lambda: asyncio.run(build(out))).result()
