@@ -11,7 +11,7 @@ const SYN = process.env.SYNTH_DIR || '/workspace/plbuild/synth';
 const FX = process.env.ASD_FIXTURE || require('child_process').execFileSync('python3', ['-c', 'import sys; sys.path.insert(0, sys.argv[1]); import make_synthetic_pl as m; print(m.ensure("shaft_asd", sys.argv[2]))', __dirname, SYN]).toString().trim();
 let pass = 0, fail = 0, skipped = 0; const t = (n, c, i) => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + n + (i !== undefined && !c ? '  ' + JSON.stringify(i) : '')); };
 const HAVE = fs.existsSync(FX); const tf = (n, c, i) => { if (HAVE) t(n, c, i); else { skipped++; console.log('SKIP', n, '(fixture absent)'); } };
-t('MLP 1.6.3', M.VERSION === '1.6.3', M.VERSION);
+t('MLP 1.7.0', M.VERSION === '1.7.0', M.VERSION);
 // ---- brand catalog
 const E = 'edwards', K = 'kidde-commercial';
 const tbl = { minDisplay: ['FHSD8300-ULF', '9-30780-KID-ULF'], stdDisplay: ['FHSD8310-ULF', '9-30781-KID-ULF'], cmdDisplay: ['FHSD8320-ULF', '9-30782-KID-ULF'], detector: ['FHSD8330-ULF', '9-30783-KID-ULF'], minilaser: ['FHSD8075-ULF', '9-30501-KID-ULF'], asd160: ['FHSD8025-7-ULF', '9-30671-7-KID-ULF'], asdRelay: ['33-30436A', '33-30436A'], mlHousing: ['9-30520', '9-30520'] };

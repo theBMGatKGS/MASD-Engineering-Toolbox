@@ -8201,7 +8201,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
           <h4>${plEsc(fl.floorName)} <span class="plw-count">${fl.nDet} ModuLaser detectors · 0 Std/Min</span></h4>
           <div style="padding:10px 12px">
             <div class="plw-note">Suggested: <b>1 × ${plEsc(type)}</b> (${type === 'Minimum Display' ? 'FHSD8300' : 'FHSD8310'}) named <span class="mono">${plEsc(plAssumedName(fl.floorName, 0))}</span> <span class="plw-count">${plAssumedName(fl.floorName, 0).length}/${PL_NAME_MAX}</span></div>
-            ${skipped ? '<div class="plw-warn">Skipped — detectors will have no cluster display (assumed none). Existing unassigned-cluster warnings still apply.</div>' : ''}
+            ${skipped ? '<div class="plw-warn">Skipped — detectors will have no cluster display (assumed none). Existing unassigned-cluster warnings still apply.</div>' : `
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
               <button type="button" class="btn btn-primary" data-acc="${plEsc(fl.floorKey)}">Accept</button>
               <label class="plw-count" style="display:flex;align-items:center;gap:6px">Type
@@ -8211,7 +8211,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
                 </select>
               </label>
               <button type="button" class="btn btn-ghost" data-skip="${plEsc(fl.floorKey)}">Skip this floor</button>
-            </div>
+            </div>`}
           </div>
         </div>`);
       } else {
@@ -8247,10 +8247,10 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
           <h4>${plEsc(fl.floorName)} <span class="plw-count">${fl.nDet} detectors · needs ${fl.needed} display(s) · max 8 each</span></h4>
           <div style="padding:10px 12px">
             <div class="plw-warn">Group detectors from scratch (no auto-bucket). Each display max 8 detectors. A pack of 4 detectors at fan 10 + 1 display is about 66.9 Ah and exceeds the 65 Ah charger limit — the live readout warns when a bucket would.</div>
-            ${skipped ? '<div class="plw-warn">Floor skipped — assumed none.</div>' : ''}
+            ${skipped ? '<div class="plw-warn">Floor skipped — assumed none.</div>' : `
             <div class="plw-note">Unassigned (${unassigned.length}): ${(unassigned.map(d=>plEsc(d.newName||d.origName||d.key)).join(', ')||'none')}</div>
             <div class="plw-psus">${lanes}</div>
-            <button type="button" class="btn btn-ghost" data-skip="${plEsc(fl.floorKey)}">Skip this floor</button>
+            <button type="button" class="btn btn-ghost" data-skip="${plEsc(fl.floorKey)}">Skip this floor</button>`}
           </div>
         </div>`);
       }
