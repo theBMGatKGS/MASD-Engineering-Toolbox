@@ -14,6 +14,9 @@ Fourth review: footer Next is blocked at the Networked / Standalone question (F1
 not a decision (F2); repeated Area names in one file get their own keys and link records (F3); Undo after Remove is
 flagged (F5); a fresh import of the same file asks again (L6); a different Report job zone is noted (L7); a
 whitespace-only job zone is blank (L8).
+Fifth review: same-named floors are tracked separately end to end — Check link with a 9th detector on the first of two
+'Example Zone Alpha' floors is a floor-1 SHORTAGE with the Displays prompt and the detector joins a floor-1 display; two real
+displays on same-named floors get distinct keys (engine 1.3.1 / MLP 1.7.1); unique Area names keep their keys.
 Run: python3 tests/pl_display_assign_e2e.py        (APP= / RPT= / PL_FIXTURE_DIR= override the defaults)
 """
 import asyncio, json, os, sys
@@ -311,6 +314,71 @@ async def case_dup_area(pg):
     ok('F3: one saved decision per floor', len([k for k in dp if ':area:' in k]) == 2, dp)
     ok('F3: assumed names unique', len({r['zone'] for r in rows}) == 3, [r['zone'] for r in rows])
 
+ROW_DISPLAY_JS = """(suffix)=>{ const row = [...document.querySelectorAll('[data-role=module]')].find(r => (r.dataset.plKey||'').endsWith(suffix));
+  if (!row) return null; const loc = row.closest('.location'); const cl = (row.querySelector('.cluster-select')||{}).value || '';
+  const host = cl.startsWith('r:') ? document.querySelector('.location[data-loc="' + cl.split(':')[1] + '"]') : loc;
+  const disp = host ? [...host.querySelectorAll('[data-role=module]')].filter(r => ['Standard Display','Minimum Display'].includes((r.querySelector('.type-select')||{}).value)) : [];
+  return { sheet: loc.getAttribute('data-loc'), cluster: cl, displays: disp.map(r => ({ key: r.dataset.plKey||'', area: plRowArea(r, host).key, zone: (r.querySelector('.zone-name')||{}).value })) }; }"""
+
+async def case_dup_area_check_link(pg):
+    # Fifth review (Medium): QA's repro — dup_area import, Accept, Networked, Not now, Create sheets; Check link with a 9th detector on floor 1
+    await fresh(pg)
+    await to_rename(pg, F['dup_area'])
+    await pg.evaluate("plWiz.files[0].groups[1].detectors.forEach((d,i)=>{ d.newName='ALPHB-D'+(i+1); d.userNamed=true; }); plRender()")
+    await click_next(pg)
+    await pg.click('#pl-disp-continue'); await pg.wait_for_timeout(200)
+    plan = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>({k:f.floorKey,n:f.nDet,area:f.area,dets:f.detectors.map(d=>d.key)}))")
+    small = next(f for f in plan if f['n'] == 8); big = next(f for f in plan if f['n'] == 12)
+    ok('Same-named floors: detector keys carry the floor (plain on floor 1, \' #2\' on floor 2)', all(k.startswith('Example Zone Alpha#id') for k in small['dets']) and all(k.startswith('Example Zone Alpha #2#id') for k in big['dets']) and [small['area'], big['area']] == ['Example Zone Alpha', 'Example Zone Alpha #2'], [small['dets'][:2], big['dets'][:2], small['area'], big['area']])
+    for i, dk in enumerate(big['dets']):
+        await pg.click(f'[data-assign="{big["k"]}|{"new-0" if i < 8 else "new-1"}|{dk}"] >> nth=0')
+    await pg.click(f'[data-acc="{small["k"]}"]'); await pg.wait_for_timeout(100)
+    await click_next(pg); await pick_scheme(pg, 'networked')
+    if await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await create_sheets(pg)
+    await check_link(pg, F['dup_area_v2'])
+    pd = await pg.evaluate('PL_LINKS[0].pendingDiff')
+    ok('Same-named floors: Check link +1 added (the 9th detector, floor 1 key)', pd and pd['added'] == ['Example Zone Alpha#id108'] and not pd['removed'], pd)
+    await pg.click('#pld-apply'); await pg.wait_for_timeout(300)
+    if await pg.locator('#plw-suggest-all').count(): await pg.click('#plw-suggest-all')
+    st = await click_next(pg)
+    body = await pg.inner_text('#plw-body')
+    fl = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>[f.area,f.nDet,f.nCluster,f.status,f.needed,f.floorKey])")
+    ok('Same-named floors: floor 1 is a SHORTAGE (9 det / 1 cluster, needed 1) and the Displays prompt opens', st == [4, 'gate'] and 'SHORTAGE' in body and len(fl) == 1 and fl[0][:5] == ['Example Zone Alpha', 9, 1, 'needed', 1] and fl[0][5].endswith(':area:Example Zone Alpha'), [st, fl, body[:200]])
+    await pg.click('#pl-disp-continue'); await pg.wait_for_timeout(200)
+    f1 = (await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>({k:f.floorKey,dets:f.detectors.map(d=>d.key),b:(f.buckets||[]).map(b=>b.id)}))"))[0]
+    await pg.click(f'[data-assign="{f1["k"]}|new-0|{f1["dets"][0]}"] >> nth=0'); await pg.wait_for_timeout(100)
+    st = await click_next(pg)
+    if st[0] == 4 and await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await create_sheets(pg)
+    rd = await pg.evaluate(ROW_DISPLAY_JS, '|Example Zone Alpha#id108')
+    ok('Same-named floors: the new detector joins a floor-1 display (not floor 2\'s cluster)', rd and rd['displays'] and all(d['area'] == 'Example Zone Alpha' and ' #2' not in d['key'] for d in rd['displays']), rd)
+    n2 = await pg.evaluate("[...document.querySelectorAll('[data-role=module]')].filter(r=>{ const c=(r.querySelector('.cluster-select')||{}).value||''; return (r.dataset.plKey||'').includes('Example Zone Alpha #2#id'); }).length")
+    ok('Same-named floors: floor 2 keeps its 12 detectors', n2 == 12, n2)
+    await pg.evaluate('closePlWizard()')
+
+async def case_dup_real_displays(pg):
+    # Fifth review: two real displays on same-named floors get distinct keys and link records; unique names keep the old keys
+    await fresh(pg)
+    txt = Path(F['dup_disp']).read_text()
+    keys = await pg.evaluate("t=>{ const a = plParse(t,'x.pl'), b = MLP.parsePl(t,'x.pl'); const k = p => p.groups.map(g => g.displays.map(d=>d.key).concat(g.detectors.map(d=>d.key))); return [k(a), k(b), a.groups.map(g=>g.areaKey), b.groups.map(g=>g.areaKey)]; }", txt)
+    ok('Same-named floors: parser display keys distinct (engine = MLP)', keys[0] == keys[1] and keys[0][0][0] == 'Example Zone Alpha#disp0' and keys[0][1][0] == 'Example Zone Alpha #2#disp0' and keys[2] == keys[3] == ['Example Zone Alpha', 'Example Zone Alpha #2'], keys)
+    uk = await pg.evaluate("t=>{ const a = plParse(t,'x.pl'), b = MLP.parsePl(t,'x.pl'); return [a.groups.map(g=>[g.areaKey===g.origName, g.detectors[0].key, (g.displays[0]||{}).key||'']), b.groups.map(g=>[g.areaKey===g.name, g.detectors[0].key, (g.displays[0]||{}).key||''])]; }", Path(F['v2']).read_text())
+    ok('Unique Area names: keys unchanged (Area#id…, Area#disp0)', uk[0] == uk[1] == [[True, 'Example Zone Alpha#id100', ''], [True, 'Example Zone Delta#id200', 'Example Zone Delta#disp0']], uk)
+    await to_rename(pg, F['dup_disp'])
+    await pg.evaluate("const g=plWiz.files[0].groups[1]; g.detectors.forEach((d,i)=>{ d.newName='ALPHB-D'+(i+1); d.userNamed=true; }); g.displays.forEach((d,i)=>{ d.newName='ALPHB-DSP'+(i+1); d.userNamed=true; }); plRender()")
+    st = await click_next(pg)
+    ok('Same-named floors with real displays: past Rename, no Displays gate', st[0] >= 4 and st[1] != 'gate', st)
+    await pick_scheme(pg, 'networked')
+    if await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await pack_trays(pg)   # 40 ft spacing: nothing is seeded by distance, so the trays are packed
+    await create_sheets(pg)
+    dk = [r['key'] for s in await sheet_rows(pg) for r in s['rows'] if r['type'] == 'Standard Display']
+    link = await pg.evaluate("Object.keys(PL_LINKS[0].devices).filter(k=>k.includes('#disp'))")
+    ok('Same-named floors: two real displays → two distinct plKeys and two link records', len(dk) == 2 and len(set(dk)) == 2 and sorted(k.split('|', 1)[1] for k in dk) == ['Example Zone Alpha #2#disp0', 'Example Zone Alpha#disp0'] and sorted(link) == ['Example Zone Alpha #2#disp0', 'Example Zone Alpha#disp0'], [dk, link])
+    pk = await pg.evaluate("[...document.querySelectorAll('[data-role=module]')].filter(r=>(r.dataset.plKey||'').includes('#disp')).map(r=>plRowArea(r, r.closest('.location')).key)")
+    ok('Same-named floors: each display counts to its own floor', sorted(pk) == ['Example Zone Alpha', 'Example Zone Alpha #2'], pk)
+
 async def case_standalone_after_command(pg):
     # QA limit (b) safety net: Command accepted on Networked, then every sheet made Standalone
     await fresh(pg)
@@ -486,6 +554,8 @@ async def main():
         await case_standalone(pg)
         await case_footer_next_scheme(pg)
         await case_dup_area(pg)
+        await case_dup_area_check_link(pg)
+        await case_dup_real_displays(pg)
         await case_standalone_after_command(pg)
         await case_skip_key(pg)
         await case_unique_names(pg)

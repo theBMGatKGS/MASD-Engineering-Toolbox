@@ -10,7 +10,7 @@
 (function (root) {
 'use strict';
 const MLP = {};
-MLP.VERSION = '1.7.0';   // 1.7.0: assumed-display origin/assumption fields, displayPlan, project.timeZone, HASH_DEFAULTS additives (schema v1). 1.6.3: QA delta — stored out-of-range target held at the published limit for the Fire 1 seed / MiniLaser AF; one-time notice banner for Calculator and Report. 1.6.2: MiniLaser SFD/OAP alarm factor follows the scope's SFD/OAP target (Brent 2026-10-20 7:09 AM CT). 1.6.1: SFD/OAP design target (Brent 2026-10-20). 1.6.0: brand catalog, ASD-160. 1.5.1: MiniLaser pipe limits (M p.66)
+MLP.VERSION = '1.7.1';   // 1.7.1: parsePl — a repeated Area/Group name in one .pl gets ' #2', ' #3'… on the 2nd, 3rd… floor of that name (g.areaKey, detector and display keys, same as engine 1.3.1); unique names keep their keys. 1.7.0: assumed-display origin/assumption fields, displayPlan, project.timeZone, HASH_DEFAULTS additives (schema v1). 1.6.3: QA delta — stored out-of-range target held at the published limit for the Fire 1 seed / MiniLaser AF; one-time notice banner for Calculator and Report. 1.6.2: MiniLaser SFD/OAP alarm factor follows the scope's SFD/OAP target (Brent 2026-10-20 7:09 AM CT). 1.6.1: SFD/OAP design target (Brent 2026-10-20). 1.6.0: brand catalog, ASD-160. 1.5.1: MiniLaser pipe limits (M p.66)
 MLP.FORMAT = 'modulaser-project';
 MLP.SCHEMA_VERSION = 1;
 MLP.EXT = '.mlproj.json';
@@ -83,7 +83,8 @@ MLP.shortName = function (s){
 
 /* ---------------- PipeCAD .pl parser ----------------
    Keys and fingerprints match the Battery Calculator's link format:
-   detector key = `${area}#id${id}` (or #n<name>), display key = `${area}#disp${i}`. */
+   detector key = `${area}#id${id}` (or #n<name>), display key = `${area}#disp${i}`; area = the Area/Group name, plus ' #N' on the
+   Nth floor of a name repeated in the file (1.7.1). */
 MLP.parsePl = function (text, fileName){
   const doc = new DOMParser().parseFromString(text, 'application/xml');
   if (doc.getElementsByTagName('parsererror').length) throw new Error('Not a valid PipeCAD .pl (XML) file.');
@@ -109,15 +110,18 @@ MLP.parsePl = function (text, fileName){
     groups: [], skipped: []
   };
   if (!imperial) out.skipped.push(out.sensWarning);
+  const nameSeen = {};   // 1.7.1: occurrence of each Area/Group name in this file (counted only among same-named floors)
   kids(kid(rootEl, 'floorDatabase'), 'Floor').forEach((fl, gi) => {
     const gname = txt(fl, 'name') || `Area ${gi + 1}`;
-    const g = { idx: gi, name: gname, detectors: [], displays: [], psus: [], batteries: [] };
+    nameSeen[gname] = (nameSeen[gname] || 0) + 1;
+    const akey = nameSeen[gname] > 1 ? `${gname} #${nameSeen[gname]}` : gname;   // 1.7.1: key prefix; unique names unchanged
+    const g = { idx: gi, name: gname, areaKey: akey, detectors: [], displays: [], psus: [], batteries: [] };
     const seen = {};
     kids(kid(fl, 'detectorDatabase'), 'Detector').forEach((d, di) => {
       const name = txt(d, 'name') || `Detector ${di + 1}`;
       const typeRaw = txt(d, 'type');
       const idTxt = txt(d, 'id');
-      let key = `${gname}#${idTxt !== '' ? 'id' + idTxt : 'n' + name}`;
+      let key = `${akey}#${idTxt !== '' ? 'id' + idTxt : 'n' + name}`;
       if (seen[key]) key += '~' + (++seen[key]); else seen[key] = 1;
       const fanN = parseInt(txt(d, 'aspiratorSpeed'), 10);
       const isML = typeRaw === 'SOLO';   // 1.5.0: MiniLaser FHSD8075-ULF — standalone, never addressed (Brent Q1/Q2)
@@ -171,7 +175,7 @@ MLP.parsePl = function (text, fileName){
       const pn = txt(d, 'partNumber');
       const type = MLP.DISPLAY_PARTS[pn];
       if (!type){ out.skipped.push(`${gname}: display ${i + 1} has unknown partNumber “${pn}” — skipped`); return; }
-      g.displays.push({ key: `${gname}#disp${i}`, ord: i, kind: 'display', origName: `${type} ${i + 1}`, type, partNumber: pn,
+      g.displays.push({ key: `${akey}#disp${i}`, ord: i, kind: 'display', origName: `${type} ${i + 1}`, type, partNumber: pn,
         x: num0(d, 'startX') * scale, y: num0(d, 'startY') * scale, z: num0(d, 'startZ') * scale,
         fp: fnv([pn, num0(d, 'startX'), num0(d, 'startY')].join('|')) });
     });

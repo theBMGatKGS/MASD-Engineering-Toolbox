@@ -36,8 +36,8 @@ function loadMLP(){
 const E = loadEngine();
 const MLP = loadMLP();
 
-t('engine version 1.3.0', E.MASD_ENGINE.version === '1.3.0', E.MASD_ENGINE.version);
-t('MLP version 1.7.0', MLP.VERSION === '1.7.0', MLP.VERSION);
+t('engine version 1.3.1', E.MASD_ENGINE.version === '1.3.1', E.MASD_ENGINE.version);
+t('MLP version 1.7.1', MLP.VERSION === '1.7.1', MLP.VERSION);
 t('schema still v1', MLP.SCHEMA_VERSION === 1);
 
 // H5: numbers unchanged

@@ -86,7 +86,7 @@ const rec = { fan: 4, pipe: { holes: new Array(8).fill({}), lengthFt: 100 } };
 t('.pl import (miniLaserFromPl) derives AF from the Area target', M.miniLaserFromPl(rec, M.miniLaserClass(A3, 'Lab')).alarmFactor === 7 && M.miniLaserFromPl(rec, M.miniLaserClass(A3, 'Other')).alarmFactor === 8);
 t('designFromPl path: perf passed through (UL 1.80 → AF7)', (() => { const P2 = M.perfBlank(); M.sfdTargetSet(P2, '', 1.8, ok); return M.miniLaserFromPl(rec, M.miniLaserClass(P2, '')).derivation.threshold === 1.8; })());
 t('a .pl alarm factor (AfActivated) is still taken as-is', M.miniLaserFromPl({ fan: 4, pipe: { holes: new Array(8).fill({}), afActivatedRaw: 'true', af: 8 } }, c1).alarmFactor === 8);
-t('MLP 1.7.0', M.VERSION === '1.7.0');
+t('MLP 1.7.1', M.VERSION === '1.7.1');
 
 // QA A1: a stored out-of-range target stays flagged but drives the Fire 1 seed / MiniLaser AF at the nearest published limit
 const X = M.perfBlank(); X.sfdTarget = { value: 2.3, ref: 'hand-edited', initials: 'BW', family: 'UL' };

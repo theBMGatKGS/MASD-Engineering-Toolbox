@@ -10,7 +10,7 @@ const M = require(path.join(process.env.TOOLBOX_DIR || path.join(__dirname, '..'
 const SYN = process.env.SYNTH_DIR || '/workspace/plbuild/synth';
 const FX = process.env.ML_FIXTURE || require('child_process').execFileSync('python3', ['-c', 'import sys; sys.path.insert(0, sys.argv[1]); import make_synthetic_pl as m; print(m.ensure("shaft_ml", sys.argv[2]))', __dirname, SYN]).toString().trim();
 let pass = 0, fail = 0; const t = (n, c, i) => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + n + (i !== undefined ? '  ' + JSON.stringify(i) : '')); };
-t('MLP 1.7.0', M.VERSION === '1.7.0', M.VERSION);
+t('MLP 1.7.1', M.VERSION === '1.7.1', M.VERSION);
 const HAVE = fs.existsSync(FX); let skipped = 0;   // real fixtures stay off GitHub — fixture checks SKIP when it's absent
 const tf = (n, c, i) => { if (HAVE) t(n, c, i); else { skipped++; console.log('SKIP', n, '(fixture absent: ' + FX + ')'); } };
 let pc = null; if (HAVE) try { pc = M.parsePl(fs.readFileSync(FX, 'utf8'), 'Example-Shaft-MiniLaser.pl'); } catch (e) { t('MiniLaser .pl parses without throwing', false, e.message); }

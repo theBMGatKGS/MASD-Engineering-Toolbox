@@ -5,7 +5,7 @@
    MASD_ENGINE_VERSION and the revision of BOTH apps, with matching
    Revision-log notes that name the engine version.
    ===================================================================== */
-const MASD_ENGINE_VERSION = '1.3.0';   // 1.3.0: suggestDisplays for PipeCAD Displays step (Std/Min capacity vs ceil(n/8); le8 → 1 Std; needed>1 empty buckets). 1.2.0: explicit supply lookup, battery family/fit keys, 12V6A5 (manual only), brand-aware hardware via MLP 1.6.0
+const MASD_ENGINE_VERSION = '1.3.1';   // 1.3.1: plParse — a repeated Area/Group name in one .pl gets ' #2', ' #3'… on the 2nd, 3rd… floor of that name (g.areaKey, detector and display keys); unique names keep their keys. 1.3.0: suggestDisplays for PipeCAD Displays step (Std/Min capacity vs ceil(n/8); le8 → 1 Std; needed>1 empty buckets). 1.2.0: explicit supply lookup, battery family/fit keys, 12V6A5 (manual only), brand-aware hardware via MLP 1.6.0
 const MASD_ENGINE = {
   version: MASD_ENGINE_VERSION,
   /* BS 5839-1 Annex E: D = 1 when the battery 20-hour rate (Ah / 20) meets the alarm current, else 1.75. */
@@ -194,16 +194,19 @@ function plParse(text, fileName){
   };
   const floorDb = plKid(root, 'floorDatabase');
   const floors = floorDb ? Array.from(floorDb.children).filter(c => c.tagName === 'Floor') : [];
+  const nameSeen = {};   // 1.3.1: occurrence of each Area/Group name in this file (counted only among same-named floors)
   floors.forEach((fl, gi) => {
     const gname = plTxt(fl, 'name') || `Area ${gi + 1}`;
-    const g = { idx: gi, origName: gname, name: gname, include: true, detectors: [], displays: [], psus: [], miniLasers: [] };
+    nameSeen[gname] = (nameSeen[gname] || 0) + 1;
+    const akey = nameSeen[gname] > 1 ? `${gname} #${nameSeen[gname]}` : gname;   // key prefix: unique names unchanged
+    const g = { idx: gi, origName: gname, name: gname, areaKey: akey, include: true, detectors: [], displays: [], psus: [], miniLasers: [] };
     const seen = {};
     const ddb = plKid(fl, 'detectorDatabase');
     (ddb ? Array.from(ddb.children).filter(c => c.tagName === 'Detector') : []).forEach((d, di) => {
       const name = plTxt(d, 'name') || `Detector ${di + 1}`;
       const typeRaw = plTxt(d, 'type');
       const idTxt = plTxt(d, 'id');
-      let key = `${gname}#${idTxt !== '' ? 'id' + idTxt : 'n' + name}`;
+      let key = `${akey}#${idTxt !== '' ? 'id' + idTxt : 'n' + name}`;
       if (seen[key]) key += '~' + (++seen[key]); else seen[key] = 1;
       const fan = parseInt(plTxt(d, 'aspiratorSpeed'), 10);
       const rec = { key, ord: di, kind: 'detector', origName: name, typeRaw,
@@ -227,7 +230,7 @@ function plParse(text, fileName){
       const pn = plTxt(d, 'partNumber');
       const type = PL_DISPLAY_PARTS[pn];
       if (!type){ out.skipped.push(`${gname}: display ${i + 1} has unknown partNumber “${pn}” — skipped`); return; }
-      g.displays.push({ key: `${gname}#disp${i}`, ord: i, kind: 'display', origName: `${type} ${i + 1}`, type, partNumber: pn,
+      g.displays.push({ key: `${akey}#disp${i}`, ord: i, kind: 'display', origName: `${type} ${i + 1}`, type, partNumber: pn,
         x: plNum(d, 'startX') * scale, y: plNum(d, 'startY') * scale, z: plNum(d, 'startZ') * scale,
         fp: plFnv([pn, plNum(d,'startX'), plNum(d,'startY')].join('|')) });
     });
