@@ -10,7 +10,7 @@
 (function (root) {
 'use strict';
 const MLP = {};
-MLP.VERSION = '1.6.3';   // 1.6.3: QA delta — stored out-of-range target held at the published limit for the Fire 1 seed / MiniLaser AF; one-time notice banner for Calculator and Report. 1.6.2: MiniLaser SFD/OAP alarm factor follows the scope's SFD/OAP target (Brent 2026-10-20 7:09 AM CT). 1.6.1: SFD/OAP design target (Brent 2026-10-20) — project/Area target, published-limit validation, Fire 1 seed on UL scopes. 1.6.0: brand catalog (Edwards | Kidde Commercial), ASD-160 kind (MICRA25), hash defaults. 1.5.1: MiniLaser pipe limits (M p.66)
+MLP.VERSION = '1.7.0';   // 1.7.0: assumed-display origin/assumption fields, displayPlan, project.timeZone, HASH_DEFAULTS additives (schema v1). 1.6.3: QA delta — stored out-of-range target held at the published limit for the Fire 1 seed / MiniLaser AF; one-time notice banner for Calculator and Report. 1.6.2: MiniLaser SFD/OAP alarm factor follows the scope's SFD/OAP target (Brent 2026-10-20 7:09 AM CT). 1.6.1: SFD/OAP design target (Brent 2026-10-20). 1.6.0: brand catalog, ASD-160. 1.5.1: MiniLaser pipe limits (M p.66)
 MLP.FORMAT = 'modulaser-project';
 MLP.SCHEMA_VERSION = 1;
 MLP.EXT = '.mlproj.json';
@@ -278,7 +278,7 @@ MLP.verifyChangesAgainstPl = function (changes, parsed, devices){
 /* ---------------- project document ---------------- */
 MLP.blank = function (){
   return { format: MLP.FORMAT, schemaVersion: MLP.SCHEMA_VERSION, savedAt: '', savedBy: null,
-    project: { name: '', location: '', designer: '', company: '', building: '', networkNumber: '', preparedBy: '', date: '', brand: '' },
+    project: { name: '', location: '', designer: '', company: '', building: '', networkNumber: '', preparedBy: '', date: '', brand: '', timeZone: '' },
     design: null, site: null, changes: [], approvals: {} };
 };
 MLP.isProject = o => !!(o && o.format === MLP.FORMAT && typeof o.schemaVersion === 'number');
@@ -298,7 +298,7 @@ MLP.stringify = function (doc, app, rev, user){
    design.id keeps the old 32-bit FNV identity hash as a short display id only. */
 MLP.HASH_DROP = ['hash', 'id', 'updatedAt', 'importedAt'];
 /* 1.6.0 (B3a): new fields at their defaults are stripped before hashing, so an unchanged 02.01.000 file keeps its hash. */
-MLP.HASH_DEFAULTS = { brand: 'edwards', variant: '120', accessories: [], facuSource: false, ulOptIn: false, psVariant: '120', psTamper: false, psSeismic: false, cabinetUserSet: false, tpFacuSource: false, tpFacuUserSet: false };
+MLP.HASH_DEFAULTS = { brand: 'edwards', variant: '120', accessories: [], facuSource: false, ulOptIn: false, psVariant: '120', psTamper: false, psSeismic: false, cabinetUserSet: false, tpFacuSource: false, tpFacuUserSet: false, origin: 'pl', assumption: null, displayPlan: null, timeZone: null, displaysAssumed: false, commandOfferDismissed: false };
 function stripDefaults(v){
   if (Array.isArray(v)) return v.map(stripDefaults);
   if (v && typeof v === 'object'){ const o = {}; Object.keys(v).forEach(k => { const d = MLP.HASH_DEFAULTS[k], x = v[k];
@@ -1181,6 +1181,83 @@ MLP.asd160ConfigIssues = function (v){
   [['actionDly', 'Pre-Alarm delay', 0, 90], ['fire1Dly', 'Fire delay', 0, 90], ['flowLow', 'Flow low', 0, 20], ['flowHigh', 'Flow high', 0, 20], ['flowLow2', 'Flow low 2', 0, 30], ['flowHigh2', 'Flow high 2', 0, 30], ['flowDly', 'Flow fault delay', 0, 240]]
     .forEach(([k, l, lo, hi]) => { const x = num(v[k]); if (x != null && (x < lo || x > hi)) out.push({ level: 'error', msg: `${l} ${x} is outside ${lo}–${hi}` }); });
   return out;
+};
+
+
+/* ---- Assumed displays (1.7.0) ---- */
+MLP.displayOrigin = function (dev){
+  if (!dev) return 'pl';
+  return dev.origin || 'pl';
+};
+MLP.isAssumedDisplay = function (dev){
+  return !!(dev && (dev.origin === 'assumed' || (dev.assumption && dev.assumption.rule)));
+};
+/** Replace assumed Std/Min rows with real PipeCAD displays, keeping address and cluster (R1A). */
+MLP.replaceAssumedWithReal = function (designDevices, realDisplays, matchFn){
+  const out = (designDevices || []).slice();
+  const reals = (realDisplays || []).slice();
+  const assumed = out.filter(d => MLP.isAssumedDisplay(d) && (d.type === 'Standard Display' || d.type === 'Minimum Display'));
+  assumed.forEach((a, i) => {
+    const real = matchFn ? matchFn(a, reals, i) : reals[i];
+    if (!real) return;
+    const idx = out.indexOf(a);
+    if (idx < 0) return;
+    const kept = { address: a.address, cluster: a.cluster, sheetId: a.sheetId, power: a.power, network: a.network };
+    const merged = Object.assign({}, real, {
+      address: real.address != null && real.address !== '' ? real.address : kept.address,
+      cluster: real.cluster != null && real.cluster !== '' ? real.cluster : kept.cluster,
+      sheetId: kept.sheetId || real.sheetId,
+      power: kept.power || real.power,
+      network: kept.network != null ? kept.network : real.network,
+      origin: 'pl',
+      assumption: null,
+      pl: real.pl != null ? real.pl : true
+    });
+    out[idx] = merged;
+    const ri = reals.indexOf(real); if (ri >= 0) reals.splice(ri, 1);
+  });
+  return out;
+};
+MLP.makeAssumedDisplay = function (opts){
+  opts = opts || {};
+  const type = opts.type || 'Standard Display';
+  return {
+    kind: 'display',
+    type: type,
+    model: (MLP.DISPLAY_MODELS && MLP.DISPLAY_MODELS[type]) || 'FHSD8310',
+    name: opts.name || 'DSP01',
+    origin: 'assumed',
+    assumption: {
+      by: opts.by || '',
+      at: opts.at || new Date().toISOString(),
+      why: opts.why || 'Assumed during PipeCAD import — displays missing or under-provisioned.',
+      rule: opts.rule || 'le8-floor',
+      floor: opts.floor || '',
+      floorIdx: opts.floorIdx != null ? opts.floorIdx : 0,
+      bucket: opts.bucket != null ? opts.bucket : 0,
+      linkId: opts.linkId || '',
+      decision: opts.decision || 'accept'
+    },
+    pl: null,
+    pipe: null,
+    fan: null,
+    address: opts.address || '',
+    cluster: opts.cluster != null ? opts.cluster : '',
+    id: opts.id || ('assumed:' + (opts.linkId || 'link') + ':' + (opts.floorIdx || 0) + ':' + (opts.bucket || 0))
+  };
+};
+/** Resolve job time zone for As-Built / Field Change display (R4A). */
+MLP.resolveTimeZone = function (project, runtimeTz){
+  const p = project || {};
+  const cand = p.timeZone || runtimeTz || '';
+  try {
+    if (cand){ Intl.DateTimeFormat('en-US', { timeZone: cand }).format(new Date()); return { timeZone: cand, source: p.timeZone ? 'project' : 'runtime', note: p.timeZone ? null : 'Job time zone not set — using this device.' }; }
+  } catch (e){}
+  return { timeZone: 'UTC', source: 'utc', note: 'Job time zone not set — using UTC.' };
+};
+MLP.formatInTimeZone = function (iso, timeZone){
+  try { return new Date(iso).toLocaleString('en-US', { timeZone: timeZone || 'UTC' }); }
+  catch (e){ return new Date(iso).toLocaleString('en-US', { timeZone: 'UTC' }) + ' UTC'; }
 };
 
 root.MLP = MLP;

@@ -2339,7 +2339,7 @@ body.v2 .model-cell{ font-size:10.5px; }
    MASD_ENGINE_VERSION and the revision of BOTH apps, with matching
    Revision-log notes that name the engine version.
    ===================================================================== */
-const MASD_ENGINE_VERSION = '1.2.0';   // 1.2.0: explicit supply lookup (no '6A'→'10A' string swap), battery family/fit keys, 12V6A5 (manual only), brand-aware hardware via MLP 1.6.0
+const MASD_ENGINE_VERSION = '1.3.0';   // 1.3.0: suggestDisplays for PipeCAD Displays step (Std/Min capacity vs ceil(n/8); le8 → 1 Std; needed>1 empty buckets). 1.2.0: explicit supply lookup, battery family/fit keys, 12V6A5 (manual only), brand-aware hardware via MLP 1.6.0
 const MASD_ENGINE = {
   version: MASD_ENGINE_VERSION,
   /* BS 5839-1 Annex E: D = 1 when the battery 20-hour rate (Ah / 20) meets the alarm current, else 1.75. */
@@ -2375,6 +2375,9 @@ const MODULE_TYPES = {
   "Detector":         { model: "FHSD8330-ULF", kind: "detector", ma: null }
 };
 const FAN_SPEED_MA = {1:218,2:234,3:255,4:279,5:301,6:330,7:363,8:393,9:431,10:471,11:506,12:552,13:602,14:646,15:712,16:762};
+/* H5 (closed): FAN_SPEED_MA figures are engineering-approved values used by the calculation engine.
+   They differ from some printed manual / worksheet tables on purpose. Numbers must not be changed
+   without a new engineering approval. Source: Brent, relayed by QA, 2026-11-09 5:22 PM CT. */
 // 18V reference figures from the manufacturer's current-draw worksheet, for the Help menu's
 // reference table only — not used in any calculation (the calculator's own math always uses
 // FAN_SPEED_MA above). Does not match either the 18.0V or 20.4V rows exactly in every case;
@@ -2662,6 +2665,85 @@ function plSuggestForGroup(g, devs){
   return out;
 }
 
+/* ---------- Displays step (1.3.0): cluster Std/Min capacity vs detectors ---------- */
+/* Command displays do NOT count toward capacity. MiniLaser / ASD-160 floors are skipped. */
+function suggestDisplays(groups, existingState){
+  const plan = { floors: [], neededTotal: 0, anyNeeded: false };
+  const state = existingState || {};
+  const prior = state.displayPlan || {};
+  (groups || []).forEach((g, floorIdx) => {
+    const floorName = g.name || g.origName || ('Floor ' + (floorIdx + 1));
+    const floorKey = String(state.linkId || 'link') + ':' + floorIdx + ':' + floorName;
+    const dets = (g.detectors || []).filter(d => d.kind === 'detector' || (!d.kind && d.type !== 'MiniLaser' && d.type !== 'ASD-160'));
+    // Prefer explicit kind from plParse
+    const mlDets = (g.detectors || []).filter(d => d.kind === 'detector');
+    const nDet = mlDets.length;
+    const clusterDisp = (g.displays || []).filter(d => d.type === 'Standard Display' || d.type === 'Minimum Display');
+    const nCluster = clusterDisp.length;
+    const cmds = (g.displays || []).filter(d => d.type === 'Command Display');
+    const hasMiniOnly = nDet === 0 && ((g.detectors || []).some(d => d.kind === 'minilaser') || (g.minilasers || []).length);
+    const hasAsdOnly = nDet === 0 && ((g.detectors || []).some(d => d.kind === 'asd' || d.type === 'ASD-160') || (g.asds || []).length);
+    if (nDet === 0){
+      plan.floors.push({ floorKey, floorIdx, floorName, nDet: 0, nCluster, needed: 0, status: 'skip', reason: hasMiniOnly ? 'minilaser-only' : (hasAsdOnly ? 'asd-only' : 'no-modulaser-detectors'), suggestion: null, buckets: [], detectors: [] });
+      return;
+    }
+    const capacityNeed = Math.ceil(nDet / MAX_DETECTORS_PER_CLUSTER);
+    const needed = Math.max(0, capacityNeed - nCluster);
+    const priorFloor = prior[floorKey] || prior[floorName];
+    if (priorFloor && priorFloor.decision === 'skip' && needed > 0 && !(priorFloor.neededGrown && needed > (priorFloor.needed || 0))){
+      // Skip persistence (L4 / test 13): do not re-prompt unless needed grew
+      if ((priorFloor.needed || 0) >= needed){
+        plan.floors.push({ floorKey, floorIdx, floorName, nDet, nCluster, needed, status: 'skipped', suggestion: null, buckets: [], detectors: mlDets, commands: cmds.length });
+        return;
+      }
+    }
+    if (needed === 0){
+      plan.floors.push({ floorKey, floorIdx, floorName, nDet, nCluster, needed: 0, status: 'ok', suggestion: null, buckets: [], detectors: mlDets, commands: cmds.length });
+      return;
+    }
+    plan.anyNeeded = true;
+    plan.neededTotal += needed;
+    let suggestion = null;
+    let buckets = [];
+    if (nCluster === 0 && nDet >= 1 && nDet <= MAX_DETECTORS_PER_CLUSTER){
+      suggestion = { rule: 'le8-floor', type: 'Standard Display', count: 1, part: 'FHSD8310' };
+    } else {
+      // needed > 1 or under-provisioned: empty buckets equal to `needed` (existing Std/Min stay as pre-filled)
+      for (let i = 0; i < nCluster; i++){
+        buckets.push({ id: 'exist-' + i, type: clusterDisp[i].type || 'Standard Display', existing: true, detectors: [], max: MAX_DETECTORS_PER_CLUSTER });
+      }
+      for (let i = 0; i < needed; i++){
+        buckets.push({ id: 'new-' + i, type: 'Standard Display', existing: false, detectors: [], max: MAX_DETECTORS_PER_CLUSTER });
+      }
+      suggestion = { rule: 'grouped', type: 'Standard Display', count: needed, part: 'FHSD8310' };
+    }
+    plan.floors.push({ floorKey, floorIdx, floorName, nDet, nCluster, needed, capacityNeed, status: 'needed', suggestion, buckets, detectors: mlDets, existingDisplays: clusterDisp, commands: cmds.length });
+  });
+  return plan;
+}
+
+/** Projected PSU count for a bucket under the 4-det + 1-display rule (ignores Ah split). */
+function displayBucketPsuCount(detectorCount, hasDisplay){
+  const dets = detectorCount || 0;
+  const disp = hasDisplay ? 1 : 0;
+  if (!dets && !disp) return 0;
+  // Each PSU holds ≤4 detectors and ≤1 display
+  const byDet = Math.ceil(dets / PL_MAX_DET_PER_PSU) || (disp ? 1 : 0);
+  return Math.max(byDet, disp ? 1 : 0);
+}
+
+/** Live Ah estimate for devices on a PSU using wizard settings (Edwards A/BPS + 1 AUX). */
+function displayBucketAh(devices, settings){
+  return plRequiredAh(devices || [], settings || { designBasis: 'NFPA 72 Standard', standbyHours: '24', alarmMinutes: '5', margin: '0.25', temperature: '77', mode: 'edwards' });
+}
+
+if (typeof MASD_ENGINE !== 'undefined'){
+  MASD_ENGINE.suggestDisplays = suggestDisplays;
+  MASD_ENGINE.displayBucketPsuCount = displayBucketPsuCount;
+  MASD_ENGINE.displayBucketAh = displayBucketAh;
+  MASD_ENGINE.MAX_DETECTORS_PER_CLUSTER = MAX_DETECTORS_PER_CLUSTER;
+  MASD_ENGINE.CHARGER_MAX_AH = CHARGER_MAX_AH;
+}
 
 </script><!--ENGINE-END-->
 <script>
@@ -2696,6 +2778,7 @@ const AMENDMENTS = [
   { rev: "000", major: "00", minor: "02", date: "261016", desc: "Harmonized with Battery Calculator 02.01.000 (Brent 10-16): <b>MiniLaser ASD (FHSD8075-ULF)</b> — Standalone ASDs table on each sheet (never addressed), dedicated AUX circuit per MiniLaser (35 mA overhead, 3.0 A limit; overflow recommends another power supply), I/O Expansion Modules 9-30521 0–2 with the 9-30520 housing added automatically, Pre-engineered picker (manual Tables 13–31) or Manual config, .pl SOLO import with alarm-factor derivation and DIP/Remote advice. <b>Config mode</b>: MiniLaser devices with R1 Fault relay (fixed, fail-safe), R2 Relay output 1 (Prealarm), R3 Relay output 2 (Fire Alarm), IN1 supervised input, expansion X1/X2 OUT1–5 and IN1–2; application (Table 35), alarm delay and flow-fault level/delay start blank; flow fault 40% on a UL/FM application warns. masd-engine.js 1.1.0, modulaser-project.js 1.5.1. <b>Arrangement with 2+ clusters (Brent 9:02 PM):</b> the disparate-clusters warning does not withhold the Recommended Power Supply Arrangement any more. The warning stays and the arrangement card shows alongside it. Final (Brent): it is a warning only — the sheet can pass and nothing is withheld (no “Recommendation withheld” banner; BOM and export shown). On Edwards A/BPS it never fires (AUX is unique per entry point; the unreachable shared-pathway check was removed). <b>QA delta:</b> MiniLaser manual p.66 pipe limits enforced (holes per class, pipe length, first hole when known); Current Draw Reference xlsx has an explicit black font. <b>Final:</b> the Disparate-clusters message is a warning only (the sheet can pass, nothing is withheld; never on Edwards A/BPS); modulaser-project.js 1.5.1. Side panel: validation flags are styled apart from the amber warning, and warnings are not counted; offline cache masd-toolbox-00-02-000-r2." },
   { rev: "000", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.000. <b>Brand selector (Edwards | Kidde Commercial)</b> — project-level, first in Project information; part numbers, supply labels, BOM, logos and report titles follow the brand; the remembered default seeds new projects. Per-sheet supply <b>variant</b> (120 V / 220–230 V / ULC), tamper and seismic accessories, and <b>FACU powers these ASDs</b> with a power-source prompt (in-house / third-party / unidentified; unidentified makes the sheet Incomplete). <b>ASD-160 (Micra25 / Senator 25)</b> rows in the ASD table: 250 mA, dedicated AUX circuit, networked address 1–127, PipeCAD .pl import (MICRA25), Remote configuration, UL/non-UL alarm-factor rules (1.28 cap on UL SFD/OAP, R-AF7). Battery 12V6A5 (7.2 Ah) is manual-only with a too-small advisory. AUX/ribbon rules: max 4 AUX per power supply; each ribbon run holds max 4 detectors + 1 display; a detector-started run counts that detector; hybrid clusters may have any number of runs; own-AUX modules are not runs. Help revised with current screenshots; new printable Quick Start (Help ▸ Print Quick Start). MLP 1.6.0, engine 1.2.0. Config: ASD-160 branch — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers. Report band: brand logo and brand label; Excel report header gets a Brand row (no fills). Quick Start one-pager (quickstart.html) and in-app Toolbox Quick Start carry current screenshots. `tools/build.py` is marked retired (index.html is the source of truth); `src/toolbox.js` and `src/tb-asd160.js` are exact copies of the inline blocks (tested). Manual battery or capacity pick turns Auto Battery Sizing off (with a toast); the controls stay selectable in Auto. Networked ASD-160s count toward the 127-module SenseNET limit and share the network's addresses (duplicates flagged). Unidentified power source → ⚠ Incomplete everywhere: sheet status and amber dot, side panel, print stamp and project file; the Report adds a blank “Power source identified” item to every power supply sheet and an amber banner. A manual alarm factor on an ASD-160 row is what gets validated (\"alarm factor N … exceeds … — lower the alarm factor\"). Excel Detail sheet: Brand row under Project (no fills). Brand logo in the KGS print band (PDF / HTML / print preview)." },
   { rev: "001", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.001 (Brent 10-19 5:56 PM). <b>Printed Quick Start</b> (Help ▸ Print Quick Start): larger white brand logo (Edwards or Kidde Commercial) in the header with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages. No battery-calculation change (MLP 1.6.3, engine 1.2.0). Printed Quick Start Step 1 is a full-width row (Brent 6:28 PM); Calculator lineage reads 02.02.001 in About, README, Help and the Quick Start. Every printed step is a full-width row with its screenshot on the right (Brent 7:07 PM); step numbers run continuously across pages; Step 3 sub-steps lettered a, b, c. Printed Toolbox Quick Start screenshots (Config, Battery calc) re-captured at 2× with tighter crops at full image width so they are legible (≤ 1.9 source px per print px); Toolbox print pages are now steps 1–2 and 3–5 (still 2 pages). <b>SFD/OAP design target</b> (Brent 2026-10-20 6:39–6:49 AM CT: “SFD/OAP for Engineering Toolbox must be revised from 2.5% obs/ft to 2.0% obs/ft. Make this the target for any UL-driven SFD or OAP requirement. FM and other non-UL targets can remain at 2.5% obs/ft. Allow toolbox a means of adjusting the default % obs/ft to different values for SFD for baseline configurations that apply project-wide but remain within the published limits of the respective detector.” · “UL limit is 1.71% to 2.18%. Target 2.0% for practical purposes.” · “Adjustable for FM too.” · “Allow per-Area/Group overrides too.” · “Yes, for projects requiring UL compliance. All others can remain at 2.5% by default.” · “Reject it with a message.” · “Yes, require a reference and initials.” · “Fold it into 02.02.001.”): the SFD/OAP design target is 2.0 %obs/ft for UL-driven scopes and 2.5 %obs/ft for FM and other standards; adjustable project-wide and per Area/Group (UL and FM), within each detector's published limits (UL: ModuLaser and MiniLaser 1.70–2.18; FM: ModuLaser and MiniLaser ≤2.50, ASD-160 ≤3.5; the ASD-160 UL 1.28 cap always governs). Out-of-range or non-numeric entries are rejected with a message, never clamped; a non-default target needs a reference and the engineer's initials. On UL scopes the SFD Fire 1 seed follows the target; otherwise it stays 2.5. Pass/fail is unchanged (UL Open Area 1.70–2.18 %obs/ft, ≤43 s; FM 3230 ≤2.50, ≤120 s). Older projects adopt the default with a one-time notice. modulaser-project.js 1.6.1. Then (Brent 2026-10-20 7:09 AM CT): “Keep 1.70, per the manual” (UL lower limit unchanged) and “Yes, follow the target”: the MiniLaser alarm-factor rule for SFD and OAP now uses the scope's SFD/OAP target (Area/Group override → project → default; UL default 2.0, FM default 2.5) instead of a fixed 2.18 (OAP) / 2.0 (SFD). FM targets accepted up to 2.50 inclusive. modulaser-project.js 1.6.2. QA SFD/OAP delta: a stored out-of-range target (hand-edited or imported) stays flagged and blocks export, but the Fire 1 seed and the MiniLaser alarm factor use the nearest published limit instead; the one-time notice also shows in the Calculator and the Report; the Report validates the target against the linked design's device kinds (an FM project with only ASD-160s may use up to 3.5 without a false deficiency). modulaser-project.js 1.6.3." },
+  { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.0, MASD engine 1.3.0; wizard region parity." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -7835,6 +7918,517 @@ function plSetPattern(p){ try { localStorage.setItem(PL_PATTERN_KEY, p); } catch
 
 /* ---------- wizard state ---------- */
 const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedByGroup: {}, mode: 'new', linkUpdate: null };
+
+/* ---- DISPLAYS-WIZARD-BEGIN ---- */
+/* Displays step (Calculator / Toolbox shared wizard) — PipeCAD-first gate + assumed fallback.
+   Mockup picks (Brent 2026-11-09 5:45 PM CT): S1A, S2A, S3B, S5B. */
+(function (){
+  if (typeof plWiz === 'undefined') return;
+  plWiz.displayPlan = plWiz.displayPlan || {};
+  plWiz.displaysPhase = plWiz.displaysPhase || null; // null | 'gate' | 'fallback' | 'command'
+  plWiz.displaysSuggest = plWiz.displaysSuggest || null;
+  plWiz.rerunPipeCad = !!plWiz.rerunPipeCad;
+  plWiz.commandOffer = plWiz.commandOffer || null; // { show, dismissed, accepted }
+  plWiz.assumedScratch = plWiz.assumedScratch || {}; // floorKey -> assumed display drafts
+
+  function plFloorKey(fi, g, floorIdx){
+    return String(fi) + ':' + floorIdx + ':' + (g.origName || g.name || '');
+  }
+  function plModuLaserDets(g){
+    return (g.detectors || []).filter(d => d.kind === 'detector');
+  }
+  function plClusterDisplays(g){
+    return (g.displays || []).filter(d => d.type === 'Standard Display' || d.type === 'Minimum Display');
+  }
+  function plBuildSuggest(){
+    const groups = [];
+    const meta = [];
+    plIncludedGroups().forEach(({ f, fi, g }, idx) => {
+      groups.push(g);
+      meta.push({ f, fi, g, floorIdx: idx, floorKey: plFloorKey(fi, g, idx) });
+    });
+    const raw = (typeof suggestDisplays === 'function' ? suggestDisplays : MASD_ENGINE.suggestDisplays)(groups, {
+      linkId: (plWiz.files[0] && plWiz.files[0].linkId) || 'link',
+      displayPlan: plWiz.displayPlan
+    });
+    raw.floors.forEach((fl, i) => {
+      const m = meta[i] || {};
+      fl.fi = m.fi; fl.g = m.g; fl.f = m.f;
+      fl.floorKey = m.floorKey || fl.floorKey;
+    });
+    plWiz.displaysSuggest = raw;
+    return raw;
+  }
+  function plAnyDisplaysNeeded(){
+    const p = plBuildSuggest();
+    return !!(p && p.anyNeeded);
+  }
+  function plAssumedName(floorName, bucketIdx){
+    const abbr = (typeof plAbbr === 'function' ? plAbbr(floorName) : String(floorName || 'F').replace(/\s+/g, '').slice(0, 6));
+    const tail = 'DSP' + String(bucketIdx + 1).padStart(2, '0');
+    let n = abbr + '-' + tail;
+    if (n.length > PL_NAME_MAX) n = ('F' + (bucketIdx + 1) + '-' + tail).slice(0, PL_NAME_MAX);
+    return n.slice(0, PL_NAME_MAX);
+  }
+  function plInjectAssumedIntoGroup(g, floor, decision){
+    if (decision === 'skip'){
+      plWiz.displayPlan[floor.floorKey] = { decision: 'skip', needed: floor.needed, at: new Date().toISOString() };
+      return;
+    }
+    const type = (plWiz.assumedScratch[floor.floorKey] && plWiz.assumedScratch[floor.floorKey].type) || (floor.suggestion && floor.suggestion.type) || 'Standard Display';
+    if (floor.suggestion && floor.suggestion.rule === 'le8-floor'){
+      const name = plAssumedName(floor.floorName, 0);
+      const disp = {
+        key: 'assumed:' + floor.floorKey + ':0',
+        kind: 'display', type, origName: name, newName: name, suggest: name, userNamed: true,
+        fan: null, x: 0, y: 0, ord: -1, origin: 'assumed',
+        assumption: { rule: 'le8-floor', floor: floor.floorName, floorIdx: floor.floorIdx, bucket: 0, decision: 'accept', at: new Date().toISOString(), why: 'Assumed during import — floor short on Std/Min displays.' },
+        fp: 'assumed-' + floor.floorKey
+      };
+      g.displays = g.displays || [];
+      g.displays.push(disp);
+      plWiz.displayPlan[floor.floorKey] = { decision: 'accept', type, needed: floor.needed, name };
+      return;
+    }
+    // grouped: materialize one assumed display per non-existing bucket that has detectors assigned
+    const buckets = (plWiz.assumedScratch[floor.floorKey] && plWiz.assumedScratch[floor.floorKey].buckets) || floor.buckets || [];
+    buckets.forEach((b, bi) => {
+      if (b.existing) return;
+      const assigned = b.detectors || [];
+      if (!assigned.length) return;
+      const name = plAssumedName(floor.floorName, bi);
+      const disp = {
+        key: 'assumed:' + floor.floorKey + ':' + bi,
+        kind: 'display', type: b.type || 'Standard Display', origName: name, newName: name, suggest: name, userNamed: true,
+        fan: null, x: 0, y: 0, ord: -1, origin: 'assumed',
+        assumption: { rule: 'grouped', floor: floor.floorName, floorIdx: floor.floorIdx, bucket: bi, decision: 'grouped', at: new Date().toISOString(), why: 'Assumed during import — grouped detectors to display.' },
+        fp: 'assumed-' + floor.floorKey + '-' + bi,
+        _bucketDetKeys: assigned.map(d => d.key || d)
+      };
+      g.displays = g.displays || [];
+      g.displays.push(disp);
+    });
+    plWiz.displayPlan[floor.floorKey] = { decision: 'grouped', needed: floor.needed, buckets: buckets.map(b => ({ id: b.id, n: (b.detectors || []).length })) };
+  }
+  function plApplyAllAssumed(){
+    const p = plWiz.displaysSuggest || plBuildSuggest();
+    p.floors.forEach(fl => {
+      if (fl.status !== 'needed' && fl.status !== 'skipped') return;
+      if (fl.status === 'skipped') return;
+      const scratch = plWiz.assumedScratch[fl.floorKey] || {};
+      if (scratch.decision === 'skip'){
+        plInjectAssumedIntoGroup(fl.g, fl, 'skip');
+        return;
+      }
+      plInjectAssumedIntoGroup(fl.g, fl, scratch.decision || 'accept');
+    });
+    plWiz.rerunPipeCad = true;
+  }
+  function plCommandOfferNeeded(){
+    // After assumed applied: count clusters (Std/Min) across included groups on networked import
+    let clusters = 0, cmds = 0;
+    plIncludedGroups().forEach(({ g }) => {
+      clusters += plClusterDisplays(g).length;
+      cmds += (g.displays || []).filter(d => d.type === 'Command Display').length;
+    });
+    return clusters >= 2 && cmds === 0;
+  }
+
+  window.plDisplaysGateStop = function (){
+    // Stop import — leave calc unchanged; no assumed rows; light pause note only
+    plWiz.rerunPipeCad = false;
+    plWiz.displayPlan = {};
+    plWiz.assumedScratch = {};
+    plWiz.displaysPhase = null;
+    plWiz.displaysSuggest = null;
+    const ov = document.getElementById('plw-overlay');
+    if (ov) ov.classList.remove('open');
+    const ban = document.getElementById('pl-link-banner');
+    if (ban){ ban.hidden = false; ban.textContent = 'Import paused: fix displays in PipeCAD, then re-run Import .pl…'; }
+    const msg = document.getElementById('plw-msg'); if (msg) msg.textContent = '';
+  };
+  window.plDisplaysGateContinue = function (){
+    plWiz.rerunPipeCad = true;
+    plWiz.displaysPhase = 'fallback';
+    plBuildSuggest();
+    plRender();
+  };
+  window.plDisplaysAcceptFloor = function (floorKey){
+    plWiz.assumedScratch[floorKey] = Object.assign({}, plWiz.assumedScratch[floorKey], { decision: 'accept' });
+    plRender();
+  };
+  window.plDisplaysSkipFloor = function (floorKey){
+    plWiz.assumedScratch[floorKey] = Object.assign({}, plWiz.assumedScratch[floorKey], { decision: 'skip' });
+    plRender();
+  };
+  window.plDisplaysSetType = function (floorKey, type){
+    plWiz.assumedScratch[floorKey] = Object.assign({}, plWiz.assumedScratch[floorKey], { type: type, decision: 'accept' });
+    plRender();
+  };
+  window.plDisplaysAssignDet = function (floorKey, bucketId, detKey){
+    const fl = (plWiz.displaysSuggest.floors || []).find(f => f.floorKey === floorKey);
+    if (!fl) return;
+    const scratch = plWiz.assumedScratch[floorKey] || { buckets: JSON.parse(JSON.stringify(fl.buckets || [])) };
+    if (!scratch.buckets) scratch.buckets = JSON.parse(JSON.stringify(fl.buckets || []));
+    // remove from all buckets
+    scratch.buckets.forEach(b => { b.detectors = (b.detectors || []).filter(d => (d.key || d) !== detKey); });
+    const b = scratch.buckets.find(x => x.id === bucketId);
+    if (b){
+      b.detectors = b.detectors || [];
+      if (b.detectors.length >= 8) return;
+      const det = (fl.detectors || []).find(d => d.key === detKey) || { key: detKey };
+      b.detectors.push(det);
+    }
+    scratch.decision = 'grouped';
+    plWiz.assumedScratch[floorKey] = scratch;
+    plRender();
+  };
+  window.plDisplaysUnassignDet = function (floorKey, detKey){
+    const scratch = plWiz.assumedScratch[floorKey];
+    if (!scratch || !scratch.buckets) return;
+    scratch.buckets.forEach(b => { b.detectors = (b.detectors || []).filter(d => (d.key || d) !== detKey); });
+    plRender();
+  };
+  window.plCommandAccept = function (){
+    // Add 1 Command display onto first included group
+    const first = plIncludedGroups()[0];
+    if (first){
+      const name = plAssumedName(first.g.origName || 'Net', 90).replace('DSP', 'CMD').slice(0, PL_NAME_MAX);
+      first.g.displays = first.g.displays || [];
+      first.g.displays.push({
+        key: 'assumed:cmd:' + Date.now().toString(36), kind: 'display', type: 'Command Display',
+        origName: name, newName: name, suggest: name, userNamed: true, fan: null, x: 0, y: 0, ord: -2,
+        origin: 'assumed', assumption: { rule: 'command-offer', decision: 'accept', at: new Date().toISOString(), why: 'SenseNET network has 2+ clusters and no Command display.' },
+        fp: 'assumed-cmd'
+      });
+    }
+    plWiz.commandOffer = { show: false, accepted: true, dismissed: false };
+    plWiz.displaysPhase = 'done';
+    plWiz.step = 5; // Power supplies
+    plWiz.suggested = false;
+    plRender();
+  };
+  window.plCommandDismiss = function (){
+    plWiz.commandOffer = { show: false, accepted: false, dismissed: true };
+    plWiz.displayPlan.__commandDismissed = true;
+    plWiz.displaysPhase = 'done';
+    plWiz.step = 5;
+    plWiz.suggested = false;
+    plRender();
+  };
+
+  window.plRenderDisplaysStep = function (body){
+    const plan = plBuildSuggest();
+    if (!plWiz.displaysPhase) plWiz.displaysPhase = plan.anyNeeded ? 'gate' : 'done';
+    if (plWiz.displaysPhase === 'done' || !plan.anyNeeded){
+      // Nothing to do — advance path handled by plNext
+      body.innerHTML = `<div class="plw-note">All included floors have enough Standard/Minimum cluster displays.</div>`;
+      return;
+    }
+    if (plWiz.displaysPhase === 'gate'){
+      // S1A — floor shortage table, Stop primary
+      const rows = plan.floors.map(fl => {
+        let status, cls;
+        if (fl.status === 'ok'){ status = 'OK'; cls = 'ok'; }
+        else if (fl.status === 'skip' || fl.status === 'skipped'){ status = fl.status === 'skipped' ? 'SKIPPED' : '—'; cls = ''; }
+        else if (fl.nCluster === 0){ status = 'MISSING'; cls = 'bad'; }
+        else { status = 'SHORTAGE'; cls = 'bad'; }
+        return `<tr><td>${plEsc(fl.floorName)}</td><td class="plw-count">${String(fl.nDet).padStart(2,'0')}</td><td class="plw-count">${String(fl.nCluster).padStart(2,'0')}</td><td class="plw-count">${String(fl.needed || fl.capacityNeed || 0).padStart(2,'0')}</td><td><span class="plw-tag ${cls}">${status}</span></td></tr>`;
+      }).join('');
+      body.innerHTML = `
+        <div style="text-align:center;margin:8px 0 14px">
+          <div style="font-size:28px;color:var(--accent)">⚠</div>
+          <h3 style="margin:6px 0;font-size:16px">Displays missing or under-provisioned</h3>
+          <p style="color:var(--text-dim);font-size:12.5px;max-width:640px;margin:0 auto">Display modules belong in the PipeCAD project. Correct Std/Min displays there, then re-import.</p>
+        </div>
+        <div class="plw-warn">For accurate battery sizing, fix Std/Min displays in PipeCAD first. Assumed displays are a fallback only if you continue.</div>
+        <table class="plw-table"><thead><tr><th>Location / Floor</th><th>Detectors</th><th>Std/Min</th><th>Needed</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="plw-foot" style="border:0;padding:16px 0 0;justify-content:space-between">
+          <button type="button" class="btn btn-primary" id="pl-disp-stop">Stop import — I'll fix PipeCAD first</button>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-ghost" id="plw-back-proxy">Back</button>
+            <button type="button" class="btn btn-ghost" id="pl-disp-continue">Continue without PipeCAD displays…</button>
+          </div>
+        </div>`;
+      body.querySelector('#pl-disp-stop').onclick = () => plDisplaysGateStop();
+      body.querySelector('#pl-disp-continue').onclick = () => plDisplaysGateContinue();
+      body.querySelector('#plw-back-proxy').onclick = () => { plWiz.step = 3; plWiz.displaysPhase = null; plRender(); };
+      // Hide default foot Next while on gate
+      const fin = document.getElementById('plw-finish'); if (fin) fin.hidden = true;
+      return;
+    }
+    if (plWiz.displaysPhase === 'command'){
+      // S5B — modal over wizard
+      body.innerHTML = `
+        <div style="position:relative;min-height:280px">
+          <div style="opacity:.35;pointer-events:none"><div class="plw-note">Reviewing SenseNET Command display requirement…</div></div>
+          <div role="dialog" aria-modal="true" style="position:absolute;inset:10% 12%;background:var(--panel);border:1px solid var(--border);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);padding:18px;z-index:2">
+            <h3 style="margin:0 0 8px;font-size:16px">Add Command display?</h3>
+            <div class="plw-warn">This SenseNET network has 2+ clusters and no Command display.</div>
+            <ul style="font-size:12.5px;color:var(--text-dim);line-height:1.55;margin:0 0 14px;padding-left:18px">
+              <li>Command display draws <b class="mono">232 mA</b></li>
+              <li>Does <b>not</b> host a detector cluster</li>
+              <li>Counts toward max <b>2</b> Command displays per network</li>
+              <li>Needs its own address and usually its own PSU slot</li>
+            </ul>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+              <button type="button" class="btn btn-ghost" id="pl-cmd-no">Not now</button>
+              <button type="button" class="btn btn-primary" id="pl-cmd-yes">Add 1 Command display</button>
+            </div>
+          </div>
+        </div>`;
+      body.querySelector('#pl-cmd-yes').onclick = () => plCommandAccept();
+      body.querySelector('#pl-cmd-no').onclick = () => plCommandDismiss();
+      return;
+    }
+    // fallback phase — S2A / S3B
+    const parts = [];
+    plan.floors.forEach(fl => {
+      if (fl.status === 'ok'){
+        parts.push(`<div class="plw-area"><h4>${plEsc(fl.floorName)} <span class="plw-tag ok">OK</span> <span class="plw-count">${fl.nDet} det / ${fl.nCluster} cluster displays</span></h4></div>`);
+        return;
+      }
+      if (fl.status === 'skip' || fl.status === 'skipped'){
+        parts.push(`<div class="plw-area"><h4>${plEsc(fl.floorName)} <span class="plw-tag">${fl.reason || 'skipped'}</span></h4></div>`);
+        return;
+      }
+      const scratch = plWiz.assumedScratch[fl.floorKey] || {};
+      if (fl.suggestion && fl.suggestion.rule === 'le8-floor'){
+        // S2A
+        const type = scratch.type || 'Standard Display';
+        const skipped = scratch.decision === 'skip';
+        parts.push(`<div class="plw-area">
+          <h4>${plEsc(fl.floorName)} <span class="plw-count">${fl.nDet} ModuLaser detectors · 0 Std/Min</span></h4>
+          <div style="padding:10px 12px">
+            <div class="plw-note">Suggested: <b>1 × ${plEsc(type)}</b> (${type === 'Minimum Display' ? 'FHSD8300' : 'FHSD8310'}) named <span class="mono">${plEsc(plAssumedName(fl.floorName, 0))}</span> <span class="plw-count">${plAssumedName(fl.floorName, 0).length}/${PL_NAME_MAX}</span></div>
+            ${skipped ? '<div class="plw-warn">Skipped — detectors will have no cluster display (assumed none). Existing unassigned-cluster warnings still apply.</div>' : ''}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <button type="button" class="btn btn-primary" data-acc="${plEsc(fl.floorKey)}">Accept</button>
+              <label class="plw-count" style="display:flex;align-items:center;gap:6px">Type
+                <select data-type="${plEsc(fl.floorKey)}">
+                  <option value="Standard Display" ${type==='Standard Display'?'selected':''}>Standard (FHSD8310)</option>
+                  <option value="Minimum Display" ${type==='Minimum Display'?'selected':''}>Minimum (FHSD8300)</option>
+                </select>
+              </label>
+              <button type="button" class="btn btn-ghost" data-skip="${plEsc(fl.floorKey)}">Skip this floor</button>
+            </div>
+          </div>
+        </div>`);
+      } else {
+        // S3B swimlanes
+        const buckets = (scratch.buckets) || JSON.parse(JSON.stringify(fl.buckets || []));
+        if (!scratch.buckets){ plWiz.assumedScratch[fl.floorKey] = Object.assign({}, scratch, { buckets, decision: 'grouped' }); }
+        const assignedKeys = new Set();
+        buckets.forEach(b => (b.detectors || []).forEach(d => assignedKeys.add(d.key || d)));
+        const unassigned = (fl.detectors || []).filter(d => !assignedKeys.has(d.key));
+        const lanes = buckets.map(b => {
+          const n = (b.detectors || []).length;
+          const pct = Math.min(100, (n / 8) * 100);
+          const devices = (b.detectors || []).concat(b.existing ? [] : [{ kind: 'display', type: b.type || 'Standard Display' }]);
+          const ah = (typeof displayBucketAh === 'function' ? displayBucketAh(devices.concat(b.detectors||[]), plWiz.settings) : 0);
+          // rough: dets + 1 display
+          const ahDevs = (b.detectors || []).concat([{ kind: 'display', type: b.type || 'Standard Display' }]);
+          const ahV = typeof displayBucketAh === 'function' ? displayBucketAh(ahDevs, plWiz.settings) : 0;
+          const psuN = typeof displayBucketPsuCount === 'function' ? displayBucketPsuCount(n, true) : Math.ceil(Math.max(n,1)/4);
+          const over = ahV > 65;
+          return `<div class="plw-psu" style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <b>${plEsc(b.existing ? 'Existing display' : 'Display cluster')} · ${plEsc(b.type || 'Standard Display')}</b>
+              <span class="plw-count ${n>8?'over':''}">${n} / 8</span>
+            </div>
+            <div style="height:4px;background:var(--panel-3);border-radius:2px;margin:6px 0"><div style="height:100%;width:${pct}%;background:${n>8?'var(--danger)':'var(--accent)'}"></div></div>
+            <div style="min-height:36px;font-size:11.5px;font-family:var(--mono);color:var(--text-dim)">${(b.detectors||[]).map(d=>plEsc(d.newName||d.origName||d.key)).join(', ') || '<i>Drop detectors here</i>'}</div>
+            <div class="plw-count">PSU ≈ ${psuN} · Ah ≈ ${ahV.toFixed(1)}${over ? ' <span class="plw-tag bad">over 65 Ah charger</span>' : ''}</div>
+            <div style="margin-top:6px">${unassigned.map(d => `<button type="button" class="btn btn-ghost btn-sm" style="margin:2px" data-assign="${plEsc(fl.floorKey)}|${plEsc(b.id)}|${plEsc(d.key)}">+ ${plEsc(d.newName||d.origName||d.key)}</button>`).join('')}</div>
+          </div>`;
+        }).join('');
+        const skipped = scratch.decision === 'skip';
+        parts.push(`<div class="plw-area">
+          <h4>${plEsc(fl.floorName)} <span class="plw-count">${fl.nDet} detectors · needs ${fl.needed} display(s) · max 8 each</span></h4>
+          <div style="padding:10px 12px">
+            <div class="plw-warn">Group detectors from scratch (no auto-bucket). Each display max 8 detectors. A pack of 4 detectors at fan 10 + 1 display is about 66.9 Ah and exceeds the 65 Ah charger limit — the live readout warns when a bucket would.</div>
+            ${skipped ? '<div class="plw-warn">Floor skipped — assumed none.</div>' : ''}
+            <div class="plw-note">Unassigned (${unassigned.length}): ${(unassigned.map(d=>plEsc(d.newName||d.origName||d.key)).join(', ')||'none')}</div>
+            <div class="plw-psus">${lanes}</div>
+            <button type="button" class="btn btn-ghost" data-skip="${plEsc(fl.floorKey)}">Skip this floor</button>
+          </div>
+        </div>`);
+      }
+    });
+    body.innerHTML = `<div class="plw-note">Continuing without PipeCAD displays — assumed Std/Min will be added before power supplies are packed. Re-run in PipeCAD and re-import when real displays exist.</div>` + parts.join('');
+    body.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => plDisplaysAcceptFloor(b.dataset.acc));
+    body.querySelectorAll('[data-skip]').forEach(b => b.onclick = () => plDisplaysSkipFloor(b.dataset.skip));
+    body.querySelectorAll('[data-type]').forEach(sel => sel.onchange = () => plDisplaysSetType(sel.dataset.type, sel.value));
+    body.querySelectorAll('[data-assign]').forEach(b => {
+      b.onclick = () => { const [fk, bid, dk] = b.dataset.assign.split('|'); plDisplaysAssignDet(fk, bid, dk); };
+    });
+  };
+
+  window.plDisplaysFallbackReady = function (){
+    const plan = plWiz.displaysSuggest || plBuildSuggest();
+    for (const fl of plan.floors){
+      if (fl.status !== 'needed') continue;
+      const scratch = plWiz.assumedScratch[fl.floorKey] || {};
+      if (scratch.decision === 'skip') continue;
+      if (fl.suggestion && fl.suggestion.rule === 'le8-floor'){
+        if (scratch.decision !== 'accept' && scratch.decision !== 'grouped') return 'Accept or Skip each floor that needs a display.';
+        continue;
+      }
+      const buckets = scratch.buckets || fl.buckets || [];
+      const assigned = new Set();
+      for (const b of buckets){
+        const n = (b.detectors || []).length;
+        if (!b.existing && n === 0) return 'Assign detectors to every new display bucket, or Skip the floor.';
+        if (n > 8) return 'A display bucket has more than 8 detectors.';
+        (b.detectors || []).forEach(d => assigned.add(d.key || d));
+      }
+      const left = (fl.detectors || []).filter(d => !assigned.has(d.key));
+      if (left.length) return `${left.length} detector(s) still unassigned on ${fl.floorName}.`;
+    }
+    return '';
+  };
+
+  window.plDisplaysOnEnterFromRename = function (){
+    const needed = plAnyDisplaysNeeded();
+    if (!needed){
+      plWiz.displaysPhase = 'done';
+      plWiz.step = 5; // skip straight to power supplies
+      plWiz.suggested = false;
+      return false; // caller should plRender
+    }
+    plWiz.displaysPhase = 'gate';
+    plWiz.step = 4;
+    return true;
+  };
+
+  window.plDisplaysAdvanceFromFallback = function (){
+    const err = plDisplaysFallbackReady();
+    if (err) return err;
+    plApplyAllAssumed();
+    if (plCommandOfferNeeded() && !(plWiz.commandOffer && plWiz.commandOffer.dismissed) && !plWiz.displayPlan.__commandDismissed){
+      plWiz.displaysPhase = 'command';
+      plRender();
+      return '';
+    }
+    plWiz.displaysPhase = 'done';
+    plWiz.step = 5;
+    plWiz.suggested = false;
+    plRender();
+    return '';
+  };
+
+
+  // Seed Power-supply suggestions from assumed buckets (M3 pin; avoid 0,0 clustering)
+  window.plSeedPsusFromAssumed = function (){
+    if (!plWiz || !plWiz.displayPlan) return;
+    plIncludedGroups().forEach(({ f, fi, g }) => {
+      const gk = plGroupKey(fi, g);
+      const assumed = (g.displays || []).filter(d => d.origin === 'assumed' && (d.type === 'Standard Display' || d.type === 'Minimum Display'));
+      if (!assumed.length) return;
+      const used = new Set();
+      const psus = [];
+      assumed.forEach((disp, di) => {
+        const keys = disp._bucketDetKeys || [];
+        const dets = (g.detectors || []).filter(d => keys.includes(d.key) && !used.has(d.key));
+        dets.forEach(d => used.add(d.key));
+        let remain = dets.slice();
+        const first = remain.splice(0, 4);
+        psus.push({ id: 'a' + di + 'p0', devices: [disp].concat(first), fromAssumed: true });
+        let pi = 1;
+        while (remain.length){
+          psus.push({ id: 'a' + di + 'p' + pi, devices: remain.splice(0, 4), fromAssumed: true, parentDisplayKey: disp.key });
+          pi++;
+        }
+      });
+      const leftover = (g.displays || []).filter(d => d.origin !== 'assumed').concat(
+        (g.detectors || []).filter(d => !used.has(d.key))
+      );
+      if (leftover.length){
+        const extra = (typeof plSuggestForGroup === 'function') ? plSuggestForGroup(g, leftover) : [];
+        const arr = Array.isArray(extra) ? extra : [];
+        psus.push(...arr);
+        plWiz.unassignedByGroup[gk] = (extra && extra.unassigned) || [];
+      } else {
+        plWiz.unassignedByGroup[gk] = [];
+      }
+      plWiz.psuByGroup[gk] = psus;
+    });
+    plWiz.suggested = true;
+  };
+
+  window.plAssignClusterRefs = function (createdLocs){
+    const byArea = {};
+    document.querySelectorAll('.location').forEach(locEl => {
+      const area = (locEl.querySelector('.ps-location') && locEl.querySelector('.ps-location').value) ||
+                   (locEl.querySelector('.ps-location-primary') && locEl.querySelector('.ps-location-primary').value) || '';
+      const locId = locEl.getAttribute('data-loc');
+      if (!byArea[area]) byArea[area] = [];
+      byArea[area].push({ locEl, locId });
+    });
+    Object.keys(byArea).forEach(area => {
+      const sheets = byArea[area];
+      let nextCluster = 1;
+      const displayHomes = [];
+      sheets.forEach(({ locEl, locId }) => {
+        locEl.querySelectorAll('[data-role="module"]').forEach(row => {
+          const typeSel = row.querySelector('.module-type, select.module-type, [data-role="module-type"]');
+          const type = typeSel ? typeSel.value : '';
+          if (type === 'Standard Display' || type === 'Minimum Display'){
+            const cSel = row.querySelector('.cluster-select, select.cluster, [data-role="cluster"]');
+            const num = String(nextCluster).padStart(2, '0');
+            if (cSel){
+              if (![...cSel.options].some(o => o.value === num)){
+                const opt = document.createElement('option'); opt.value = num; opt.textContent = num; cSel.appendChild(opt);
+              }
+              cSel.value = num;
+            }
+            displayHomes.push({ locId, clusterNum: num, row });
+            nextCluster++;
+          }
+        });
+      });
+      if (!displayHomes.length) return;
+      sheets.forEach(({ locEl, locId }) => {
+        const localDisp = displayHomes.find(h => h.locId === locId);
+        locEl.querySelectorAll('[data-role="module"]').forEach(row => {
+          const typeSel = row.querySelector('.module-type, select.module-type, [data-role="module-type"]');
+          const type = typeSel ? typeSel.value : '';
+          if (type !== 'Detector') return;
+          const cSel = row.querySelector('.cluster-select, select.cluster, [data-role="cluster"]');
+          if (!cSel) return;
+          if (localDisp){
+            if (![...cSel.options].some(o => o.value === localDisp.clusterNum)){
+              const opt = document.createElement('option'); opt.value = localDisp.clusterNum; opt.textContent = localDisp.clusterNum; cSel.appendChild(opt);
+            }
+            cSel.value = localDisp.clusterNum;
+          } else {
+            const home = displayHomes[0];
+            const key = 'r:' + home.locId + ':' + home.clusterNum;
+            if (![...cSel.options].some(o => o.value === key)){
+              const opt = document.createElement('option'); opt.value = key; opt.textContent = key; cSel.appendChild(opt);
+            }
+            cSel.value = key;
+          }
+        });
+      });
+    });
+  };
+
+  const _adv = window.plDisplaysAdvanceFromFallback;
+  window.plDisplaysAdvanceFromFallback = function (){
+    const err = _adv();
+    if (err) return err;
+    if (plWiz.step === 5){ plSeedPsusFromAssumed(); plRender(); }
+    return '';
+  };
+  const _cmdA = window.plCommandAccept;
+  window.plCommandAccept = function (){ _cmdA(); if (plWiz.step === 5){ plSeedPsusFromAssumed(); plRender(); } };
+  const _cmdD = window.plCommandDismiss;
+  window.plCommandDismiss = function (){ _cmdD(); if (plWiz.step === 5){ plSeedPsusFromAssumed(); plRender(); } };
+
+})();
+
+/* ---- DISPLAYS-WIZARD-END ---- */
 function plDefaultSettings(){
   const cur = getCurrentLocationEl && getCurrentLocationEl();
   const g = sel => cur && cur.querySelector(sel);
@@ -7869,7 +8463,7 @@ function openPlWizard(opts){
 }
 function closePlWizard(){ document.getElementById('plw-overlay').classList.remove('open'); }
 
-const PL_STEPS = ['Battery settings', 'Pick .pl files', 'Rename', 'Power supplies'];
+const PL_STEPS = ['Battery settings', 'Pick .pl files', 'Rename', 'Displays', 'Power supplies'];
 function plRender(){
   const strip = document.getElementById('plw-steps');
   strip.innerHTML = PL_STEPS.map((t, i) => `<div class="plw-step ${i + 1 === plWiz.step ? 'active' : (i + 1 < plWiz.step ? 'done' : '')}"><span class="n">${i + 1}</span>${t}</div>`).join('');
@@ -7878,11 +8472,12 @@ function plRender(){
   if (plWiz.step === 1) plRenderStep1(body);
   else if (plWiz.step === 2) plRenderStep2(body);
   else if (plWiz.step === 3) plRenderStep3(body);
+  else if (plWiz.step === 4) plRenderDisplaysStep(body);
   else plRenderStep4(body);
   document.getElementById('plw-back').disabled = plWiz.step === 1 || (plWiz.mode === 'update' && plWiz.step <= 3);
-  document.getElementById('plw-next').hidden = plWiz.step === 4;
-  document.getElementById('plw-finish').hidden = plWiz.step !== 4;
-  if (plWiz.step === 4) plValidateStep4();
+  document.getElementById('plw-next').hidden = plWiz.step === 5;
+  document.getElementById('plw-finish').hidden = plWiz.step !== 5;
+  if (plWiz.step === 5) plValidateStep4();
 }
 
 function plRenderStep1(body){
@@ -8175,7 +8770,21 @@ function plNext(){
   if (plWiz.step === 3){
     const p = plStep3Problems();
     if (p.length){ msg.textContent = p[0] + (p.length > 1 ? ` (+${p.length - 1} more)` : ''); return; }
+    if (typeof plDisplaysOnEnterFromRename === 'function'){
+      plDisplaysOnEnterFromRename();
+      return plRender();
+    }
     plWiz.step = 4; return plRender();
+  }
+  if (plWiz.step === 4){
+    if (plWiz.displaysPhase === 'gate'){ msg.textContent = 'Choose Stop import or Continue without PipeCAD displays.'; return; }
+    if (plWiz.displaysPhase === 'command'){ msg.textContent = 'Add a Command display or choose Not now.'; return; }
+    if (plWiz.displaysPhase === 'fallback'){
+      const err = plDisplaysAdvanceFromFallback();
+      if (err){ msg.textContent = err; return; }
+      return;
+    }
+    plWiz.step = 5; plWiz.suggested = false; return plRender();
   }
 }
 function plBack(){ if (plWiz.step > 1){ plWiz.step--; plRender(); } }
@@ -8210,7 +8819,7 @@ async function plFinish(){
       psNum++;
       const sheetId = 'pls-' + Date.now().toString(36) + '-' + (++plSheetSeq);
       const devs = p.devices.slice().sort((a, b) => ((a.kind === 'display' ? 0 : 1) - (b.kind === 'display' ? 0 : 1)) || (a.ord - b.ord));
-      const modules = devs.map(d => ({ type: d.kind === 'display' ? d.type : 'Detector', zone: d.newName, address: '', fan: d.kind === 'detector' && d.fan ? String(d.fan) : '', cluster: '', power: '', circuitSource: '', auxCircuitNum: '', plKey: link.id + '|' + d.key }));
+      const modules = devs.map(d => ({ type: d.kind === 'display' ? d.type : 'Detector', zone: d.newName, address: '', fan: d.kind === 'detector' && d.fan ? String(d.fan) : '', cluster: '', power: '', origin: d.origin || undefined, assumption: d.assumption || undefined, circuitSource: '', auxCircuitNum: '', plKey: link.id + '|' + d.key }));
       const loc = restoreLocation(plSavedLocation(s, `PS-${psNum}`, g.name, `${f.project} · ${f.fileName}`, modules, sheetId));
       created.push(loc);
       devs.forEach(d => { link.devices[d.key] = { fp: d.fp, kind: d.kind, origName: d.origName, type: d.kind === 'display' ? d.type : 'Detector', fan: d.fan || null, zone: d.newName, group: g.origName, sheetId }; });
@@ -8225,6 +8834,7 @@ async function plFinish(){
   if (plWiz.linkUpdate && plWiz.newFile){ Object.assign(plWiz.linkUpdate, plWiz.newFile); }
   // Batch recalc: per-sheet inner pass with the cross-sheet cascade suspended, then one global pass
   // (calling recalcLocation per sheet is O(n²) and took >30 s for ~100 sheets).
+  if (typeof plAssignClusterRefs === 'function'){ try { plAssignClusterRefs(created); } catch (e){ console.warn('plAssignClusterRefs', e); } }
   window.__inCascade = true;
   try { created.forEach(loc => recalcLocationInner(loc)); } finally { window.__inCascade = false; }
   updateNetworkAddressAvailability();
@@ -9667,7 +10277,7 @@ wirePrintDialog();
 (function (root) {
 'use strict';
 const MLP = {};
-MLP.VERSION = '1.6.3';   // 1.6.3: QA delta — stored out-of-range target held at the published limit for the Fire 1 seed / MiniLaser AF; one-time notice banner for Calculator and Report. 1.6.2: MiniLaser SFD/OAP alarm factor follows the scope's SFD/OAP target (Brent 2026-10-20 7:09 AM CT). 1.6.1: SFD/OAP design target (Brent 2026-10-20) — project/Area target, published-limit validation, Fire 1 seed on UL scopes. 1.6.0: brand catalog (Edwards | Kidde Commercial), ASD-160 kind (MICRA25), hash defaults. 1.5.1: MiniLaser pipe limits (M p.66)
+MLP.VERSION = '1.7.0';   // 1.7.0: assumed-display origin/assumption fields, displayPlan, project.timeZone, HASH_DEFAULTS additives (schema v1). 1.6.3: QA delta — stored out-of-range target held at the published limit for the Fire 1 seed / MiniLaser AF; one-time notice banner for Calculator and Report. 1.6.2: MiniLaser SFD/OAP alarm factor follows the scope's SFD/OAP target (Brent 2026-10-20 7:09 AM CT). 1.6.1: SFD/OAP design target (Brent 2026-10-20). 1.6.0: brand catalog, ASD-160. 1.5.1: MiniLaser pipe limits (M p.66)
 MLP.FORMAT = 'modulaser-project';
 MLP.SCHEMA_VERSION = 1;
 MLP.EXT = '.mlproj.json';
@@ -9935,7 +10545,7 @@ MLP.verifyChangesAgainstPl = function (changes, parsed, devices){
 /* ---------------- project document ---------------- */
 MLP.blank = function (){
   return { format: MLP.FORMAT, schemaVersion: MLP.SCHEMA_VERSION, savedAt: '', savedBy: null,
-    project: { name: '', location: '', designer: '', company: '', building: '', networkNumber: '', preparedBy: '', date: '', brand: '' },
+    project: { name: '', location: '', designer: '', company: '', building: '', networkNumber: '', preparedBy: '', date: '', brand: '', timeZone: '' },
     design: null, site: null, changes: [], approvals: {} };
 };
 MLP.isProject = o => !!(o && o.format === MLP.FORMAT && typeof o.schemaVersion === 'number');
@@ -9955,7 +10565,7 @@ MLP.stringify = function (doc, app, rev, user){
    design.id keeps the old 32-bit FNV identity hash as a short display id only. */
 MLP.HASH_DROP = ['hash', 'id', 'updatedAt', 'importedAt'];
 /* 1.6.0 (B3a): new fields at their defaults are stripped before hashing, so an unchanged 02.01.000 file keeps its hash. */
-MLP.HASH_DEFAULTS = { brand: 'edwards', variant: '120', accessories: [], facuSource: false, ulOptIn: false, psVariant: '120', psTamper: false, psSeismic: false, cabinetUserSet: false, tpFacuSource: false, tpFacuUserSet: false };
+MLP.HASH_DEFAULTS = { brand: 'edwards', variant: '120', accessories: [], facuSource: false, ulOptIn: false, psVariant: '120', psTamper: false, psSeismic: false, cabinetUserSet: false, tpFacuSource: false, tpFacuUserSet: false, origin: 'pl', assumption: null, displayPlan: null, timeZone: null, displaysAssumed: false, commandOfferDismissed: false };
 function stripDefaults(v){
   if (Array.isArray(v)) return v.map(stripDefaults);
   if (v && typeof v === 'object'){ const o = {}; Object.keys(v).forEach(k => { const d = MLP.HASH_DEFAULTS[k], x = v[k];
@@ -10840,6 +11450,83 @@ MLP.asd160ConfigIssues = function (v){
   return out;
 };
 
+
+/* ---- Assumed displays (1.7.0) ---- */
+MLP.displayOrigin = function (dev){
+  if (!dev) return 'pl';
+  return dev.origin || 'pl';
+};
+MLP.isAssumedDisplay = function (dev){
+  return !!(dev && (dev.origin === 'assumed' || (dev.assumption && dev.assumption.rule)));
+};
+/** Replace assumed Std/Min rows with real PipeCAD displays, keeping address and cluster (R1A). */
+MLP.replaceAssumedWithReal = function (designDevices, realDisplays, matchFn){
+  const out = (designDevices || []).slice();
+  const reals = (realDisplays || []).slice();
+  const assumed = out.filter(d => MLP.isAssumedDisplay(d) && (d.type === 'Standard Display' || d.type === 'Minimum Display'));
+  assumed.forEach((a, i) => {
+    const real = matchFn ? matchFn(a, reals, i) : reals[i];
+    if (!real) return;
+    const idx = out.indexOf(a);
+    if (idx < 0) return;
+    const kept = { address: a.address, cluster: a.cluster, sheetId: a.sheetId, power: a.power, network: a.network };
+    const merged = Object.assign({}, real, {
+      address: real.address != null && real.address !== '' ? real.address : kept.address,
+      cluster: real.cluster != null && real.cluster !== '' ? real.cluster : kept.cluster,
+      sheetId: kept.sheetId || real.sheetId,
+      power: kept.power || real.power,
+      network: kept.network != null ? kept.network : real.network,
+      origin: 'pl',
+      assumption: null,
+      pl: real.pl != null ? real.pl : true
+    });
+    out[idx] = merged;
+    const ri = reals.indexOf(real); if (ri >= 0) reals.splice(ri, 1);
+  });
+  return out;
+};
+MLP.makeAssumedDisplay = function (opts){
+  opts = opts || {};
+  const type = opts.type || 'Standard Display';
+  return {
+    kind: 'display',
+    type: type,
+    model: (MLP.DISPLAY_MODELS && MLP.DISPLAY_MODELS[type]) || 'FHSD8310',
+    name: opts.name || 'DSP01',
+    origin: 'assumed',
+    assumption: {
+      by: opts.by || '',
+      at: opts.at || new Date().toISOString(),
+      why: opts.why || 'Assumed during PipeCAD import — displays missing or under-provisioned.',
+      rule: opts.rule || 'le8-floor',
+      floor: opts.floor || '',
+      floorIdx: opts.floorIdx != null ? opts.floorIdx : 0,
+      bucket: opts.bucket != null ? opts.bucket : 0,
+      linkId: opts.linkId || '',
+      decision: opts.decision || 'accept'
+    },
+    pl: null,
+    pipe: null,
+    fan: null,
+    address: opts.address || '',
+    cluster: opts.cluster != null ? opts.cluster : '',
+    id: opts.id || ('assumed:' + (opts.linkId || 'link') + ':' + (opts.floorIdx || 0) + ':' + (opts.bucket || 0))
+  };
+};
+/** Resolve job time zone for As-Built / Field Change display (R4A). */
+MLP.resolveTimeZone = function (project, runtimeTz){
+  const p = project || {};
+  const cand = p.timeZone || runtimeTz || '';
+  try {
+    if (cand){ Intl.DateTimeFormat('en-US', { timeZone: cand }).format(new Date()); return { timeZone: cand, source: p.timeZone ? 'project' : 'runtime', note: p.timeZone ? null : 'Job time zone not set — using this device.' }; }
+  } catch (e){}
+  return { timeZone: 'UTC', source: 'utc', note: 'Job time zone not set — using UTC.' };
+};
+MLP.formatInTimeZone = function (iso, timeZone){
+  try { return new Date(iso).toLocaleString('en-US', { timeZone: timeZone || 'UTC' }); }
+  catch (e){ return new Date(iso).toLocaleString('en-US', { timeZone: 'UTC' }) + ' UTC'; }
+};
+
 root.MLP = MLP;
 if (typeof module !== 'undefined' && module.exports) module.exports = MLP;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -11706,7 +12393,7 @@ body[data-tb-view=config] #v2-center{width:auto!important;max-width:none!importa
    (same engine: masd-engine.js; same project file: modulaser-project.js)
    Modes · Config (design) · Legacy imports · Field-change loop · Reports
    ===================================================================== */
-const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000', '00.03.001': '02.02.001' };
+const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000', '00.03.001': '02.02.001', '00.03.002': '02.02.002' };
 let TB_LINEAGE_MISSING = false;   // QA D5: true when the lineage map has no entry for the running Toolbox revision (tests fail on it)
 const TB_CALC_LINEAGE = (() => { const l = AMENDMENTS[AMENDMENTS.length - 1], k = `${l.major}.${l.minor}.${l.rev}`; if (TB_LINEAGE_BY_REV[k]) return TB_LINEAGE_BY_REV[k];
   TB_LINEAGE_MISSING = true; console.warn(`TB_LINEAGE_BY_REV has no entry for Toolbox ${k}; calculator lineage falls back to the last mapped revision — add the entry.`);

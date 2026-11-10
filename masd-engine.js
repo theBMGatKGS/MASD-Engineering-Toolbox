@@ -5,7 +5,7 @@
    MASD_ENGINE_VERSION and the revision of BOTH apps, with matching
    Revision-log notes that name the engine version.
    ===================================================================== */
-const MASD_ENGINE_VERSION = '1.2.0';   // 1.2.0: explicit supply lookup (no '6A'→'10A' string swap), battery family/fit keys, 12V6A5 (manual only), brand-aware hardware via MLP 1.6.0
+const MASD_ENGINE_VERSION = '1.3.0';   // 1.3.0: suggestDisplays for PipeCAD Displays step (Std/Min capacity vs ceil(n/8); le8 → 1 Std; needed>1 empty buckets). 1.2.0: explicit supply lookup, battery family/fit keys, 12V6A5 (manual only), brand-aware hardware via MLP 1.6.0
 const MASD_ENGINE = {
   version: MASD_ENGINE_VERSION,
   /* BS 5839-1 Annex E: D = 1 when the battery 20-hour rate (Ah / 20) meets the alarm current, else 1.75. */
@@ -41,6 +41,9 @@ const MODULE_TYPES = {
   "Detector":         { model: "FHSD8330-ULF", kind: "detector", ma: null }
 };
 const FAN_SPEED_MA = {1:218,2:234,3:255,4:279,5:301,6:330,7:363,8:393,9:431,10:471,11:506,12:552,13:602,14:646,15:712,16:762};
+/* H5 (closed): FAN_SPEED_MA figures are engineering-approved values used by the calculation engine.
+   They differ from some printed manual / worksheet tables on purpose. Numbers must not be changed
+   without a new engineering approval. Source: Brent, relayed by QA, 2026-11-09 5:22 PM CT. */
 // 18V reference figures from the manufacturer's current-draw worksheet, for the Help menu's
 // reference table only — not used in any calculation (the calculator's own math always uses
 // FAN_SPEED_MA above). Does not match either the 18.0V or 20.4V rows exactly in every case;
@@ -328,3 +331,82 @@ function plSuggestForGroup(g, devs){
   return out;
 }
 
+/* ---------- Displays step (1.3.0): cluster Std/Min capacity vs detectors ---------- */
+/* Command displays do NOT count toward capacity. MiniLaser / ASD-160 floors are skipped. */
+function suggestDisplays(groups, existingState){
+  const plan = { floors: [], neededTotal: 0, anyNeeded: false };
+  const state = existingState || {};
+  const prior = state.displayPlan || {};
+  (groups || []).forEach((g, floorIdx) => {
+    const floorName = g.name || g.origName || ('Floor ' + (floorIdx + 1));
+    const floorKey = String(state.linkId || 'link') + ':' + floorIdx + ':' + floorName;
+    const dets = (g.detectors || []).filter(d => d.kind === 'detector' || (!d.kind && d.type !== 'MiniLaser' && d.type !== 'ASD-160'));
+    // Prefer explicit kind from plParse
+    const mlDets = (g.detectors || []).filter(d => d.kind === 'detector');
+    const nDet = mlDets.length;
+    const clusterDisp = (g.displays || []).filter(d => d.type === 'Standard Display' || d.type === 'Minimum Display');
+    const nCluster = clusterDisp.length;
+    const cmds = (g.displays || []).filter(d => d.type === 'Command Display');
+    const hasMiniOnly = nDet === 0 && ((g.detectors || []).some(d => d.kind === 'minilaser') || (g.minilasers || []).length);
+    const hasAsdOnly = nDet === 0 && ((g.detectors || []).some(d => d.kind === 'asd' || d.type === 'ASD-160') || (g.asds || []).length);
+    if (nDet === 0){
+      plan.floors.push({ floorKey, floorIdx, floorName, nDet: 0, nCluster, needed: 0, status: 'skip', reason: hasMiniOnly ? 'minilaser-only' : (hasAsdOnly ? 'asd-only' : 'no-modulaser-detectors'), suggestion: null, buckets: [], detectors: [] });
+      return;
+    }
+    const capacityNeed = Math.ceil(nDet / MAX_DETECTORS_PER_CLUSTER);
+    const needed = Math.max(0, capacityNeed - nCluster);
+    const priorFloor = prior[floorKey] || prior[floorName];
+    if (priorFloor && priorFloor.decision === 'skip' && needed > 0 && !(priorFloor.neededGrown && needed > (priorFloor.needed || 0))){
+      // Skip persistence (L4 / test 13): do not re-prompt unless needed grew
+      if ((priorFloor.needed || 0) >= needed){
+        plan.floors.push({ floorKey, floorIdx, floorName, nDet, nCluster, needed, status: 'skipped', suggestion: null, buckets: [], detectors: mlDets, commands: cmds.length });
+        return;
+      }
+    }
+    if (needed === 0){
+      plan.floors.push({ floorKey, floorIdx, floorName, nDet, nCluster, needed: 0, status: 'ok', suggestion: null, buckets: [], detectors: mlDets, commands: cmds.length });
+      return;
+    }
+    plan.anyNeeded = true;
+    plan.neededTotal += needed;
+    let suggestion = null;
+    let buckets = [];
+    if (nCluster === 0 && nDet >= 1 && nDet <= MAX_DETECTORS_PER_CLUSTER){
+      suggestion = { rule: 'le8-floor', type: 'Standard Display', count: 1, part: 'FHSD8310' };
+    } else {
+      // needed > 1 or under-provisioned: empty buckets equal to `needed` (existing Std/Min stay as pre-filled)
+      for (let i = 0; i < nCluster; i++){
+        buckets.push({ id: 'exist-' + i, type: clusterDisp[i].type || 'Standard Display', existing: true, detectors: [], max: MAX_DETECTORS_PER_CLUSTER });
+      }
+      for (let i = 0; i < needed; i++){
+        buckets.push({ id: 'new-' + i, type: 'Standard Display', existing: false, detectors: [], max: MAX_DETECTORS_PER_CLUSTER });
+      }
+      suggestion = { rule: 'grouped', type: 'Standard Display', count: needed, part: 'FHSD8310' };
+    }
+    plan.floors.push({ floorKey, floorIdx, floorName, nDet, nCluster, needed, capacityNeed, status: 'needed', suggestion, buckets, detectors: mlDets, existingDisplays: clusterDisp, commands: cmds.length });
+  });
+  return plan;
+}
+
+/** Projected PSU count for a bucket under the 4-det + 1-display rule (ignores Ah split). */
+function displayBucketPsuCount(detectorCount, hasDisplay){
+  const dets = detectorCount || 0;
+  const disp = hasDisplay ? 1 : 0;
+  if (!dets && !disp) return 0;
+  // Each PSU holds ≤4 detectors and ≤1 display
+  const byDet = Math.ceil(dets / PL_MAX_DET_PER_PSU) || (disp ? 1 : 0);
+  return Math.max(byDet, disp ? 1 : 0);
+}
+
+/** Live Ah estimate for devices on a PSU using wizard settings (Edwards A/BPS + 1 AUX). */
+function displayBucketAh(devices, settings){
+  return plRequiredAh(devices || [], settings || { designBasis: 'NFPA 72 Standard', standbyHours: '24', alarmMinutes: '5', margin: '0.25', temperature: '77', mode: 'edwards' });
+}
+
+if (typeof MASD_ENGINE !== 'undefined'){
+  MASD_ENGINE.suggestDisplays = suggestDisplays;
+  MASD_ENGINE.displayBucketPsuCount = displayBucketPsuCount;
+  MASD_ENGINE.displayBucketAh = displayBucketAh;
+  MASD_ENGINE.MAX_DETECTORS_PER_CLUSTER = MAX_DETECTORS_PER_CLUSTER;
+  MASD_ENGINE.CHARGER_MAX_AH = CHARGER_MAX_AH;
+}
