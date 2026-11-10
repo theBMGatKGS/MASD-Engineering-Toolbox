@@ -10,6 +10,10 @@ Third review: new builds ask Networked / Standalone before the Command offer (li
 Create sheets; Make all Standalone with an assumed Command display warns and offers removal; a skipped floor stays
 skipped on Check link (stable link + Area key, limit c); assumed names never repeat; the job time zone is validated
 and exported as project.timeZone only when set, and the Field Report picks it up.
+Fourth review: footer Next is blocked at the Networked / Standalone question (F1); Esc on the Command removal prompt is
+not a decision (F2); repeated Area names in one file get their own keys and link records (F3); Undo after Remove is
+flagged (F5); a fresh import of the same file asks again (L6); a different Report job zone is noted (L7); a
+whitespace-only job zone is blank (L8).
 Run: python3 tests/pl_display_assign_e2e.py        (APP= / RPT= / PL_FIXTURE_DIR= override the defaults)
 """
 import asyncio, json, os, sys
@@ -264,6 +268,49 @@ async def wait_prompt(pg, title, ms=4000):
         await pg.wait_for_timeout(100)
     return False
 
+async def case_footer_next_scheme(pg):
+    # F1 (QA repro): two floors 12 + 8, 0 displays → Continue → group Alpha 8 + 4, accept Delta → Next → footer Next at the scheme question
+    await fresh(pg)
+    alpha, delta = await two_floor_to_fallback(pg)
+    await group_alpha_accept_delta(pg, alpha, delta)
+    st = await click_next(pg)
+    ok('F1: scheme question shown after grouping', st == [4, 'scheme'], st)
+    st = await click_next(pg)
+    msg = await pg.inner_text('#plw-msg')
+    ok('F1: footer Next is blocked at the scheme question, with a message', st == [4, 'scheme'] and 'Choose Networked or Standalone' in msg
+       and await pg.evaluate('!(plWiz.settings||{}).addrSchemeChosen') and await pg.locator('#pl-scheme-net').count() == 1, [st, msg])
+    await pick_scheme(pg, 'networked')
+    st = await pg.evaluate('[plWiz.step, plWiz.displaysPhase]')
+    ok('F1: then Networked produces the Command offer', st == [4, 'command'] and await pg.locator('#pl-cmd-yes').count() == 1, st)
+    st = await click_next(pg)
+    ok('F1: footer Next is blocked at the Command offer too', st == [4, 'command'], st)
+    await pg.evaluate('closePlWizard()')
+
+async def case_dup_area(pg):
+    # F3: two floors with the same Area name in one file → own keys, own assumed rows and link records
+    await fresh(pg)
+    await to_rename(pg, F['dup_area'])
+    await pg.evaluate("plWiz.files[0].groups[1].detectors.forEach((d,i)=>{ d.newName='ALPHB-D'+(i+1); d.userNamed=true; }); plRender()")
+    st = await click_next(pg)
+    ok('F3: gate for the two same-name floors', st == [4, 'gate'], st)
+    await pg.click('#pl-disp-continue'); await pg.wait_for_timeout(200)
+    plan = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>({k:f.floorKey,n:f.nDet,rule:f.suggestion&&f.suggestion.rule,dets:f.detectors.map(d=>d.key)}))")
+    keys = [f['k'] for f in plan]
+    ok('F3: each floor has its own key (occurrence suffix only on the repeat)', len(set(keys)) == 2 and keys[0].endswith(':area:Example Zone Alpha') and keys[1].endswith(':area:Example Zone Alpha #2'), keys)
+    small = next(f for f in plan if f['n'] == 8); big = next(f for f in plan if f['n'] == 12)
+    for i, dk in enumerate(big['dets']):
+        await pg.click(f'[data-assign="{big["k"]}|{"new-0" if i < 8 else "new-1"}|{dk}"] >> nth=0')
+    await pg.click(f'[data-acc="{small["k"]}"]'); await pg.wait_for_timeout(100)
+    await click_next(pg); await pick_scheme(pg, 'networked')
+    if await pg.locator('#pl-cmd-no').count(): await pg.click('#pl-cmd-no'); await pg.wait_for_timeout(300)
+    await create_sheets(pg)
+    rows = [r for s in await sheet_rows(pg) for r in s['rows'] if r['origin'] == 'assumed']
+    ad = await pg.evaluate("Object.keys(PL_LINKS[0].assumedDisplays||{})")
+    dp = await pg.evaluate("Object.keys(window.__displayPlan||{})")
+    ok('F3: 3 assumed rows with 3 distinct keys and 3 link records', len(rows) == 3 and len({r['key'] for r in rows}) == 3 and len(ad) == 3, [[r['key'] for r in rows], ad])
+    ok('F3: one saved decision per floor', len([k for k in dp if ':area:' in k]) == 2, dp)
+    ok('F3: assumed names unique', len({r['zone'] for r in rows}) == 3, [r['zone'] for r in rows])
+
 async def case_standalone_after_command(pg):
     # QA limit (b) safety net: Command accepted on Networked, then every sheet made Standalone
     await fresh(pg)
@@ -274,6 +321,17 @@ async def case_standalone_after_command(pg):
     await create_sheets(pg)
     n_sheets = await pg.evaluate("document.querySelectorAll('.location').length")
     await pg.evaluate("applyUnifiedAddressing('standalone', false)")
+    # F2: Esc / click outside is not a decision — the Command stays, a lasting note shows, and it is asked again
+    ok('F2: removal prompt shown', await wait_prompt(pg, 'Remove the assumed Command display?'))
+    await pg.keyboard.press('Escape'); await pg.wait_for_timeout(300)
+    if await pg.evaluate("document.getElementById('prompt-overlay').classList.contains('open')"):
+        await pg.evaluate("document.getElementById('prompt-overlay').click()"); await pg.wait_for_timeout(300)
+    ok('F2: dismissed → Command kept, lasting note on screen', await pg.evaluate("[...document.querySelectorAll('.type-select')].some(s=>s.value==='Command Display')")
+       and 'Command display not needed' in await pg.evaluate("(document.getElementById('pl-sa-cmd-flag')||{}).textContent||''"))
+    await pg.evaluate("applyUnifiedAddressing('standalone', false)")
+    ok('F2: asked again on the next change', await wait_prompt(pg, 'Remove the assumed Command display?'))
+    await pg.keyboard.press('Escape'); await pg.wait_for_timeout(300)
+    await pg.click('[data-sa-cmd]')
     shown = await wait_prompt(pg, 'Remove the assumed Command display?')
     desc = await pg.evaluate("document.getElementById('prompt-overlay').innerText")
     ok('Limit b: all sheets Standalone + assumed Command → warning offers removal', shown and 'Standalone' in desc and 'CMD' in desc, desc[:300])
@@ -284,6 +342,13 @@ async def case_standalone_after_command(pg):
     ok('Limit b: other assumed displays and the re-run flag stay', await pg.evaluate("document.querySelectorAll('[data-role=module][data-origin=assumed]').length") == 3 and await pg.evaluate('!!window.__rerunPipeCad'))
     links = await pg.evaluate("PL_LINKS.map(l=>Object.keys(l.assumedDisplays||{}).filter(k=>k.startsWith('assumed:cmd')).length)")
     ok('Limit b: removed Command is dropped from the link record', links == [0], links)
+    ok('F2: note gone once the Command is removed', not await pg.evaluate("!!document.getElementById('pl-sa-cmd-flag')"))
+    # F5: Undo brings the sheets back to Networked, not the Command → flagged on screen
+    await pg.evaluate('addrUndo()'); await pg.wait_for_timeout(400)
+    net = await pg.evaluate("[...document.querySelectorAll('.location')].every(l=>addrSchemeOf(l)==='networked')")
+    flag = await pg.evaluate("(document.getElementById('pl-no-cmd-flag')||{}).textContent||''")
+    ok('F5: Undo after Remove → Networked with no Command is flagged', net and 'No Command display' in flag and 'SenseNET network 1' in flag, [net, flag])
+    await pg.evaluate("applyUnifiedAddressing('standalone', false)")
     await pg.evaluate("applyUnifiedAddressing('networked', false)"); await pg.evaluate("applyUnifiedAddressing('standalone', false)")
     ok('Limit b: no warning when no assumed Command is left', not await wait_prompt(pg, 'Remove the assumed Command display?', 1500))
 
@@ -309,6 +374,12 @@ async def case_skip_key(pg):
     fl = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>[f.floorName,f.nDet,f.status,f.floorKey])")
     ok('Limit c: skipped Alpha (13 det, still needs 2) is not re-prompted on Check link', st[0] == 5 and any('Alpha' in f[0] and f[1] == 13 and f[2] == 'skipped' and f[3] == key for f in fl), [st, fl])
     await pg.evaluate('closePlWizard()')
+    # L6: a fresh import of the identical file does not silently reuse the earlier Skip
+    await to_rename(pg, F['two_floor'])
+    st = await click_next(pg)
+    fl = await pg.evaluate("plWiz.displaysSuggest.floors.map(f=>[f.floorName,f.status])")
+    ok('L6: fresh import of the same file asks again (saved Skip not reused)', st == [4, 'gate'] and ['Example Zone Alpha', 'needed'] in fl, [st, fl])
+    await pg.evaluate('closePlWizard()')
 
 async def case_unique_names(pg):
     await fresh(pg)
@@ -329,6 +400,9 @@ async def case_job_tz(pg):
     await fresh(pg)
     await pg.fill('#job-tz-input', 'Mars/Olympus'); await pg.dispatch_event('#job-tz-input', 'change'); await pg.wait_for_timeout(150)
     ok('Job TZ: an invalid zone is refused (field cleared, nothing stored)', await pg.evaluate("document.getElementById('job-tz-input').value === '' && !MLP_PROJECT_EXTRA.timeZone"))
+    await pg.fill('#job-tz-input', 'america/chicago'); await pg.dispatch_event('#job-tz-input', 'change'); await pg.wait_for_timeout(150)
+    await pg.fill('#job-tz-input', '   '); await pg.dispatch_event('#job-tz-input', 'change'); await pg.wait_for_timeout(150)
+    ok('L8: whitespace-only job zone → blank field, nothing stored', await pg.evaluate("document.getElementById('job-tz-input').value === '' && !MLP_PROJECT_EXTRA.timeZone"))
     await pg.fill('#job-tz-input', 'america/chicago'); await pg.dispatch_event('#job-tz-input', 'change'); await pg.wait_for_timeout(150)
     ok('Job TZ: valid zone is normalized (america/chicago → America/Chicago)', await pg.evaluate("document.getElementById('job-tz-input').value") == 'America/Chicago')
     ok('Job TZ: carried as project.timeZone', await pg.evaluate('mlpProjectInfo().timeZone') == 'America/Chicago')
@@ -388,6 +462,15 @@ async def case_report_s4b(pg, text):
     ok('Report S4B: badge + actions menu on the module sheet', 'Assumed display (not in PipeCAD)' in html and 'Confirm installed' in html)
     z = await pg.evaluate('rpJobTimeZone()')
     ok('Report: job time zone comes from the Calculator export (America/Chicago, source project)', z.get('timeZone') == 'America/Chicago' and z.get('source') == 'project', z)
+    # L7: a Report that already has its own (different) job zone keeps it and says so in the import review
+    await pg.evaluate('localStorage.clear()'); await pg.reload()
+    await pg.wait_for_function('typeof importProjectText==="function"')
+    await pg.evaluate("()=>{ state.project = state.project || {}; state.project.timeZone = 'America/New_York'; save(); }")
+    await pg.evaluate("([t])=>importProjectText(t, 'Example-Display-Job.mlproj.json')", [text])
+    await pg.wait_for_timeout(400)
+    body = await pg.evaluate("document.getElementById('dlgBody').innerText")
+    ok('L7: different Report job zone → note in the import review, Report zone kept', 'this report keeps its own (America/New_York)' in body and 'America/Chicago' in body, body[-300:])
+    await pg.evaluate("document.getElementById('dlg').classList.remove('show')")
 
 async def main():
     async with async_playwright() as p:
@@ -401,6 +484,8 @@ async def main():
         await case_command_accept(pg)
         await case_command_dismiss_and_reopen(pg)
         await case_standalone(pg)
+        await case_footer_next_scheme(pg)
+        await case_dup_area(pg)
         await case_standalone_after_command(pg)
         await case_skip_key(pg)
         await case_unique_names(pg)

@@ -7980,9 +7980,14 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
   window.plRowArea = plRowArea;
   // (c) Skip/accept decisions are keyed by the linked file id + the PipeCAD Area/Group name: stable across re-imports
   // and Check link (same link id), not tied to the floor's position, and never shared with another file's Area.
+  // F3: when one file repeats an Area name, the 2nd, 3rd… floor of that name get a stable occurrence suffix (#2, #3…);
+  // the first keeps the plain key, so files with unique Area names are unchanged.
   function plFloorKey(f, g){
     const linkId = (plWiz.linkUpdate && plWiz.linkUpdate.id) || (f && f.linkId) || 'link';
-    return linkId + ':area:' + (g.origName || g.name || '');
+    const nm = g.origName || g.name || '';
+    const same = ((f && f.groups) || []).filter(x => (x.origName || x.name || '') === nm);
+    const occ = same.indexOf(g) + 1;
+    return linkId + ':area:' + nm + (occ > 1 ? ' #' + occ : '');
   }
   window.plFloorKey = plFloorKey;
   function plModuLaserDets(g){
@@ -8042,8 +8047,9 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     // (c) hand the engine the saved decisions under the key it looks up (linkId:index:name, for this call only)
     const engLink = (plWiz.files[0] && plWiz.files[0].linkId) || 'link';
     const engPlan = {};
+    const useSaved = plWiz.mode === 'update';   // L6: a fresh import asks again; Check link keeps the saved decision
     meta.forEach(m => {
-      const d = plWiz.displayPlan[m.floorKey];
+      const d = useSaved && plWiz.displayPlan[m.floorKey];
       if (d) engPlan[engLink + ':' + m.floorIdx + ':' + (m.g.name || m.g.origName || ('Floor ' + (m.floorIdx + 1)))] = d;
     });
     const raw = (typeof suggestDisplays === 'function' ? suggestDisplays : MASD_ENGINE.suggestDisplays)(groups, {
@@ -8067,7 +8073,7 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
     });
     // (c) a floor the user skipped stays skipped until it needs more displays than when it was skipped
     raw.floors.forEach(fl => {
-      const pr = plWiz.displayPlan[fl.floorKey];
+      const pr = useSaved && plWiz.displayPlan[fl.floorKey];
       if (fl.status === 'needed' && pr && pr.decision === 'skip' && (pr.needed || 0) >= fl.needed){ fl.status = 'skipped'; fl.suggestion = null; fl.buckets = []; }
     });
     plAssignAbbrs(raw.floors);
@@ -8318,13 +8324,29 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
       if (!l.querySelector('[data-role="module"], [data-role="minilaser"]') && document.querySelectorAll('.location').length > 1) l.remove();
     });
     if (!document.querySelector('[data-role="module"][data-origin="assumed"]')) window.__rerunPipeCad = false;
+    window.__displayPlan = Object.assign({}, window.__displayPlan || {}, { __commandRemoved: true });   // F5: flag if the sheets go back to Networked
     if (typeof aaRecalcAll === 'function') aaRecalcAll();
     if (typeof refreshAllClusterSummaries === 'function') refreshAllClusterSummaries();
     if (typeof scheduleSave === 'function') scheduleSave();
     if (typeof plRenderBanner === 'function') plRenderBanner();
   };
+  // F5: SenseNET networks (Networked sheets) with 2+ cluster displays and no Command display
+  window.plNetsMissingCommand = function (){
+    const per = {};
+    document.querySelectorAll('.location').forEach(l => {
+      if (!l.querySelector('[data-role="module"]')) return;
+      const sa = (typeof addrSchemeOf === 'function') ? addrSchemeOf(l) === 'standalone' : false; if (sa) return;
+      const net = (typeof sheetSenseNet === 'function') ? sheetSenseNet(l) : 1;
+      const e = per[net] = per[net] || { clusters: 0, cmds: 0 };
+      l.querySelectorAll('[data-role="module"]').forEach(r => { const t = (r.querySelector('.type-select') || {}).value || '';
+        if (t === 'Standard Display' || t === 'Minimum Display') e.clusters++; if (t === 'Command Display') e.cmds++; });
+    });
+    return Object.keys(per).filter(n => per[n].clusters >= 2 && !per[n].cmds).map(Number).sort((a, b) => a - b);
+  };
   let plSaCmdTimer = null, plSaCmdSig = '';
-  window.plCheckStandaloneCommand = function (){
+  window.plCheckStandaloneCommand = function (force){
+    if (force) plSaCmdSig = '';
+    if (typeof plRenderBanner === 'function') plRenderBanner();
     clearTimeout(plSaCmdTimer);
     plSaCmdTimer = setTimeout(async function tryCheck(){
       const ov = document.getElementById('prompt-overlay'), wz = document.getElementById('plw-overlay');
@@ -8346,6 +8368,8 @@ const plWiz = { step: 1, files: [], settings: null, psuByGroup: {}, unassignedBy
         desc: `<p>Every sheet is now <b>Standalone</b> (no SenseNET), so the clusters do not need a Command display. This assumed Command display is still in the design, with its own power supply and battery:</p><ul class="aa-list">${list}</ul><p class="plw-note">Remove takes it out (and its sheet when nothing else is on it). Keep leaves it as an assumed display to confirm in PipeCAD.</p>`,
         buttons: [{ label: 'Keep', value: 'keep' }, { label: 'Remove', value: 'remove', primary: true }] }) : 'keep';
       if (v === 'remove') plRemoveAssumedCommands(rows);
+      else if (v !== 'keep') plSaCmdSig = '';   // F2: Esc / click outside is not a decision — ask again on the next change
+      if (typeof plRenderBanner === 'function') plRenderBanner();
     }, 300);
   };
 
@@ -9063,6 +9087,7 @@ function plNext(){
   }
   if (plWiz.step === 4){
     if (plWiz.displaysPhase === 'gate'){ msg.textContent = 'Choose Stop import or Continue without PipeCAD displays.'; return; }
+    if (plWiz.displaysPhase === 'scheme'){ msg.textContent = 'Choose Networked or Standalone.'; return; }
     if (plWiz.displaysPhase === 'command'){ msg.textContent = 'Add a Command display or choose Not now.'; return; }
     if (plWiz.displaysPhase === 'fallback'){
       const err = plDisplaysAdvanceFromFallback();
@@ -9252,14 +9277,20 @@ function plRenderBanner(){
   const nAssumed = document.querySelectorAll('[data-role="module"][data-origin="assumed"]').length;
   if (window.__rerunPipeCad && !nAssumed) window.__rerunPipeCad = false;
   const rerun = window.__rerunPipeCad && nAssumed;
-  if (!changed.length && !rerun){ b.hidden = true; b.innerHTML = ''; return; }
+  // F2: every sheet Standalone but an assumed Command display remains; F5: a removed Command left a Networked network without one
+  const saCmd = (typeof plStandaloneAssumedCommands === 'function') ? plStandaloneAssumedCommands().length : 0;
+  const noCmdNets = ((window.__displayPlan || {}).__commandRemoved && typeof plNetsMissingCommand === 'function') ? plNetsMissingCommand() : [];
+  const extra = (saCmd ? `<span id="pl-sa-cmd-flag">⚠ <b>Command display not needed:</b> every sheet is Standalone (no SenseNET), but ${saCmd} assumed Command display${saCmd === 1 ? ' is' : 's are'} still in this design.</span> <button class="btn btn-sm" data-sa-cmd="1">Review…</button>` : '')
+    + (noCmdNets.length ? `${saCmd ? '<br>' : ''}<span id="pl-no-cmd-flag">⚠ <b>No Command display:</b> SenseNET network ${noCmdNets.join(', ')} has 2+ clusters and no Command display (an assumed Command display was removed). Add one, or correct it in PipeCAD.</span>` : '');
+  if (!changed.length && !rerun && !extra){ b.hidden = true; b.innerHTML = ''; return; }
   b.hidden = false;
-  b.innerHTML = (rerun ? `<span id="pl-rerun-flag">⚠ <b>Re-run in PipeCAD:</b> ${nAssumed} assumed display${nAssumed === 1 ? '' : 's'} (not in PipeCAD) ${nAssumed === 1 ? 'is' : 'are'} in this design. Correct the display modules in PipeCAD, then use <b>Linked .pl files → Check link…</b> to replace ${nAssumed === 1 ? 'it' : 'them'} (address and cluster are kept).</span>
+  b.innerHTML = (extra ? extra + (rerun || changed.length ? '<br>' : '') : '') + (rerun ? `<span id="pl-rerun-flag">⚠ <b>Re-run in PipeCAD:</b> ${nAssumed} assumed display${nAssumed === 1 ? '' : 's'} (not in PipeCAD) ${nAssumed === 1 ? 'is' : 'are'} in this design. Correct the display modules in PipeCAD, then use <b>Linked .pl files → Check link…</b> to replace ${nAssumed === 1 ? 'it' : 'them'} (address and cluster are kept).</span>
     <button class="btn btn-sm" data-linked-open="1">Linked .pl files…</button>${changed.length ? '<br>' : ''}` : '') +
     changed.map(l => `<span>⚠ Linked PipeCAD file <b>${plEsc(l.name)}</b> has changed since import: <span class="plw-diff-added">+${l.pendingDiff.added.length} added</span> · <span class="plw-diff-removed">−${l.pendingDiff.removed.length} removed</span> · <span class="plw-diff-changed">~${l.pendingDiff.changed.length} changed</span>${nRep(l) ? ` · <span class="plw-diff-changed">⇄${nRep(l)} replaces assumed</span>` : ''}</span>
     <button class="btn btn-sm" data-review="${plEsc(l.id)}">Review &amp; re-import…</button>`).join('<br>');
   b.querySelectorAll('[data-review]').forEach(btn => btn.addEventListener('click', () => plOpenDiff(btn.dataset.review)));
   b.querySelectorAll('[data-linked-open]').forEach(btn => btn.addEventListener('click', () => plOpenLinks()));
+  b.querySelectorAll('[data-sa-cmd]').forEach(btn => btn.addEventListener('click', () => plCheckStandaloneCommand(true)));
 }
 function plRowsForKey(plKey){ return Array.from(document.querySelectorAll('[data-role="module"]')).filter(r => r.dataset.plKey === plKey); }
 /* R1A, QA Low: Check link only PLANS the replacement of assumed displays by new real PipeCAD displays (same Area/Group,
@@ -11992,7 +12023,7 @@ function jobTzSync(){ const i = document.getElementById('job-tz-input'); if (i) 
       alert(`"${i.value.trim()}" is not a time zone this browser recognises. Use an IANA name such as America/Chicago. The job time zone was left blank.`);
       delete MLP_PROJECT_EXTRA.timeZone; i.value = '';
     } else if (c){ MLP_PROJECT_EXTRA.timeZone = c; i.value = c; }
-    else delete MLP_PROJECT_EXTRA.timeZone;
+    else { delete MLP_PROJECT_EXTRA.timeZone; i.value = ''; }
     scheduleSave();
   });
   const _a = applyLoadedState; applyLoadedState = function(state){ const r = _a(state); jobTzSync(); return r; };
@@ -12004,6 +12035,7 @@ function jobTzSync(){ const i = document.getElementById('job-tz-input'); if (i) 
   document.addEventListener('change', ev => { if (ev.target && ev.target.matches && ev.target.matches('.addr-scheme-radio')) plCheckStandaloneCommand(); });
   const _u = applyUnifiedAddressing; applyUnifiedAddressing = function(){ const r = _u.apply(this, arguments); plCheckStandaloneCommand(); return r; };
   const _aa = promptAutoAddress; promptAutoAddress = async function(){ const r = await _aa.apply(this, arguments); plCheckStandaloneCommand(); return r; };
+  if (typeof addrUndo === 'function'){ const _un = addrUndo; addrUndo = function(){ const r = _un.apply(this, arguments); plCheckStandaloneCommand(); return r; }; }
 })();
 /* Copy pipe/hole results and placement from freshly parsed files into the saved links (keeps them in the calc file). */
 function mlpAttachPipe(){

@@ -1,0 +1,2214 @@
+{
+ "format": "modulaser-project",
+ "schemaVersion": 1,
+ "savedAt": "2026-11-10T03:14:58.370Z",
+ "savedBy": {
+  "app": "ModuLaser Battery Calculator",
+  "rev": "02.02.002_261109",
+  "name": "Example Engineer"
+ },
+ "project": {
+  "location": "NFPA 318 Fab Ceiling",
+  "designer": "Example Engineer",
+  "company": "Example Co.",
+  "name": "NFPA 318 Fab Ceiling",
+  "preparedBy": "Example Engineer",
+  "date": "2026-11-10",
+  "networkNumber": "Network 1",
+  "building": "Bldg 4"
+ },
+ "design": {
+  "owner": "battery-calculator",
+  "rev": "02.02.002_261109",
+  "engine": "1.3.0",
+  "updatedAt": "2026-11-10T03:14:58.368Z",
+  "plLinks": [
+   {
+    "id": "pl-0727d02d3c05-0",
+    "name": "NFPA318-Fab-Ceiling.pl",
+    "sha256": "0727d02d3c05311da08f74fa6d89dc093a7441f978f4605f764fafec103d5b83",
+    "size": 1907,
+    "lastModified": 1794057435571,
+    "version": "",
+    "unit": "Imperial (ft)",
+    "project": "NFPA 318 Fab Ceiling",
+    "groups": [
+     "Fab Ceiling RA"
+    ],
+    "importedAt": "2026-11-10T03:14:55.567Z",
+    "placement": [
+     {
+      "area": "Fab Ceiling RA",
+      "psus": [],
+      "batteries": []
+     }
+    ]
+   },
+   {
+    "id": "pl-03cb7b080339-1",
+    "name": "Example-Campus-PSU.pl",
+    "sha256": "03cb7b0803393ffccf58e6a3b44a4f4190697e0a4047caf02c7c7e1dbc8ed8d6",
+    "size": 56603,
+    "lastModified": 1794057435775,
+    "version": "",
+    "unit": "Imperial (ft)",
+    "project": "Example Campus Plant Room",
+    "groups": [
+     "Campus Main Plant Room Return Air"
+    ],
+    "importedAt": "2026-11-10T03:14:55.573Z",
+    "placement": [
+     {
+      "area": "Campus Main Plant Room Return Air",
+      "psus": [
+       {
+        "x": 179.5,
+        "y": 182,
+        "z": 0
+       },
+       {
+        "x": 171.5,
+        "y": 181,
+        "z": 0
+       }
+      ],
+      "batteries": [
+       {
+        "x": 179.5,
+        "y": 181.5,
+        "z": 0
+       },
+       {
+        "x": 171.5,
+        "y": 180.5,
+        "z": 0
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "areas": [
+   "Fab Ceiling RA",
+   "Campus Main Plant Room Return Air"
+  ],
+  "psus": [
+   {
+    "id": "pls-mwa4a30v-1",
+    "sheet": 1,
+    "name": "PS-1",
+    "area": "Fab Ceiling RA",
+    "location": "Fab Ceiling RA",
+    "model": "BPS6A",
+    "enclosure": "3-RCC7R + 3-BATS (battery shelf)",
+    "battery": {
+     "model": "12V65A (65 Ah)",
+     "ah": 65,
+     "qty": 1,
+     "part": "3-BATS"
+    },
+    "requiredAh": 58.26,
+    "standbyHours": 24,
+    "alarmMinutes": 15,
+    "designBasis": "NFPA 72 Voice",
+    "totalMa": 1922,
+    "status": "PASS",
+    "flags": []
+   },
+   {
+    "id": "pls-mwa4a30z-2",
+    "sheet": 2,
+    "name": "PS-2",
+    "area": "Fab Ceiling RA",
+    "location": "Fab Ceiling RA",
+    "model": "BPS6A",
+    "enclosure": "BC-1",
+    "battery": {
+     "model": "12V40A (40 Ah)",
+     "ah": 40,
+     "qty": 2,
+     "part": "12V40A"
+    },
+    "requiredAh": 29.31,
+    "standbyHours": 24,
+    "alarmMinutes": 15,
+    "designBasis": "NFPA 72 Voice",
+    "totalMa": 967,
+    "status": "PASS",
+    "flags": []
+   },
+   {
+    "id": "pls-mwa4a311-3",
+    "sheet": 3,
+    "name": "PS-3",
+    "area": "Campus Main Plant Room Return Air",
+    "location": "Campus Main Plant Room Return Air",
+    "model": "BPS6A",
+    "enclosure": "BC-1",
+    "battery": {
+     "model": "12V40A (40 Ah)",
+     "ah": 40,
+     "qty": 2,
+     "part": "12V40A"
+    },
+    "requiredAh": 35.59,
+    "standbyHours": 24,
+    "alarmMinutes": 15,
+    "designBasis": "NFPA 72 Voice",
+    "totalMa": 1174,
+    "status": "PASS",
+    "flags": []
+   }
+  ],
+  "devices": [
+   {
+    "id": "pl-0727d02d3c05-0|Fab Ceiling RA#disp0",
+    "kind": "display",
+    "type": "Minimum Display",
+    "model": "FHSD8300-ULF",
+    "partNumber": "1",
+    "name": "N318FC-FCR-DSP1",
+    "plName": "Minimum Display 1",
+    "area": "Fab Ceiling RA",
+    "address": "1",
+    "network": 1,
+    "psuId": "pls-mwa4a30v-1",
+    "fan": null,
+    "cluster": "01",
+    "ma": 210,
+    "pl": {
+     "link": "pl-0727d02d3c05-0",
+     "file": "NFPA318-Fab-Ceiling.pl",
+     "key": "Fab Ceiling RA#disp0",
+     "fp": "be12dd3c"
+    },
+    "pipe": null
+   },
+   {
+    "id": "pl-0727d02d3c05-0|Fab Ceiling RA#id0",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "N318FC-FCR-D1",
+    "plName": "FC Bay 1 RA",
+    "area": "Fab Ceiling RA",
+    "address": "2",
+    "network": 1,
+    "psuId": "pls-mwa4a30v-1",
+    "fan": 14,
+    "cluster": "01",
+    "ma": 646,
+    "pl": {
+     "link": "pl-0727d02d3c05-0",
+     "file": "NFPA318-Fab-Ceiling.pl",
+     "key": "Fab Ceiling RA#id0",
+     "fp": "bd0fa6ca"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": 60,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-0727d02d3c05-0|Fab Ceiling RA#id1",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "N318FC-FCR-D2",
+    "plName": "FC Bay 2 RA",
+    "area": "Fab Ceiling RA",
+    "address": "3",
+    "network": 1,
+    "psuId": "pls-mwa4a30v-1",
+    "fan": 6,
+    "cluster": "01",
+    "ma": 330,
+    "pl": {
+     "link": "pl-0727d02d3c05-0",
+     "file": "NFPA318-Fab-Ceiling.pl",
+     "key": "Fab Ceiling RA#id1",
+     "fp": "bbbf5bf7"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": 60,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-0727d02d3c05-0|Fab Ceiling RA#id2",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "N318FC-FCR-D3",
+    "plName": "FC Bay 3 RA",
+    "area": "Fab Ceiling RA",
+    "address": "4",
+    "network": 1,
+    "psuId": "pls-mwa4a30v-1",
+    "fan": 6,
+    "cluster": "01",
+    "ma": 330,
+    "pl": {
+     "link": "pl-0727d02d3c05-0",
+     "file": "NFPA318-Fab-Ceiling.pl",
+     "key": "Fab Ceiling RA#id2",
+     "fp": "f61fe7a3"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": 60,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-0727d02d3c05-0|Fab Ceiling RA#id3",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "N318FC-FCR-D4",
+    "plName": "FC Bay 4 RA",
+    "area": "Fab Ceiling RA",
+    "address": "5",
+    "network": 1,
+    "psuId": "pls-mwa4a30v-1",
+    "fan": 5,
+    "cluster": "01",
+    "ma": 301,
+    "pl": {
+     "link": "pl-0727d02d3c05-0",
+     "file": "NFPA318-Fab-Ceiling.pl",
+     "key": "Fab Ceiling RA#id3",
+     "fp": "cc7136ea"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": 60,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-0727d02d3c05-0|Fab Ceiling RA#id4",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "N318FC-FCR-D5",
+    "plName": "FC Chase N",
+    "area": "Fab Ceiling RA",
+    "address": "6",
+    "network": 1,
+    "psuId": "pls-mwa4a30z-2",
+    "fan": 9,
+    "cluster": "01",
+    "ma": 431,
+    "pl": {
+     "link": "pl-0727d02d3c05-0",
+     "file": "NFPA318-Fab-Ceiling.pl",
+     "key": "Fab Ceiling RA#id4",
+     "fp": "84f0e912"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": 60,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-0727d02d3c05-0|Fab Ceiling RA#id5",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "N318FC-FCR-D6",
+    "plName": "FC Chase S",
+    "area": "Fab Ceiling RA",
+    "address": "7",
+    "network": 1,
+    "psuId": "pls-mwa4a30z-2",
+    "fan": 9,
+    "cluster": "01",
+    "ma": 431,
+    "pl": {
+     "link": "pl-0727d02d3c05-0",
+     "file": "NFPA318-Fab-Ceiling.pl",
+     "key": "Fab Ceiling RA#id5",
+     "fp": "269c17ee"
+    },
+    "pipe": {
+     "runs": "",
+     "lengthFt": 0,
+     "af": null,
+     "afActivated": true,
+     "designSens": null,
+     "maxTransit": 60,
+     "temperature": null,
+     "pressure": null,
+     "holeUnit": "in",
+     "flow": null,
+     "tt": null,
+     "balance": null,
+     "bends90": null,
+     "sockets": null,
+     "clips": null,
+     "hasResults": false,
+     "holes": [],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-03cb7b080339-1|assumed:pl-03cb7b080339-1:area:Campus Main Plant Room Return Air:0",
+    "kind": "display",
+    "type": "Standard Display",
+    "model": "FHSD8310-ULF",
+    "origin": "assumed",
+    "assumption": {
+     "rule": "le8-floor",
+     "floor": "Campus Main Plant Room Return Air",
+     "area": "Campus Main Plant Room Return Air",
+     "floorIdx": 1,
+     "bucket": 0,
+     "decision": "accept",
+     "at": "2026-11-10T03:14:54.790Z",
+     "why": "Assumed during import \u2014 floor short on Std/Min displays."
+    },
+    "partNumber": "0",
+    "name": "CMPRRA-DSP01",
+    "plName": "",
+    "area": "Campus Main Plant Room Return Air",
+    "address": "8",
+    "network": 1,
+    "psuId": "pls-mwa4a311-3",
+    "fan": null,
+    "cluster": "01",
+    "ma": 232,
+    "pl": null,
+    "pipe": null
+   },
+   {
+    "id": "pl-03cb7b080339-1|Campus Main Plant Room Return Air#id0",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "ECPR-CMPRRA-D1",
+    "plName": "Det 01",
+    "area": "Campus Main Plant Room Return Air",
+    "address": "9",
+    "network": 1,
+    "psuId": "pls-mwa4a311-3",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-03cb7b080339-1",
+     "file": "Example-Campus-PSU.pl",
+     "key": "Campus Main Plant Room Return Air#id0",
+     "fp": "e21d4ab0"
+    },
+    "pipe": {
+     "runs": "Pipe 1",
+     "lengthFt": 169.5,
+     "af": 0,
+     "afActivated": false,
+     "designSens": 0.08,
+     "maxTransit": 90,
+     "temperature": 20,
+     "pressure": 1013,
+     "holeUnit": "in",
+     "flow": 20.887758996578,
+     "tt": 61.859751942241054,
+     "balance": 91.6341956215706,
+     "bends90": 2,
+     "sockets": 21,
+     "clips": 36,
+     "hasResults": true,
+     "holes": [
+      {
+       "i": "1",
+       "endcap": false,
+       "name": "",
+       "size": 0.09000000000000002,
+       "flow": 0.9811963646414149,
+       "tt": 27.362183854182987,
+       "sens": 1.703044140748449
+      },
+      {
+       "i": "2",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.437028171292586,
+       "tt": 22.82380121257591,
+       "sens": 1.1628308707568211
+      },
+      {
+       "i": "3",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.4062600270544463,
+       "tt": 24.989622769847422,
+       "sens": 1.1882729278925477
+      },
+      {
+       "i": "4",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.3731744978872205,
+       "tt": 27.935667874644075,
+       "sens": 1.2169034032435708
+      },
+      {
+       "i": "5",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.3374650609415195,
+       "tt": 30.387302771008116,
+       "sens": 1.2493939232699742
+      },
+      {
+       "i": "6",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.2987653187451074,
+       "tt": 33.725294179329765,
+       "sens": 1.2866225295735594
+      },
+      {
+       "i": "7",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.256632473972754,
+       "tt": 36.54137288709675,
+       "sens": 1.329760892175122
+      },
+      {
+       "i": "8",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.2105243384324362,
+       "tt": 40.37965925477036,
+       "sens": 1.380410675501264
+      },
+      {
+       "i": "9",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.1597662707769725,
+       "tt": 47.22825767718051,
+       "sens": 1.4408254161476506
+      },
+      {
+       "i": "10",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.1035016302907072,
+       "tt": 50.84469663913754,
+       "sens": 1.5142893076524275
+      },
+      {
+       "i": "11",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.0406135775059457,
+       "tt": 55.795117733928166,
+       "sens": 1.6058033028275498
+      },
+      {
+       "i": "12",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.3542252767180096,
+       "tt": 54.06637229243757,
+       "sens": 1.2339311253855711
+      },
+      {
+       "i": "13",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.237883518389747,
+       "tt": 59.88266843613093,
+       "sens": 1.3499014203694406
+      },
+      {
+       "i": "14",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.0982165545038607,
+       "tt": 65.58988678671592,
+       "sens": 1.5215766989427273
+      },
+      {
+       "i": "15",
+       "endcap": false,
+       "name": "",
+       "size": 0.15000000000000002,
+       "flow": 1.2305055344738913,
+       "tt": 68.57052099305805,
+       "sens": 1.3579952896682363
+      },
+      {
+       "i": "16",
+       "endcap": false,
+       "name": "",
+       "size": 0.17,
+       "flow": 1.1704980092097297,
+       "tt": 73.61998227935135,
+       "sens": 1.4276151745481753
+      },
+      {
+       "i": "17",
+       "endcap": false,
+       "name": "",
+       "size": 0.31,
+       "flow": 1.1915023717416506,
+       "tt": 63.793059767362664,
+       "sens": 1.4024485048096589
+      }
+     ],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-03cb7b080339-1|Campus Main Plant Room Return Air#id22",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "ECPR-CMPRRA-D2",
+    "plName": "Det 02",
+    "area": "Campus Main Plant Room Return Air",
+    "address": "10",
+    "network": 1,
+    "psuId": "pls-mwa4a311-3",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-03cb7b080339-1",
+     "file": "Example-Campus-PSU.pl",
+     "key": "Campus Main Plant Room Return Air#id22",
+     "fp": "60f1def6"
+    },
+    "pipe": {
+     "runs": "Pipe 5",
+     "lengthFt": 169.5,
+     "af": 0,
+     "afActivated": false,
+     "designSens": 0.08,
+     "maxTransit": 90,
+     "temperature": 20,
+     "pressure": 1013,
+     "holeUnit": "in",
+     "flow": 20.887758996578,
+     "tt": 61.859751942241054,
+     "balance": 91.6341956215706,
+     "bends90": 2,
+     "sockets": 21,
+     "clips": 36,
+     "hasResults": true,
+     "holes": [
+      {
+       "i": "1",
+       "endcap": false,
+       "name": "",
+       "size": 0.09000000000000002,
+       "flow": 0.9811963646414149,
+       "tt": 27.362183854182987,
+       "sens": 1.703044140748449
+      },
+      {
+       "i": "2",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.437028171292586,
+       "tt": 22.82380121257591,
+       "sens": 1.1628308707568211
+      },
+      {
+       "i": "3",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.4062600270544463,
+       "tt": 24.989622769847422,
+       "sens": 1.1882729278925477
+      },
+      {
+       "i": "4",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.3731744978872205,
+       "tt": 27.935667874644075,
+       "sens": 1.2169034032435708
+      },
+      {
+       "i": "5",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.3374650609415195,
+       "tt": 30.387302771008116,
+       "sens": 1.2493939232699742
+      },
+      {
+       "i": "6",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.2987653187451074,
+       "tt": 33.725294179329765,
+       "sens": 1.2866225295735594
+      },
+      {
+       "i": "7",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.256632473972754,
+       "tt": 36.54137288709675,
+       "sens": 1.329760892175122
+      },
+      {
+       "i": "8",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.2105243384324362,
+       "tt": 40.37965925477036,
+       "sens": 1.380410675501264
+      },
+      {
+       "i": "9",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.1597662707769725,
+       "tt": 47.22825767718051,
+       "sens": 1.4408254161476506
+      },
+      {
+       "i": "10",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.1035016302907072,
+       "tt": 50.84469663913754,
+       "sens": 1.5142893076524275
+      },
+      {
+       "i": "11",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.0406135775059457,
+       "tt": 55.795117733928166,
+       "sens": 1.6058033028275498
+      },
+      {
+       "i": "12",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.3542252767180096,
+       "tt": 54.06637229243757,
+       "sens": 1.2339311253855711
+      },
+      {
+       "i": "13",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.237883518389747,
+       "tt": 59.88266843613093,
+       "sens": 1.3499014203694406
+      },
+      {
+       "i": "14",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.0982165545038607,
+       "tt": 65.58988678671592,
+       "sens": 1.5215766989427273
+      },
+      {
+       "i": "15",
+       "endcap": false,
+       "name": "",
+       "size": 0.15000000000000002,
+       "flow": 1.2305055344738913,
+       "tt": 68.57052099305805,
+       "sens": 1.3579952896682363
+      },
+      {
+       "i": "16",
+       "endcap": false,
+       "name": "",
+       "size": 0.17,
+       "flow": 1.1704980092097297,
+       "tt": 73.61998227935135,
+       "sens": 1.4276151745481753
+      },
+      {
+       "i": "17",
+       "endcap": false,
+       "name": "",
+       "size": 0.31,
+       "flow": 1.1915023717416506,
+       "tt": 63.793059767362664,
+       "sens": 1.4024485048096589
+      }
+     ],
+     "testPoints": []
+    }
+   },
+   {
+    "id": "pl-03cb7b080339-1|Campus Main Plant Room Return Air#id44",
+    "kind": "detector",
+    "type": "Detector",
+    "model": "FHSD8330-ULF",
+    "partNumber": "",
+    "name": "ECPR-CMPRRA-D3",
+    "plName": "Det 03",
+    "area": "Campus Main Plant Room Return Air",
+    "address": "11",
+    "network": 1,
+    "psuId": "pls-mwa4a311-3",
+    "fan": 4,
+    "cluster": "01",
+    "ma": 279,
+    "pl": {
+     "link": "pl-03cb7b080339-1",
+     "file": "Example-Campus-PSU.pl",
+     "key": "Campus Main Plant Room Return Air#id44",
+     "fp": "ef6d2879"
+    },
+    "pipe": {
+     "runs": "Pipe 9",
+     "lengthFt": 169.5,
+     "af": 0,
+     "afActivated": false,
+     "designSens": 0.08,
+     "maxTransit": 90,
+     "temperature": 20,
+     "pressure": 1013,
+     "holeUnit": "in",
+     "flow": 20.887758996578,
+     "tt": 61.859751942241054,
+     "balance": 91.6341956215706,
+     "bends90": 2,
+     "sockets": 21,
+     "clips": 36,
+     "hasResults": true,
+     "holes": [
+      {
+       "i": "1",
+       "endcap": false,
+       "name": "",
+       "size": 0.09000000000000002,
+       "flow": 0.9811963646414149,
+       "tt": 27.362183854182987,
+       "sens": 1.703044140748449
+      },
+      {
+       "i": "2",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.437028171292586,
+       "tt": 22.82380121257591,
+       "sens": 1.1628308707568211
+      },
+      {
+       "i": "3",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.4062600270544463,
+       "tt": 24.989622769847422,
+       "sens": 1.1882729278925477
+      },
+      {
+       "i": "4",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.3731744978872205,
+       "tt": 27.935667874644075,
+       "sens": 1.2169034032435708
+      },
+      {
+       "i": "5",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.3374650609415195,
+       "tt": 30.387302771008116,
+       "sens": 1.2493939232699742
+      },
+      {
+       "i": "6",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.2987653187451074,
+       "tt": 33.725294179329765,
+       "sens": 1.2866225295735594
+      },
+      {
+       "i": "7",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.256632473972754,
+       "tt": 36.54137288709675,
+       "sens": 1.329760892175122
+      },
+      {
+       "i": "8",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.2105243384324362,
+       "tt": 40.37965925477036,
+       "sens": 1.380410675501264
+      },
+      {
+       "i": "9",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.1597662707769725,
+       "tt": 47.22825767718051,
+       "sens": 1.4408254161476506
+      },
+      {
+       "i": "10",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.1035016302907072,
+       "tt": 50.84469663913754,
+       "sens": 1.5142893076524275
+      },
+      {
+       "i": "11",
+       "endcap": false,
+       "name": "",
+       "size": 0.11000000000000003,
+       "flow": 1.0406135775059457,
+       "tt": 55.795117733928166,
+       "sens": 1.6058033028275498
+      },
+      {
+       "i": "12",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.3542252767180096,
+       "tt": 54.06637229243757,
+       "sens": 1.2339311253855711
+      },
+      {
+       "i": "13",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.237883518389747,
+       "tt": 59.88266843613093,
+       "sens": 1.3499014203694406
+      },
+      {
+       "i": "14",
+       "endcap": false,
+       "name": "",
+       "size": 0.13000000000000003,
+       "flow": 1.0982165545038607,
+       "tt": 65.58988678671592,
+       "sens": 1.5215766989427273
+      },
+      {
+       "i": "15",
+       "endcap": false,
+       "name": "",
+       "size": 0.15000000000000002,
+       "flow": 1.2305055344738913,
+       "tt": 68.57052099305805,
+       "sens": 1.3579952896682363
+      },
+      {
+       "i": "16",
+       "endcap": false,
+       "name": "",
+       "size": 0.17,
+       "flow": 1.1704980092097297,
+       "tt": 73.61998227935135,
+       "sens": 1.4276151745481753
+      },
+      {
+       "i": "17",
+       "endcap": false,
+       "name": "",
+       "size": 0.31,
+       "flow": 1.1915023717416506,
+       "tt": 63.793059767362664,
+       "sens": 1.4024485048096589
+      }
+     ],
+     "testPoints": []
+    }
+   }
+  ],
+  "calc": {
+   "state": {
+    "version": 1,
+    "autosaveActivated": false,
+    "autosaveEnabled": false,
+    "projectName": "NFPA 318 Fab Ceiling",
+    "preparedBy": "Example Engineer",
+    "projectDate": "2026-11-10",
+    "networkNumber": "Network 1",
+    "building": "Bldg 4",
+    "primaryCdmLocation": "",
+    "backupCdmLocation": "",
+    "printBom": true,
+    "locations": [
+     {
+      "name": "NFPA 318 Fab Ceiling \u00b7 NFPA318-Fab-Ceiling.pl",
+      "psName": "PS-1",
+      "psLocation": "Fab Ceiling RA",
+      "psCapacity": "6",
+      "batteryCabinet": "edwards",
+      "ribbonAssignMode": "auto",
+      "autoBatteryMode": "auto",
+      "tpAutoBatteryMode": "off",
+      "standbyHours": "24",
+      "alarmMinutes": "15",
+      "designBasis": "NFPA 72 Voice",
+      "temperature": "77",
+      "nfpa72Edition": "2022plus",
+      "derating": "1.75",
+      "showCalcDetail": false,
+      "addrScheme": "networked",
+      "senseNet": 1,
+      "mode": "builtin",
+      "submode": "custom",
+      "customQuiescent": "70",
+      "customAuxMa": "35",
+      "tpSupplyMakeModel": "",
+      "auxCircuits": "1",
+      "auxCircuitsCustom": "1",
+      "margin": "0.25",
+      "batterySize": "65",
+      "batterySizeCustom": "40",
+      "tpBatteryModel": "",
+      "tpBatteryAh": "40",
+      "tpBatteryVoltage": "12",
+      "exportMargin": "0.25",
+      "exportChargerAh": "65",
+      "modules": [
+       {
+        "type": "Minimum Display",
+        "zone": "N318FC-FCR-DSP1",
+        "address": "1",
+        "fan": "",
+        "cluster": "1",
+        "power": "own",
+        "circuitSource": "PS-1 AUX-1",
+        "auxCircuitNum": "1",
+        "rowId": "mod-1-1",
+        "plKey": "pl-0727d02d3c05-0|Fab Ceiling RA#disp0"
+       },
+       {
+        "type": "Detector",
+        "zone": "N318FC-FCR-D1",
+        "address": "2",
+        "fan": "14",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-2",
+        "plKey": "pl-0727d02d3c05-0|Fab Ceiling RA#id0"
+       },
+       {
+        "type": "Detector",
+        "zone": "N318FC-FCR-D2",
+        "address": "3",
+        "fan": "6",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-3",
+        "plKey": "pl-0727d02d3c05-0|Fab Ceiling RA#id1"
+       },
+       {
+        "type": "Detector",
+        "zone": "N318FC-FCR-D3",
+        "address": "4",
+        "fan": "6",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-4",
+        "plKey": "pl-0727d02d3c05-0|Fab Ceiling RA#id2"
+       },
+       {
+        "type": "Detector",
+        "zone": "N318FC-FCR-D4",
+        "address": "5",
+        "fan": "5",
+        "cluster": "1",
+        "power": "follow:mod-1-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-1-5",
+        "plKey": "pl-0727d02d3c05-0|Fab Ceiling RA#id3"
+       }
+      ],
+      "plSheetId": "pls-mwa4a30v-1"
+     },
+     {
+      "name": "NFPA 318 Fab Ceiling \u00b7 NFPA318-Fab-Ceiling.pl",
+      "psName": "PS-2",
+      "psLocation": "Fab Ceiling RA",
+      "psCapacity": "6",
+      "batteryCabinet": "",
+      "ribbonAssignMode": "auto",
+      "autoBatteryMode": "auto",
+      "tpAutoBatteryMode": "off",
+      "standbyHours": "24",
+      "alarmMinutes": "15",
+      "designBasis": "NFPA 72 Voice",
+      "temperature": "77",
+      "nfpa72Edition": "2022plus",
+      "derating": "1.75",
+      "showCalcDetail": false,
+      "addrScheme": "networked",
+      "senseNet": 1,
+      "mode": "builtin",
+      "submode": "custom",
+      "customQuiescent": "70",
+      "customAuxMa": "35",
+      "tpSupplyMakeModel": "",
+      "auxCircuits": "1",
+      "auxCircuitsCustom": "1",
+      "margin": "0.25",
+      "batterySize": "40",
+      "batterySizeCustom": "40",
+      "tpBatteryModel": "",
+      "tpBatteryAh": "40",
+      "tpBatteryVoltage": "12",
+      "exportMargin": "0.25",
+      "exportChargerAh": "65",
+      "modules": [
+       {
+        "type": "Detector",
+        "zone": "N318FC-FCR-D5",
+        "address": "6",
+        "fan": "9",
+        "cluster": "r:1:1",
+        "power": "own",
+        "circuitSource": "PS-2 AUX-1",
+        "auxCircuitNum": "1",
+        "rowId": "mod-2-1",
+        "plKey": "pl-0727d02d3c05-0|Fab Ceiling RA#id4"
+       },
+       {
+        "type": "Detector",
+        "zone": "N318FC-FCR-D6",
+        "address": "7",
+        "fan": "9",
+        "cluster": "r:1:1",
+        "power": "follow:mod-2-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-2-2",
+        "plKey": "pl-0727d02d3c05-0|Fab Ceiling RA#id5"
+       }
+      ],
+      "plSheetId": "pls-mwa4a30z-2"
+     },
+     {
+      "name": "Example Campus Plant Room \u00b7 Example-Campus-PSU.pl",
+      "psName": "PS-3",
+      "psLocation": "Campus Main Plant Room Return Air",
+      "psCapacity": "6",
+      "batteryCabinet": "",
+      "ribbonAssignMode": "auto",
+      "autoBatteryMode": "auto",
+      "tpAutoBatteryMode": "off",
+      "standbyHours": "24",
+      "alarmMinutes": "15",
+      "designBasis": "NFPA 72 Voice",
+      "temperature": "77",
+      "nfpa72Edition": "2022plus",
+      "derating": "1.75",
+      "showCalcDetail": false,
+      "addrScheme": "networked",
+      "senseNet": 1,
+      "mode": "builtin",
+      "submode": "custom",
+      "customQuiescent": "70",
+      "customAuxMa": "35",
+      "tpSupplyMakeModel": "",
+      "auxCircuits": "1",
+      "auxCircuitsCustom": "1",
+      "margin": "0.25",
+      "batterySize": "40",
+      "batterySizeCustom": "40",
+      "tpBatteryModel": "",
+      "tpBatteryAh": "40",
+      "tpBatteryVoltage": "12",
+      "exportMargin": "0.25",
+      "exportChargerAh": "65",
+      "modules": [
+       {
+        "type": "Standard Display",
+        "zone": "CMPRRA-DSP01",
+        "address": "8",
+        "fan": "",
+        "cluster": "1",
+        "power": "own",
+        "circuitSource": "PS-3 AUX-1",
+        "auxCircuitNum": "1",
+        "rowId": "mod-3-1",
+        "plKey": "pl-03cb7b080339-1|assumed:pl-03cb7b080339-1:area:Campus Main Plant Room Return Air:0",
+        "origin": "assumed",
+        "assumption": {
+         "rule": "le8-floor",
+         "floor": "Campus Main Plant Room Return Air",
+         "area": "Campus Main Plant Room Return Air",
+         "floorIdx": 1,
+         "bucket": 0,
+         "decision": "accept",
+         "at": "2026-11-10T03:14:54.790Z",
+         "why": "Assumed during import \u2014 floor short on Std/Min displays."
+        }
+       },
+       {
+        "type": "Detector",
+        "zone": "ECPR-CMPRRA-D1",
+        "address": "9",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-3-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-3-2",
+        "plKey": "pl-03cb7b080339-1|Campus Main Plant Room Return Air#id0"
+       },
+       {
+        "type": "Detector",
+        "zone": "ECPR-CMPRRA-D2",
+        "address": "10",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-3-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-3-3",
+        "plKey": "pl-03cb7b080339-1|Campus Main Plant Room Return Air#id22"
+       },
+       {
+        "type": "Detector",
+        "zone": "ECPR-CMPRRA-D3",
+        "address": "11",
+        "fan": "4",
+        "cluster": "1",
+        "power": "follow:mod-3-1",
+        "circuitSource": "",
+        "auxCircuitNum": "",
+        "rowId": "mod-3-4",
+        "plKey": "pl-03cb7b080339-1|Campus Main Plant Room Return Air#id44"
+       }
+      ],
+      "plSheetId": "pls-mwa4a311-3"
+     }
+    ],
+    "addrLog": [],
+    "displayPlan": {
+     "pl-03cb7b080339-1:area:Campus Main Plant Room Return Air": {
+      "decision": "accept",
+      "type": "Standard Display",
+      "needed": 1,
+      "name": "CMPRRA-DSP01"
+     }
+    },
+    "rerunPipeCad": true,
+    "displaysAssumed": true,
+    "plLinks": [
+     {
+      "id": "pl-0727d02d3c05-0",
+      "name": "NFPA318-Fab-Ceiling.pl",
+      "path": "",
+      "size": 1907,
+      "lastModified": 1794057435571,
+      "sha256": "0727d02d3c05311da08f74fa6d89dc093a7441f978f4605f764fafec103d5b83",
+      "project": "NFPA 318 Fab Ceiling",
+      "unit": "Imperial (ft)",
+      "importedAt": "2026-11-10T03:14:55.567Z",
+      "groups": [
+       "Fab Ceiling RA"
+      ],
+      "devices": {
+       "Fab Ceiling RA#disp0": {
+        "fp": "be12dd3c",
+        "kind": "display",
+        "origName": "Minimum Display 1",
+        "type": "Minimum Display",
+        "fan": null,
+        "zone": "N318FC-FCR-DSP1",
+        "group": "Fab Ceiling RA",
+        "sheetId": "pls-mwa4a30v-1"
+       },
+       "Fab Ceiling RA#id0": {
+        "fp": "bd0fa6ca",
+        "kind": "detector",
+        "origName": "FC Bay 1 RA",
+        "type": "Detector",
+        "fan": 14,
+        "zone": "N318FC-FCR-D1",
+        "group": "Fab Ceiling RA",
+        "sheetId": "pls-mwa4a30v-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": 60,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Fab Ceiling RA#id1": {
+        "fp": "bbbf5bf7",
+        "kind": "detector",
+        "origName": "FC Bay 2 RA",
+        "type": "Detector",
+        "fan": 6,
+        "zone": "N318FC-FCR-D2",
+        "group": "Fab Ceiling RA",
+        "sheetId": "pls-mwa4a30v-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": 60,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Fab Ceiling RA#id2": {
+        "fp": "f61fe7a3",
+        "kind": "detector",
+        "origName": "FC Bay 3 RA",
+        "type": "Detector",
+        "fan": 6,
+        "zone": "N318FC-FCR-D3",
+        "group": "Fab Ceiling RA",
+        "sheetId": "pls-mwa4a30v-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": 60,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Fab Ceiling RA#id3": {
+        "fp": "cc7136ea",
+        "kind": "detector",
+        "origName": "FC Bay 4 RA",
+        "type": "Detector",
+        "fan": 5,
+        "zone": "N318FC-FCR-D4",
+        "group": "Fab Ceiling RA",
+        "sheetId": "pls-mwa4a30v-1",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": 60,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Fab Ceiling RA#id4": {
+        "fp": "84f0e912",
+        "kind": "detector",
+        "origName": "FC Chase N",
+        "type": "Detector",
+        "fan": 9,
+        "zone": "N318FC-FCR-D5",
+        "group": "Fab Ceiling RA",
+        "sheetId": "pls-mwa4a30z-2",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": 60,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       },
+       "Fab Ceiling RA#id5": {
+        "fp": "269c17ee",
+        "kind": "detector",
+        "origName": "FC Chase S",
+        "type": "Detector",
+        "fan": 9,
+        "zone": "N318FC-FCR-D6",
+        "group": "Fab Ceiling RA",
+        "sheetId": "pls-mwa4a30z-2",
+        "pipe": {
+         "runs": "",
+         "lengthFt": 0,
+         "af": null,
+         "afActivated": true,
+         "designSens": null,
+         "maxTransit": 60,
+         "temperature": null,
+         "pressure": null,
+         "holeUnit": "in",
+         "flow": null,
+         "tt": null,
+         "balance": null,
+         "bends90": null,
+         "sockets": null,
+         "clips": null,
+         "hasResults": false,
+         "holes": [],
+         "testPoints": []
+        }
+       }
+      },
+      "displayPlan": {
+       "pl-03cb7b080339-1:area:Campus Main Plant Room Return Air": {
+        "decision": "accept",
+        "type": "Standard Display",
+        "needed": 1,
+        "name": "CMPRRA-DSP01"
+       }
+      },
+      "rerunPipeCad": true,
+      "placement": [
+       {
+        "area": "Fab Ceiling RA",
+        "psus": [],
+        "batteries": []
+       }
+      ],
+      "meta": {
+       "name": "NFPA 318 Fab Ceiling",
+       "location": "NFPA 318 Fab Ceiling",
+       "designer": "Example Engineer",
+       "company": "Example Co."
+      },
+      "pipeType": {
+       "innerDiameter": null,
+       "outerDiameter": null,
+       "material": ""
+      }
+     },
+     {
+      "id": "pl-03cb7b080339-1",
+      "name": "Example-Campus-PSU.pl",
+      "path": "",
+      "size": 56603,
+      "lastModified": 1794057435775,
+      "sha256": "03cb7b0803393ffccf58e6a3b44a4f4190697e0a4047caf02c7c7e1dbc8ed8d6",
+      "project": "Example Campus Plant Room",
+      "unit": "Imperial (ft)",
+      "importedAt": "2026-11-10T03:14:55.573Z",
+      "groups": [
+       "Campus Main Plant Room Return Air"
+      ],
+      "devices": {
+       "Campus Main Plant Room Return Air#id0": {
+        "fp": "e21d4ab0",
+        "kind": "detector",
+        "origName": "Det 01",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "ECPR-CMPRRA-D1",
+        "group": "Campus Main Plant Room Return Air",
+        "sheetId": "pls-mwa4a311-3",
+        "pipe": {
+         "runs": "Pipe 1",
+         "lengthFt": 169.5,
+         "af": 0,
+         "afActivated": false,
+         "designSens": 0.08,
+         "maxTransit": 90,
+         "temperature": 20,
+         "pressure": 1013,
+         "holeUnit": "in",
+         "flow": 20.887758996578,
+         "tt": 61.859751942241054,
+         "balance": 91.6341956215706,
+         "bends90": 2,
+         "sockets": 21,
+         "clips": 36,
+         "hasResults": true,
+         "holes": [
+          {
+           "i": "1",
+           "endcap": false,
+           "name": "",
+           "size": 0.09000000000000002,
+           "flow": 0.9811963646414149,
+           "tt": 27.362183854182987,
+           "sens": 1.703044140748449
+          },
+          {
+           "i": "2",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.437028171292586,
+           "tt": 22.82380121257591,
+           "sens": 1.1628308707568211
+          },
+          {
+           "i": "3",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.4062600270544463,
+           "tt": 24.989622769847422,
+           "sens": 1.1882729278925477
+          },
+          {
+           "i": "4",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.3731744978872205,
+           "tt": 27.935667874644075,
+           "sens": 1.2169034032435708
+          },
+          {
+           "i": "5",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.3374650609415195,
+           "tt": 30.387302771008116,
+           "sens": 1.2493939232699742
+          },
+          {
+           "i": "6",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.2987653187451074,
+           "tt": 33.725294179329765,
+           "sens": 1.2866225295735594
+          },
+          {
+           "i": "7",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.256632473972754,
+           "tt": 36.54137288709675,
+           "sens": 1.329760892175122
+          },
+          {
+           "i": "8",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.2105243384324362,
+           "tt": 40.37965925477036,
+           "sens": 1.380410675501264
+          },
+          {
+           "i": "9",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.1597662707769725,
+           "tt": 47.22825767718051,
+           "sens": 1.4408254161476506
+          },
+          {
+           "i": "10",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.1035016302907072,
+           "tt": 50.84469663913754,
+           "sens": 1.5142893076524275
+          },
+          {
+           "i": "11",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.0406135775059457,
+           "tt": 55.795117733928166,
+           "sens": 1.6058033028275498
+          },
+          {
+           "i": "12",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.3542252767180096,
+           "tt": 54.06637229243757,
+           "sens": 1.2339311253855711
+          },
+          {
+           "i": "13",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.237883518389747,
+           "tt": 59.88266843613093,
+           "sens": 1.3499014203694406
+          },
+          {
+           "i": "14",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.0982165545038607,
+           "tt": 65.58988678671592,
+           "sens": 1.5215766989427273
+          },
+          {
+           "i": "15",
+           "endcap": false,
+           "name": "",
+           "size": 0.15000000000000002,
+           "flow": 1.2305055344738913,
+           "tt": 68.57052099305805,
+           "sens": 1.3579952896682363
+          },
+          {
+           "i": "16",
+           "endcap": false,
+           "name": "",
+           "size": 0.17,
+           "flow": 1.1704980092097297,
+           "tt": 73.61998227935135,
+           "sens": 1.4276151745481753
+          },
+          {
+           "i": "17",
+           "endcap": false,
+           "name": "",
+           "size": 0.31,
+           "flow": 1.1915023717416506,
+           "tt": 63.793059767362664,
+           "sens": 1.4024485048096589
+          }
+         ],
+         "testPoints": []
+        }
+       },
+       "Campus Main Plant Room Return Air#id22": {
+        "fp": "60f1def6",
+        "kind": "detector",
+        "origName": "Det 02",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "ECPR-CMPRRA-D2",
+        "group": "Campus Main Plant Room Return Air",
+        "sheetId": "pls-mwa4a311-3",
+        "pipe": {
+         "runs": "Pipe 5",
+         "lengthFt": 169.5,
+         "af": 0,
+         "afActivated": false,
+         "designSens": 0.08,
+         "maxTransit": 90,
+         "temperature": 20,
+         "pressure": 1013,
+         "holeUnit": "in",
+         "flow": 20.887758996578,
+         "tt": 61.859751942241054,
+         "balance": 91.6341956215706,
+         "bends90": 2,
+         "sockets": 21,
+         "clips": 36,
+         "hasResults": true,
+         "holes": [
+          {
+           "i": "1",
+           "endcap": false,
+           "name": "",
+           "size": 0.09000000000000002,
+           "flow": 0.9811963646414149,
+           "tt": 27.362183854182987,
+           "sens": 1.703044140748449
+          },
+          {
+           "i": "2",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.437028171292586,
+           "tt": 22.82380121257591,
+           "sens": 1.1628308707568211
+          },
+          {
+           "i": "3",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.4062600270544463,
+           "tt": 24.989622769847422,
+           "sens": 1.1882729278925477
+          },
+          {
+           "i": "4",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.3731744978872205,
+           "tt": 27.935667874644075,
+           "sens": 1.2169034032435708
+          },
+          {
+           "i": "5",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.3374650609415195,
+           "tt": 30.387302771008116,
+           "sens": 1.2493939232699742
+          },
+          {
+           "i": "6",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.2987653187451074,
+           "tt": 33.725294179329765,
+           "sens": 1.2866225295735594
+          },
+          {
+           "i": "7",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.256632473972754,
+           "tt": 36.54137288709675,
+           "sens": 1.329760892175122
+          },
+          {
+           "i": "8",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.2105243384324362,
+           "tt": 40.37965925477036,
+           "sens": 1.380410675501264
+          },
+          {
+           "i": "9",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.1597662707769725,
+           "tt": 47.22825767718051,
+           "sens": 1.4408254161476506
+          },
+          {
+           "i": "10",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.1035016302907072,
+           "tt": 50.84469663913754,
+           "sens": 1.5142893076524275
+          },
+          {
+           "i": "11",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.0406135775059457,
+           "tt": 55.795117733928166,
+           "sens": 1.6058033028275498
+          },
+          {
+           "i": "12",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.3542252767180096,
+           "tt": 54.06637229243757,
+           "sens": 1.2339311253855711
+          },
+          {
+           "i": "13",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.237883518389747,
+           "tt": 59.88266843613093,
+           "sens": 1.3499014203694406
+          },
+          {
+           "i": "14",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.0982165545038607,
+           "tt": 65.58988678671592,
+           "sens": 1.5215766989427273
+          },
+          {
+           "i": "15",
+           "endcap": false,
+           "name": "",
+           "size": 0.15000000000000002,
+           "flow": 1.2305055344738913,
+           "tt": 68.57052099305805,
+           "sens": 1.3579952896682363
+          },
+          {
+           "i": "16",
+           "endcap": false,
+           "name": "",
+           "size": 0.17,
+           "flow": 1.1704980092097297,
+           "tt": 73.61998227935135,
+           "sens": 1.4276151745481753
+          },
+          {
+           "i": "17",
+           "endcap": false,
+           "name": "",
+           "size": 0.31,
+           "flow": 1.1915023717416506,
+           "tt": 63.793059767362664,
+           "sens": 1.4024485048096589
+          }
+         ],
+         "testPoints": []
+        }
+       },
+       "Campus Main Plant Room Return Air#id44": {
+        "fp": "ef6d2879",
+        "kind": "detector",
+        "origName": "Det 03",
+        "type": "Detector",
+        "fan": 4,
+        "zone": "ECPR-CMPRRA-D3",
+        "group": "Campus Main Plant Room Return Air",
+        "sheetId": "pls-mwa4a311-3",
+        "pipe": {
+         "runs": "Pipe 9",
+         "lengthFt": 169.5,
+         "af": 0,
+         "afActivated": false,
+         "designSens": 0.08,
+         "maxTransit": 90,
+         "temperature": 20,
+         "pressure": 1013,
+         "holeUnit": "in",
+         "flow": 20.887758996578,
+         "tt": 61.859751942241054,
+         "balance": 91.6341956215706,
+         "bends90": 2,
+         "sockets": 21,
+         "clips": 36,
+         "hasResults": true,
+         "holes": [
+          {
+           "i": "1",
+           "endcap": false,
+           "name": "",
+           "size": 0.09000000000000002,
+           "flow": 0.9811963646414149,
+           "tt": 27.362183854182987,
+           "sens": 1.703044140748449
+          },
+          {
+           "i": "2",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.437028171292586,
+           "tt": 22.82380121257591,
+           "sens": 1.1628308707568211
+          },
+          {
+           "i": "3",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.4062600270544463,
+           "tt": 24.989622769847422,
+           "sens": 1.1882729278925477
+          },
+          {
+           "i": "4",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.3731744978872205,
+           "tt": 27.935667874644075,
+           "sens": 1.2169034032435708
+          },
+          {
+           "i": "5",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.3374650609415195,
+           "tt": 30.387302771008116,
+           "sens": 1.2493939232699742
+          },
+          {
+           "i": "6",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.2987653187451074,
+           "tt": 33.725294179329765,
+           "sens": 1.2866225295735594
+          },
+          {
+           "i": "7",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.256632473972754,
+           "tt": 36.54137288709675,
+           "sens": 1.329760892175122
+          },
+          {
+           "i": "8",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.2105243384324362,
+           "tt": 40.37965925477036,
+           "sens": 1.380410675501264
+          },
+          {
+           "i": "9",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.1597662707769725,
+           "tt": 47.22825767718051,
+           "sens": 1.4408254161476506
+          },
+          {
+           "i": "10",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.1035016302907072,
+           "tt": 50.84469663913754,
+           "sens": 1.5142893076524275
+          },
+          {
+           "i": "11",
+           "endcap": false,
+           "name": "",
+           "size": 0.11000000000000003,
+           "flow": 1.0406135775059457,
+           "tt": 55.795117733928166,
+           "sens": 1.6058033028275498
+          },
+          {
+           "i": "12",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.3542252767180096,
+           "tt": 54.06637229243757,
+           "sens": 1.2339311253855711
+          },
+          {
+           "i": "13",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.237883518389747,
+           "tt": 59.88266843613093,
+           "sens": 1.3499014203694406
+          },
+          {
+           "i": "14",
+           "endcap": false,
+           "name": "",
+           "size": 0.13000000000000003,
+           "flow": 1.0982165545038607,
+           "tt": 65.58988678671592,
+           "sens": 1.5215766989427273
+          },
+          {
+           "i": "15",
+           "endcap": false,
+           "name": "",
+           "size": 0.15000000000000002,
+           "flow": 1.2305055344738913,
+           "tt": 68.57052099305805,
+           "sens": 1.3579952896682363
+          },
+          {
+           "i": "16",
+           "endcap": false,
+           "name": "",
+           "size": 0.17,
+           "flow": 1.1704980092097297,
+           "tt": 73.61998227935135,
+           "sens": 1.4276151745481753
+          },
+          {
+           "i": "17",
+           "endcap": false,
+           "name": "",
+           "size": 0.31,
+           "flow": 1.1915023717416506,
+           "tt": 63.793059767362664,
+           "sens": 1.4024485048096589
+          }
+         ],
+         "testPoints": []
+        }
+       }
+      },
+      "displayPlan": {
+       "pl-03cb7b080339-1:area:Campus Main Plant Room Return Air": {
+        "decision": "accept",
+        "type": "Standard Display",
+        "needed": 1,
+        "name": "CMPRRA-DSP01"
+       }
+      },
+      "rerunPipeCad": true,
+      "assumedDisplays": {
+       "assumed:pl-03cb7b080339-1:area:Campus Main Plant Room Return Air:0": {
+        "type": "Standard Display",
+        "zone": "CMPRRA-DSP01",
+        "assumption": {
+         "rule": "le8-floor",
+         "floor": "Campus Main Plant Room Return Air",
+         "area": "Campus Main Plant Room Return Air",
+         "floorIdx": 1,
+         "bucket": 0,
+         "decision": "accept",
+         "at": "2026-11-10T03:14:54.790Z",
+         "why": "Assumed during import \u2014 floor short on Std/Min displays."
+        },
+        "origin": "assumed"
+       }
+      },
+      "placement": [
+       {
+        "area": "Campus Main Plant Room Return Air",
+        "psus": [
+         {
+          "x": 179.5,
+          "y": 182,
+          "z": 0
+         },
+         {
+          "x": 171.5,
+          "y": 181,
+          "z": 0
+         }
+        ],
+        "batteries": [
+         {
+          "x": 179.5,
+          "y": 181.5,
+          "z": 0
+         },
+         {
+          "x": 171.5,
+          "y": 180.5,
+          "z": 0
+         }
+        ]
+       }
+      ],
+      "meta": {
+       "name": "Example Campus Plant Room",
+       "location": "Example Campus Plant Room",
+       "designer": "Example Engineer",
+       "company": "Example Co."
+      },
+      "pipeType": {
+       "innerDiameter": null,
+       "outerDiameter": null,
+       "material": ""
+      }
+     }
+    ]
+   }
+  },
+  "hash": "sha256:26d13829b32b3b6a94dea4d45ff00451dc8e62400ba609ad18a3d00748c0d053",
+  "id": "4185c373"
+ },
+ "site": null,
+ "changes": [],
+ "approvals": {}
+}

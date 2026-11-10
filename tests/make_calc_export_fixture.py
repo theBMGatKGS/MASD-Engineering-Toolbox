@@ -7,8 +7,10 @@
 # Calculator 02.02.001_261019 (MLP schema v1; fictional names; 4 sheets, 10 devices, 4 battery models).  ensure() returns
 # that pinned file so toolbox_test / report_audit_test give the same counts on a clean checkout with no cached exports.
 # Regenerating from today's Calculator gives different counts on purpose (02.02.002's Displays step adds an assumed
-# Standard display on Campus: 11 devices, and the sheet/battery split can change), so only set CALC_EXPORT (to build or
-# use a fresh export) when you also update the expectations in those tests.
+# Standard display on Campus: 3 sheets, 11 devices), so only set CALC_EXPORT (to build or use a fresh export) when you
+# also update the expectations in those tests.
+# tests/fixtures/synthetic-calc-export-02.02.002.mlproj.json is that current export (Calculator 02.02.002_261109,
+# CALC_EXPORT=<tmp> python3 make_calc_export_fixture.py <tmp>), pinned for toolbox_test's current-export case.
 import asyncio, os, sys
 CALC_DIR=os.environ.get('CALC_DIR', os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..','ModuLaser-Battery-Calculator'))
 sys.path.insert(0, os.path.join(CALC_DIR,'tests','regression'))

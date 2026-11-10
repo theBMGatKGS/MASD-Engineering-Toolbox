@@ -9,6 +9,7 @@ Detectors sit 40 ft apart, so nothing clusters by the 3 ft rule; display placeme
   v6         two_floor + a 13th detector on Zone Alpha                              (update: skipped Alpha still needs 2 → stays skipped)
   ok_one     Zone Echo 4 detectors + 1 Standard display                             (no Displays prompt)
   same_abbr  Zone Delta 4 detectors + Zone Dock 4 detectors, 0 displays             (assumed names must not repeat)
+  dup_area   two floors both named Zone Alpha (8 and 12 detectors), 0 displays      (per-floor keys inside one file)
 """
 import atexit, os, shutil, tempfile
 from xml.sax.saxutils import escape
@@ -58,6 +59,7 @@ SPECS = {
     'v6':        [('Example Zone Alpha', 13, []), ('Example Zone Delta', 8, [])],
     'ok_one':    [('Example Zone Echo', 4, [0])],
     'same_abbr': [('Example Zone Delta', 4, []), ('Example Zone Dock', 4, [])],
+    'dup_area':  [('Example Zone Alpha', 8, []), ('Example Zone Alpha', 12, [])],
 }
 
 def write_all(folder=None):
