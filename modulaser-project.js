@@ -483,7 +483,7 @@ MLP.PERF_PRESETS = [
 MLP.perfPreset = id => MLP.PERF_PRESETS.find(p => p.id === id) || null;
 MLP.perfIsUl = id => { const p = MLP.perfPreset(id); return !!(p && p.family === 'NFPA'); };
 /* code prescriptions per preset: cited rows prefilled, everything else 'engineer to define' (value blank). */
-/* Research 2026-10-13 (/workspace/deliverables/ModuLaser-Commissioning-Defaults-Citations-2026-10-13.md): NFPA 76-2024 clauses. */
+/* Research 2026-10-13 (ModuLaser-Commissioning-Defaults-Citations-2026-10-13.md, kept outside the repo): NFPA 76-2024 clauses. */
 MLP.PERF_CODE_CITED = {
   'VEWFD – NFPA 76/318': [
     { item: 'NFPA 76 VEWFD sensitivity at each sampling port (effective, above ambient)', value: 'Alert 0.2 %/ft (0.65 %/m); Alarm 1.0 %/ft (3.2 %/m)', ref: 'NFPA 76-2024 8.5.3.1.2.5' },
