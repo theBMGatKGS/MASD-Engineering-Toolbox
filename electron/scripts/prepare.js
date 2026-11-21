@@ -14,9 +14,11 @@ for (const f of ['index.html', 'quickstart.html', 'manifest.json', 'sw.js']) {
   fs.copyFileSync(path.join(root, f), path.join(appDir, f));
 }
 fs.cpSync(path.join(root, 'icons'), path.join(appDir, 'icons'), { recursive: true });
+if (fs.existsSync(path.join(root, 'assets'))) fs.cpSync(path.join(root, 'assets'), path.join(appDir, 'assets'), { recursive: true });
 
 fs.mkdirSync(buildDir, { recursive: true });
 fs.copyFileSync(path.join(root, 'icons', 'icon-512.png'), path.join(buildDir, 'icon.png'));
+if (fs.existsSync(path.join(root, 'icons', 'icon.ico'))) fs.copyFileSync(path.join(root, 'icons', 'icon.ico'), path.join(buildDir, 'icon.ico'));
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const major = (html.match(/const APP_MAJOR = "(\d+)"/) || [])[1];
