@@ -1,6 +1,6 @@
 /* MASD Engineering Toolbox — service worker. Fully offline: fonts and icons are inlined; no CDN. */
 const CACHE_VERSION = 'masd-toolbox-00-03-001';
-const APP_SHELL = ['./', './index.html', './quickstart.html', './manifest.json', './icons/icon-16.png', './icons/icon-32.png', './icons/icon-64.png', './icons/icon-192.png', './icons/apple-touch-icon.png', './icons/icon-512.png', './icons/icon-512-maskable.png', './assets/brand-brentronix/pill-dark-h22.png', './assets/brand-brentronix/pill-dark-h44.png', './assets/brand-brentronix/horizontal-full-dark-h80.png', './assets/brand-brentronix/horizontal-full-dark-h160.png'];
+const APP_SHELL = ['./', './index.html', './quickstart.html', './manifest.json', './icons/icon-16.png', './icons/icon-32.png', './icons/icon-64.png', './icons/icon-192.png', './icons/apple-touch-icon.png', './icons/icon-512.png', './icons/icon-512-maskable.png', './assets/brand-brentronix/pill-dark-h22.png', './assets/brand-brentronix/pill-dark-h44.png', './assets/brand-brentronix/horizontal-full-dark-h96.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE_VERSION).then(c => c.addAll(APP_SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
