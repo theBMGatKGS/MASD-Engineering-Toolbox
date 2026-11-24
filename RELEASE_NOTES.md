@@ -5,6 +5,16 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.03.003 — Move ASD units and granular calc cleanup (2026-11-23) · not released
+
+Harmonized with Battery Calculator 02.02.003.
+
+### Recent improvements
+- **Move MiniLaser and ASD-160 between power supplies.** A sticky Actions column keeps **⇄ Move** and **✕** in view. The Move dialog previews destination AUX usage and required battery Ah, can create a new power supply, and lets you include additional units from the source sheet. Overflow warns but is still allowed.
+- **Granular calculations** list MiniLaser and ASD-160 currents (on screen and in Print, Word and Excel Detail) and hide leftover 0 mA Displays or Detectors terms when that ModuLaser hardware is not on the sheet, so the Total Load formula equals the total.
+- Load Summary, Live Results and the third-party export panel use the same breakdown.
+- Fixed an `mlWireRow` bug that looked up the sheet with the location id string.
+
 ## v00.03.001 — Printed Quick Start header and light screenshots (2026-10-19) · not released
 
 ### Recent improvements

@@ -4,6 +4,16 @@ All notable changes to the MASD Engineering Toolbox. Format `MM.mm.rrr` (date `Y
 document owner; the revision counter increments per distinct change. Generated from the in-app Revision Log
 (`AMENDMENTS` in `index.html`), which is the source of truth. Per-release summaries: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
+## 00.03 — 2026-11-23
+
+### 00.03.003 — 2026-11-23 (local build, not released)
+- Harmonized with Battery Calculator **02.02.003**.
+- **Move MiniLaser and ASD-160 between power supplies (Option C).** The ASD units table pins a sticky Actions column so **Move** and **✕** stay visible. **⇄ Move** opens a dark dialog: other sheets grouped by Area/Group, AUX usage, a Recommended badge (same-area sheet with open AUX, pre-selected when one exists), a Full — overflow badge, **+ Create new power supply**, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; the destination sheet's validation flags handle it. Circuit source auto-fills unless the user edited it. PipeCAD metadata is preserved. The source sheet is never auto-deleted. The `ml-calc` layer is byte-identical to Calculator 02.02.003.
+- **Granular calculations include MiniLaser and ASD-160.** Per-unit rows and subtotals appear on the on-screen granular panel and in Print, Word and Excel Detail. Leftover 0 mA Displays or Detectors rows are hidden when that ModuLaser hardware is not on the sheet. The Total Load formula lists only the terms that are present, so it equals `totalMa`.
+- Load Summary donut and legend, Live Results, and the third-party export panel follow the same breakdown (MiniLaser and ASD-160 shown separately; "ModuLaser modules 0 mA" and "Display load 0 mA" hidden when that hardware is absent).
+- Fixed `mlWireRow` so class-based alarm-factor derivation reads the sheet element, not the location id string.
+- Service-worker cache `masd-toolbox-00-03-003`. Lineage map: `00.03.003` → `02.02.003`.
+
 ## 00.03 — 2026-10-19
 
 ### 00.03.001 — 2026-10-19 (local build, not released)

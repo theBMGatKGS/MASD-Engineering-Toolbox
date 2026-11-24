@@ -1931,7 +1931,7 @@ body.v2 .model-cell{ font-size:10.5px; }
           <div class="qs-step-num">29</div>
           <div class="qs-step-body">
             <div class="qs-step-title" id="qs-step-minilaser">Add a MiniLaser (standalone ASD, FHSD8075-ULF)</div>
-            <p>Each sheet has a <b>Standalone ASDs (MiniLaser FHSD8075-ULF)</b> table below the MASD modules. <b>+ Add MiniLaser</b> opens the <b>Pre-engineered</b> picker (MiniLaser manual ch.5, Tables 13–31): choose T- or I-shaped, fan speed, number of holes and alarm factor — only combinations in the manual's tables are offered — and it fills the fan speed, alarm factor and DIP settings and shows pipe length, hole diameters, transport time and average sensitivity. Cancel switches the row to <b>Manual config</b> for non-pre-engineered installs; the fan speed stays blank and amber (⚠) until you choose it. A MiniLaser is never addressed and never on SenseNET; it needs its <b>own AUX circuit</b> (one MiniLaser per circuit, never shared) with the same 35 mA per-circuit overhead and 3.0 A per-circuit limit. Draw by fan speed 1–10: 120/134/157/180/200/230/255/285/320/365 mA (standby = alarm). Pick 0–2 I/O Expansion Modules (9-30521); the 9-30520 housing is added to the BOM automatically. A .pl import brings SOLO detectors in here with the fan speed and alarm factor from the .pl; when the .pl has no alarm factor the highest factor whose average hole sensitivity (Fire 1 × holes) stays within the class limit is used, and DIP or Remote configuration is recommended.</p>
+            <p>Each sheet has a <b>Standalone ASDs (MiniLaser FHSD8075-ULF)</b> table below the MASD modules. <b>+ Add MiniLaser</b> opens the <b>Pre-engineered</b> picker (MiniLaser manual ch.5, Tables 13–31): choose T- or I-shaped, fan speed, number of holes and alarm factor — only combinations in the manual's tables are offered — and it fills the fan speed, alarm factor and DIP settings and shows pipe length, hole diameters, transport time and average sensitivity. Cancel switches the row to <b>Manual config</b> for non-pre-engineered installs; the fan speed stays blank and amber (⚠) until you choose it. A MiniLaser is never addressed and never on SenseNET; it needs its <b>own AUX circuit</b> (one MiniLaser per circuit, never shared) with the same 35 mA per-circuit overhead and 3.0 A per-circuit limit. Draw by fan speed 1–10: 120/134/157/180/200/230/255/285/320/365 mA (standby = alarm). Pick 0–2 I/O Expansion Modules (9-30521); the 9-30520 housing is added to the BOM automatically. A .pl import brings SOLO detectors in here with the fan speed and alarm factor from the .pl; when the .pl has no alarm factor the highest factor whose average hole sensitivity (Fire 1 × holes) stays within the class limit is used, and DIP or Remote configuration is recommended. Use <b>⇄ Move</b> on a row (kept visible in the sticky Actions column) to move one or more MiniLasers or ASD-160s to another power supply, or to create a new sheet; a live AUX and battery-Ah preview is shown before you confirm.</p>
           </div>
         </div>
 
@@ -2301,7 +2301,7 @@ body.v2 .model-cell{ font-size:10.5px; }
         </div>
         <div class="help-faq-item">
           <div class="q">What is "Show granular calculation detail," and where do I find it?</div>
-          <p class="a">It's a per-sheet checkbox at the bottom of the results panel, below the Bill of Materials. Turning it on reveals a full formula breakdown for that sheet — module and supply load (including every individual module's own current draw, not just the Displays/Detectors subtotals), standby/alarm capacity, safety margin and temperature de-rating, and battery/supply sizing — each line showing both the formula and the actual numbers behind it, so the math is fully auditable rather than just the final figures. It's for sheets where that level of transparency is genuinely needed (an AHJ review, a second set of eyes checking the math), not something every sheet needs on by default. Off by default; saved per sheet with the rest of the document. For printouts and exports use the <b>Detail level</b> in File → Print / Export… instead: <b>Standard</b> adds the formulas with values, <b>Full</b> adds appendix pages after each sheet with every step (formula, values substituted, result, reference) — available in PDF, Word, HTML and the Excel Detail sheet whether or not this checkbox is on.</p>
+          <p class="a">It's a per-sheet checkbox at the bottom of the results panel, below the Bill of Materials. Turning it on reveals a full formula breakdown for that sheet — module and supply load (including every individual module's own current draw, not just the Displays/Detectors subtotals), standby/alarm capacity, safety margin and temperature de-rating, and battery/supply sizing — each line showing both the formula and the actual numbers behind it, so the math is fully auditable rather than just the final figures. It's for sheets where that level of transparency is genuinely needed (an AHJ review, a second set of eyes checking the math), not something every sheet needs on by default. Off by default; saved per sheet with the rest of the document. For printouts and exports use the <b>Detail level</b> in File → Print / Export… instead: <b>Standard</b> adds the formulas with values, <b>Full</b> adds appendix pages after each sheet with every step (formula, values substituted, result, reference) — available in PDF, Word, HTML and the Excel Detail sheet whether or not this checkbox is on. MiniLaser and ASD-160 currents appear as their own per-unit rows and subtotals. Displays and Detectors subtotals are hidden when that ModuLaser hardware is not on the sheet, and the Total Load formula lists only the terms that are present so it always equals the total.</p>
         </div>
         <div class="help-faq-item">
           <div class="q">How does the battery size selection work?</div>
@@ -2798,7 +2798,8 @@ const AMENDMENTS = [
   { rev: "000", major: "00", minor: "02", date: "261016", desc: "Harmonized with Battery Calculator 02.01.000 (Brent 10-16): <b>MiniLaser ASD (FHSD8075-ULF)</b> — Standalone ASDs table on each sheet (never addressed), dedicated AUX circuit per MiniLaser (35 mA overhead, 3.0 A limit; overflow recommends another power supply), I/O Expansion Modules 9-30521 0–2 with the 9-30520 housing added automatically, Pre-engineered picker (manual Tables 13–31) or Manual config, .pl SOLO import with alarm-factor derivation and DIP/Remote advice. <b>Config mode</b>: MiniLaser devices with R1 Fault relay (fixed, fail-safe), R2 Relay output 1 (Prealarm), R3 Relay output 2 (Fire Alarm), IN1 supervised input, expansion X1/X2 OUT1–5 and IN1–2; application (Table 35), alarm delay and flow-fault level/delay start blank; flow fault 40% on a UL/FM application warns. masd-engine.js 1.1.0, modulaser-project.js 1.5.1. <b>Arrangement with 2+ clusters (Brent 9:02 PM):</b> the disparate-clusters warning does not withhold the Recommended Power Supply Arrangement any more. The warning stays and the arrangement card shows alongside it. Final (Brent): it is a warning only — the sheet can pass and nothing is withheld (no “Recommendation withheld” banner; BOM and export shown). On Edwards A/BPS it never fires (AUX is unique per entry point; the unreachable shared-pathway check was removed). <b>QA delta:</b> MiniLaser manual p.66 pipe limits enforced (holes per class, pipe length, first hole when known); Current Draw Reference xlsx has an explicit black font. <b>Final:</b> the Disparate-clusters message is a warning only (the sheet can pass, nothing is withheld; never on Edwards A/BPS); modulaser-project.js 1.5.1. Side panel: validation flags are styled apart from the amber warning, and warnings are not counted; offline cache masd-toolbox-00-02-000-r2." },
   { rev: "000", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.000. <b>Brand selector (Edwards | Kidde Commercial)</b> — project-level, first in Project information; part numbers, supply labels, BOM, logos and report titles follow the brand; the remembered default seeds new projects. Per-sheet supply <b>variant</b> (120 V / 220–230 V / ULC), tamper and seismic accessories, and <b>FACU powers these ASDs</b> with a power-source prompt (in-house / third-party / unidentified; unidentified makes the sheet Incomplete). <b>ASD-160 (Micra25 / Senator 25)</b> rows in the ASD table: 250 mA, dedicated AUX circuit, networked address 1–127, PipeCAD .pl import (MICRA25), Remote configuration, UL/non-UL alarm-factor rules (1.28 cap on UL SFD/OAP, R-AF7). Battery 12V6A5 (7.2 Ah) is manual-only with a too-small advisory. AUX/ribbon rules: max 4 AUX per power supply; each ribbon run holds max 4 detectors + 1 display; a detector-started run counts that detector; hybrid clusters may have any number of runs; own-AUX modules are not runs. Help revised with current screenshots; new printable Quick Start (Help ▸ Print Quick Start). MLP 1.6.0, engine 1.2.0. Config: ASD-160 branch — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers. Report band: brand logo and brand label; Excel report header gets a Brand row (no fills). Quick Start one-pager (quickstart.html) and in-app Toolbox Quick Start carry current screenshots. `tools/build.py` is marked retired (index.html is the source of truth); `src/toolbox.js` and `src/tb-asd160.js` are exact copies of the inline blocks (tested). Manual battery or capacity pick turns Auto Battery Sizing off (with a toast); the controls stay selectable in Auto. Networked ASD-160s count toward the 127-module SenseNET limit and share the network's addresses (duplicates flagged). Unidentified power source → ⚠ Incomplete everywhere: sheet status and amber dot, side panel, print stamp and project file; the Report adds a blank “Power source identified” item to every power supply sheet and an amber banner. A manual alarm factor on an ASD-160 row is what gets validated (\"alarm factor N … exceeds … — lower the alarm factor\"). Excel Detail sheet: Brand row under Project (no fills). Brand logo in the KGS print band (PDF / HTML / print preview)." },
   { rev: "001", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.001 (Brent 10-19 5:56 PM). <b>Printed Quick Start</b> (Help ▸ Print Quick Start): larger white brand logo (Edwards or Kidde Commercial) in the header with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages. No battery-calculation change (MLP 1.6.3, engine 1.2.0). Printed Quick Start Step 1 is a full-width row (Brent 6:28 PM); Calculator lineage reads 02.02.001 in About, README, Help and the Quick Start. Every printed step is a full-width row with its screenshot on the right (Brent 7:07 PM); step numbers run continuously across pages; Step 3 sub-steps lettered a, b, c. Printed Toolbox Quick Start screenshots (Config, Battery calc) re-captured at 2× with tighter crops at full image width so they are legible (≤ 1.9 source px per print px); Toolbox print pages are now steps 1–2 and 3–5 (still 2 pages). <b>SFD/OAP design target</b> (Brent 2026-10-20 6:39–6:49 AM CT: “SFD/OAP for Engineering Toolbox must be revised from 2.5% obs/ft to 2.0% obs/ft. Make this the target for any UL-driven SFD or OAP requirement. FM and other non-UL targets can remain at 2.5% obs/ft. Allow toolbox a means of adjusting the default % obs/ft to different values for SFD for baseline configurations that apply project-wide but remain within the published limits of the respective detector.” · “UL limit is 1.71% to 2.18%. Target 2.0% for practical purposes.” · “Adjustable for FM too.” · “Allow per-Area/Group overrides too.” · “Yes, for projects requiring UL compliance. All others can remain at 2.5% by default.” · “Reject it with a message.” · “Yes, require a reference and initials.” · “Fold it into 02.02.001.”): the SFD/OAP design target is 2.0 %obs/ft for UL-driven scopes and 2.5 %obs/ft for FM and other standards; adjustable project-wide and per Area/Group (UL and FM), within each detector's published limits (UL: ModuLaser and MiniLaser 1.70–2.18; FM: ModuLaser and MiniLaser ≤2.50, ASD-160 ≤3.5; the ASD-160 UL 1.28 cap always governs). Out-of-range or non-numeric entries are rejected with a message, never clamped; a non-default target needs a reference and the engineer's initials. On UL scopes the SFD Fire 1 seed follows the target; otherwise it stays 2.5. Pass/fail is unchanged (UL Open Area 1.70–2.18 %obs/ft, ≤43 s; FM 3230 ≤2.50, ≤120 s). Older projects adopt the default with a one-time notice. modulaser-project.js 1.6.1. Then (Brent 2026-10-20 7:09 AM CT): “Keep 1.70, per the manual” (UL lower limit unchanged) and “Yes, follow the target”: the MiniLaser alarm-factor rule for SFD and OAP now uses the scope's SFD/OAP target (Area/Group override → project → default; UL default 2.0, FM default 2.5) instead of a fixed 2.18 (OAP) / 2.0 (SFD). FM targets accepted up to 2.50 inclusive. modulaser-project.js 1.6.2. QA SFD/OAP delta: a stored out-of-range target (hand-edited or imported) stays flagged and blocks export, but the Fire 1 seed and the MiniLaser alarm factor use the nearest published limit instead; the one-time notice also shows in the Calculator and the Report; the Report validates the target against the linked design's device kinds (an FM project with only ASD-160s may use up to 3.5 without a false deficiency). modulaser-project.js 1.6.3." },
-  { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.1, MASD engine 1.3.1 (same-named floors keyed ‘ #2’, ‘ #3’…; unique names unchanged; older projects re-keyed per floor on Check link, configuration and logged changes follow); wizard region parity." }
+  { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.1, MASD engine 1.3.1 (same-named floors keyed ‘ #2’, ‘ #3’…; unique names unchanged; older projects re-keyed per floor on Check link, configuration and logged changes follow); wizard region parity." },
+  { rev: "003", major: "00", minor: "03", date: "261123", desc: "Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 between power supplies (Option C): sticky Actions column keeps Move and ✕ visible; a dark Move dialog lists other sheets by Area/Group with AUX usage, a Recommended badge, a Full — overflow badge, + Create new power supply, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; destination validation flags handle it. Circuit source auto-fills unless the user edited it; PipeCAD metadata is preserved; the source sheet is never auto-deleted. Granular calculations now list MiniLaser and ASD-160 per-unit rows and subtotals, hide leftover 0 mA Displays or Detectors when that ModuLaser hardware is absent, and build the Total Load formula from only the terms present so it equals totalMa on screen and in Print, Word and Excel Detail. Load Summary, Live Results and the third-party export panel follow the same breakdown. Fixed mlWireRow so class-based alarm-factor derivation reads the sheet element, not the location id string." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -3648,10 +3649,13 @@ function locationTemplate(loc){
               <div class="donut-chart main-donut"></div>
               <div class="loadstack-legend">
                 <div class="legend-group">
-                  <span class="legend-group-title">ModuLaser Module Load — <span class="module-load-ma">0</span> mA</span>
+                  <span class="legend-group-title legend-dev-title">ModuLaser Module Load — <span class="module-load-ma">0</span> mA</span>
                   <span><i class="swatch" style="background:#4d9fd8"></i>Displays<b class="pct pct-display"></b></span>
                   <span><i class="swatch" style="background:#ff9130"></i>Detectors<b class="pct pct-detector"></b></span>
+                  <span><i class="swatch" style="background:#e3a008"></i>MiniLasers<b class="pct pct-minilaser"></b></span>
+                  <span><i class="swatch" style="background:#a78bfa"></i>ASD-160<b class="pct pct-asd160"></b></span>
                 </div>
+
                 <div class="legend-group">
                   <span class="legend-group-title">Power Supply Inherent Load — <span class="ps-load-ma">0</span> mA</span>
                   <span><i class="swatch" style="background:#6a5acd"></i>Quiescent<b class="pct pct-quiescent"></b></span>
@@ -3669,7 +3673,7 @@ function locationTemplate(loc){
         <div data-show-when="thirdparty-export" hidden>
           <div class="section-label">ModuLaser Device Load</div>
           <div class="total-load-readout">
-            <div class="num"><span class="export-total-ma">0</span><small>mA @ 24VDC — displays + detectors only</small></div>
+            <div class="num"><span class="export-total-ma">0</span><small class="export-total-caption">mA @ 24VDC — displays + detectors only</small></div>
           </div>
         </div>
       </div>
@@ -3802,12 +3806,15 @@ function locationTemplate(loc){
           </div>
 
           <div class="export-panel" data-show-when="thirdparty-export" hidden>
-            <div class="section-label">Export ModuLaser Loads</div>
+            <div class="section-label">Export device loads</div>
             <div class="stat-grid">
-              <div class="stat"><div class="k">Display load</div><div class="v"><span class="export-display-ma">0</span> <small>mA</small></div></div>
-              <div class="stat"><div class="k">Detector load</div><div class="v"><span class="export-masd-ma">0</span> <small>mA</small></div></div>
+              <div class="stat export-display-stat"><div class="k">Display load</div><div class="v"><span class="export-display-ma">0</span> <small>mA</small></div></div>
+              <div class="stat export-detector-stat"><div class="k">Detector load</div><div class="v"><span class="export-masd-ma">0</span> <small>mA</small></div></div>
+              <div class="stat export-ml-stat" hidden><div class="k">MiniLaser load</div><div class="v"><span class="export-ml-ma">0</span> <small>mA</small></div></div>
+              <div class="stat export-asd-stat" hidden><div class="k">ASD-160 load</div><div class="v"><span class="export-asd-ma">0</span> <small>mA</small></div></div>
             </div>
-            <div class="stat highlight"><div class="k">Total ModuLaser device load</div><div class="v"><span class="export-total-ma-2">0</span> <small>mA @ 24VDC</small></div></div>
+            <div class="stat highlight"><div class="k">Total device load</div><div class="v"><span class="export-total-ma-2">0</span> <small>mA @ 24VDC</small></div></div>
+
 
             <div class="inline-field" style="margin-top:10px;">
               <label>Safety margin</label>
@@ -3870,11 +3877,12 @@ function locationTemplate(loc){
             <div class="cd-section">
               <div class="cd-heading">1. Module &amp; Supply Load</div>
               <div class="cd-permodule-rows"></div>
-              <div class="cd-row"><span class="cd-label">Displays subtotal</span><span class="cd-formula">Σ display current draw</span><span class="cd-value cd-displays-ma">0 mA</span></div>
-              <div class="cd-row"><span class="cd-label">Detectors subtotal</span><span class="cd-formula">Σ detector current draw (per selected fan speed)</span><span class="cd-value cd-detectors-ma">0 mA</span></div>
+              <div class="cd-row cd-displays-row"><span class="cd-label">Displays subtotal</span><span class="cd-formula">Σ display current draw</span><span class="cd-value cd-displays-ma">0 mA</span></div>
+              <div class="cd-row cd-detectors-row"><span class="cd-label">Detectors subtotal</span><span class="cd-formula">Σ detector current draw (per selected fan speed)</span><span class="cd-value cd-detectors-ma">0 mA</span></div>
+              <div class="cd-asd-unit-rows"></div>
               <div class="cd-row"><span class="cd-label">Quiescent load</span><span class="cd-formula">Fixed — power supply's own standby draw</span><span class="cd-value cd-quiescent-ma">0 mA</span></div>
               <div class="cd-row"><span class="cd-label">AUX load</span><span class="cd-formula cd-aux-formula">—</span><span class="cd-value cd-aux-ma">0 mA</span></div>
-              <div class="cd-row cd-total-row"><span class="cd-label">Total Load</span><span class="cd-formula">Displays + Detectors + Quiescent + AUX</span><span class="cd-value cd-total-ma-detail">0 mA</span></div>
+              <div class="cd-row cd-total-row"><span class="cd-label">Total Load</span><span class="cd-formula cd-total-formula">Displays + Detectors + Quiescent + AUX</span><span class="cd-value cd-total-ma-detail">0 mA</span></div>
             </div>
 
             <div class="cd-section">
@@ -4094,10 +4102,25 @@ function buildLocationRows(locEl, projectName, preparedBy, dateLabel){
     const current = getText(row.querySelector('.module-ma')).replace(/([0-9.]+)([A-Za-z]+)/, '$1 $2');
     rows.push([address, zone, type, model, cluster, power, fan, current]);
   });
+  if (typeof mlModel === 'function'){
+    const list = mlModel(locEl);
+    list.forEach(x => {
+      const kind = x.kind === 'asd160' ? 'ASD-160' : 'MiniLaser';
+      const current = (x.fan || x.kind === 'asd160') ? String(x.ma) + ' mA' : '—';
+      rows.push(['', x.zone || '', kind, x.model || kind, '—', x.aux || 'Dedicated AUX', x.kind === 'asd160' ? '—' : (x.fan ? String(x.fan) : '—'), current]);
+    });
+  }
   rows.push([]);
-  rows.push(['ModuLaser Module Load (mA)', getText(locEl.querySelector('.module-load-ma'))]);
+  const mlListR = (typeof mlModel === 'function') ? mlModel(locEl) : [];
+  const mlOnlyR = mlListR.filter(x => x.kind !== 'asd160');
+  const asdOnlyR = mlListR.filter(x => x.kind === 'asd160');
+  const hasModR = locEl.querySelector('[data-role="module"]');
+  const devLabel = (hasModR && (mlOnlyR.length || asdOnlyR.length)) ? 'Device Load — ModuLaser + ASD (mA)' : (hasModR ? 'ModuLaser Module Load (mA)' : ((mlOnlyR.length || asdOnlyR.length) ? 'ASD unit load (mA)' : 'Device Load (mA)'));
+  rows.push([devLabel, getText(locEl.querySelector('.module-load-ma'))]);
+  if (mlOnlyR.length) rows.push(['MiniLaser Load (mA)', String(mlOnlyR.reduce((a, x) => a + (x.ma || 0), 0))]);
+  if (asdOnlyR.length) rows.push(['ASD-160 Load (mA)', String(asdOnlyR.reduce((a, x) => a + (x.ma || 0), 0))]);
   rows.push(['Power Supply Inherent Load (mA)', getText(locEl.querySelector('.ps-load-ma'))]);
-  rows.push(['Total Load — Modules + Supply (mA)', getText(locEl.querySelector('.total-ma'))]);
+  rows.push(['Total Load — Devices + Supply (mA)', getText(locEl.querySelector('.total-ma'))]);
 
   const mode = locEl.querySelector('.mode-radio:checked').value;
   const submode = mode === 'thirdparty' ? locEl.querySelector('.submode-radio:checked').value : null;
@@ -4105,8 +4128,12 @@ function buildLocationRows(locEl, projectName, preparedBy, dateLabel){
   if (mode === 'thirdparty' && submode === 'export'){
     rows.push(['Power Supply Mode', 'Third-party (export ModuLaser loads only)']);
     rows.push(['Power Supply Make & Model', getVal(locEl.querySelector('.tp-supply-makemodel'))]);
-    rows.push(['Display Load (mA)', getText(locEl.querySelector('.export-display-ma'))]);
-    rows.push(['Detector Load (mA)', getText(locEl.querySelector('.export-masd-ma'))]);
+    const hasDispX = locEl.querySelector('.export-display-stat') ? !locEl.querySelector('.export-display-stat').hidden : !!getText(locEl.querySelector('.export-display-ma'));
+    const hasDetX = locEl.querySelector('.export-detector-stat') ? !locEl.querySelector('.export-detector-stat').hidden : !!getText(locEl.querySelector('.export-masd-ma'));
+    if (hasDispX) rows.push(['Display Load (mA)', getText(locEl.querySelector('.export-display-ma'))]);
+    if (hasDetX) rows.push(['Detector Load (mA)', getText(locEl.querySelector('.export-masd-ma'))]);
+    if (locEl.querySelector('.export-ml-stat') && !locEl.querySelector('.export-ml-stat').hidden) rows.push(['MiniLaser Load (mA)', getText(locEl.querySelector('.export-ml-ma'))]);
+    if (locEl.querySelector('.export-asd-stat') && !locEl.querySelector('.export-asd-stat').hidden) rows.push(['ASD-160 Load (mA)', getText(locEl.querySelector('.export-asd-ma'))]);
     rows.push(['Total Device Load (mA)', getText(locEl.querySelector('.export-total-ma-2'))]);
     rows.push(['Safety Margin', selectedText(locEl.querySelector('.export-margin-select'))]);
     rows.push(['Standby Capacity (Ah)', getText(locEl.querySelector('.export-standby-ah'))]);
@@ -4434,14 +4461,23 @@ function copyExportValues(loc, btn){
   const requiredAh = locEl.querySelector('.export-required-ah').textContent.trim();
   const chargerAh = locEl.querySelector('.export-charger-ah').value;
   const psRequired = locEl.querySelector('.export-ps-required').textContent;
-  const text = `${name} — ModuLaser device load export\n`
-    + `Displays: ${displayMa} mA\n`
-    + `Detectors: ${masdMa} mA\n`
-    + `Total ModuLaser device load: ${totalMa} mA @ 24VDC\n`
-    + `Standby duration: ${standbyH} h | Alarm duration: ${alarmMin} min | Safety margin: ${marginPct}%\n`
-    + `Required capacity (module load only): ${requiredAh}\n`
-    + `Power supplies required at ${chargerAh} Ah charger capacity: ${psRequired}\n`
-    + `(Add third-party supply quiescent + AUX loads separately before final sizing.)`;
+  const mlMaC = (locEl.querySelector('.export-ml-ma') || {}).textContent || '0';
+  const asdMaC = (locEl.querySelector('.export-asd-ma') || {}).textContent || '0';
+  const showDisp = locEl.querySelector('.export-display-stat') && !locEl.querySelector('.export-display-stat').hidden;
+  const showDet = locEl.querySelector('.export-detector-stat') && !locEl.querySelector('.export-detector-stat').hidden;
+  const showMl = locEl.querySelector('.export-ml-stat') && !locEl.querySelector('.export-ml-stat').hidden;
+  const showAsd = locEl.querySelector('.export-asd-stat') && !locEl.querySelector('.export-asd-stat').hidden;
+  const lines = [`${name} — device load export`];
+  if (showDisp) lines.push(`Displays: ${displayMa} mA`);
+  if (showDet) lines.push(`Detectors: ${masdMa} mA`);
+  if (showMl) lines.push(`MiniLasers: ${mlMaC} mA`);
+  if (showAsd) lines.push(`ASD-160: ${asdMaC} mA`);
+  lines.push(`Total device load: ${totalMa} mA @ 24VDC`);
+  lines.push(`Standby duration: ${standbyH} h | Alarm duration: ${alarmMin} min | Safety margin: ${marginPct}%`);
+  lines.push(`Required capacity (module load only): ${requiredAh}`);
+  lines.push(`Power supplies required at ${chargerAh} Ah charger capacity: ${psRequired}`);
+  lines.push(`(Add third-party supply quiescent + AUX loads separately before final sizing.)`);
+  const text = lines.join('\n');
   const restoreLabel = btn.textContent;
   const onDone = () => { btn.textContent = "Copied ✓"; setTimeout(() => btn.textContent = restoreLabel, 1500); };
   if (navigator.clipboard && navigator.clipboard.writeText){
@@ -4463,11 +4499,14 @@ function buildDonutSVG(segments, size, thickness){
     </svg>`;
   }
 
-  // gap after each segment (index 0:display,1:detector,2:quiescent,3:aux) — bigger gap marks the
-  // module-load / power-supply-inherent boundary on both sides of the circle
+  // Bigger gap marks the device-load / power-supply-inherent boundary.
   const smallGap = circumference * 0.008;
   const bigGap = circumference * 0.03;
-  const gapsAfter = [smallGap, bigGap, smallGap, bigGap];
+  const gapsAfter = segments.map((seg, i) => {
+    const next = segments[i + 1];
+    if (!next || seg.group !== next.group) return bigGap;
+    return smallGap;
+  });
   const gapTotal = gapsAfter.reduce((a, b) => a + b, 0);
   const drawable = circumference - gapTotal;
 
@@ -4477,8 +4516,9 @@ function buildDonutSVG(segments, size, thickness){
     const frac = seg.value / total;
     const len = Math.max(frac * drawable, 0);
     circles += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="${thickness}" stroke-dasharray="${len} ${circumference - len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"></circle>`;
-    offset += len + gapsAfter[i];
+    offset += len + (gapsAfter[i] || 0);
   });
+
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">${circles}</svg>`;
 }
 
@@ -5330,6 +5370,28 @@ function recalcLocationInner(loc){
     locEl.querySelector('.export-display-ma').textContent = displayMa.toFixed(0);
     locEl.querySelector('.export-masd-ma').textContent = detectorMa.toFixed(0);
     locEl.querySelector('.export-total-ma-2').textContent = deviceTotalMa.toFixed(0);
+    const mlListE = (typeof mlModel === 'function') ? mlModel(locEl) : [];
+    const mlOnlyE = mlListE.filter(x => x.kind !== 'asd160');
+    const asdOnlyE = mlListE.filter(x => x.kind === 'asd160');
+    const mlMaE = mlOnlyE.reduce((a, x) => a + (x.ma || 0), 0);
+    const asdMaE = asdOnlyE.reduce((a, x) => a + (x.ma || 0), 0);
+    const hasDispE = rows.some(r => { const k = (MODULE_TYPES[r.querySelector('.type-select').value] || {}).kind; return k === 'display' || k === 'command'; });
+    const hasDetE = rows.some(r => (MODULE_TYPES[r.querySelector('.type-select').value] || {}).kind === 'detector');
+    const setTxt = (sel, v) => { const e = locEl.querySelector(sel); if (e) e.textContent = v; };
+    const setHid = (sel, hide) => { const e = locEl.querySelector(sel); if (e) e.hidden = hide; };
+    setTxt('.export-ml-ma', mlMaE.toFixed(0));
+    setTxt('.export-asd-ma', asdMaE.toFixed(0));
+    setHid('.export-display-stat', !hasDispE);
+    setHid('.export-detector-stat', !hasDetE);
+    setHid('.export-ml-stat', !mlOnlyE.length);
+    setHid('.export-asd-stat', !asdOnlyE.length);
+    const capBits = [];
+    if (hasDispE) capBits.push('displays');
+    if (hasDetE) capBits.push('detectors');
+    if (mlOnlyE.length) capBits.push('MiniLasers');
+    if (asdOnlyE.length) capBits.push('ASD-160');
+    const cap = locEl.querySelector('.export-total-caption');
+    if (cap) cap.textContent = 'mA @ 24VDC' + (capBits.length ? ' — ' + capBits.join(' + ') : '');
 
     const standbyHoursX = parseFloat(locEl.querySelector(".standby-hours").value) || 0;
     const alarmMinutesX = parseFloat(locEl.querySelector(".alarm-minutes").value) || 0;
@@ -5375,18 +5437,40 @@ function recalcLocationInner(loc){
   locEl.querySelector(".module-load-ma").textContent = deviceTotalMa.toFixed(0);
   locEl.querySelector(".ps-load-ma").textContent = (quiescentMa + auxMa).toFixed(0);
 
-  const mainDonutSegments = [
-    { value: displayMa, color: "#4d9fd8" },
-    { value: detectorMa, color: "#ff9130" },
-    { value: quiescentMa, color: "#6a5acd" },
-    { value: auxMa, color: "#4bb583" }
-  ];
-  locEl.querySelector(".main-donut").innerHTML = buildDonutSVG(mainDonutSegments, 108, 18);
-  const pctOf = v => totalMa > 0 ? ((v / totalMa) * 100).toFixed(1) : "0.0";
-  locEl.querySelector(".pct-display").textContent = ` ${pctOf(displayMa)}%`;
-  locEl.querySelector(".pct-detector").textContent = ` ${pctOf(detectorMa)}%`;
-  locEl.querySelector(".pct-quiescent").textContent = ` ${pctOf(quiescentMa)}%`;
-  locEl.querySelector(".pct-aux").textContent = ` ${pctOf(auxMa)}%`;
+  const mlListD = (typeof mlModel === 'function') ? mlModel(locEl) : [];
+  const mlOnlyD = mlListD.filter(x => x.kind !== 'asd160');
+  const asdOnlyD = mlListD.filter(x => x.kind === 'asd160');
+  const mlSegMa = mlOnlyD.reduce((a, x) => a + (x.ma || 0), 0);
+  const asdSegMa = asdOnlyD.reduce((a, x) => a + (x.ma || 0), 0);
+  const hasDispLeg = rows.some(r => { const k = (MODULE_TYPES[r.querySelector('.type-select').value] || {}).kind; return k === 'display' || k === 'command'; });
+  const hasDetLeg = rows.some(r => (MODULE_TYPES[r.querySelector('.type-select').value] || {}).kind === 'detector');
+  const mainDonutSegments = [];
+  if (hasDispLeg) mainDonutSegments.push({ value: displayMa, color: '#4d9fd8', group: 'dev' });
+  if (hasDetLeg) mainDonutSegments.push({ value: detectorMa, color: '#ff9130', group: 'dev' });
+  if (mlOnlyD.length) mainDonutSegments.push({ value: mlSegMa, color: '#e3a008', group: 'dev' });
+  if (asdOnlyD.length) mainDonutSegments.push({ value: asdSegMa, color: '#a78bfa', group: 'dev' });
+  if (quiescentMa > 0) mainDonutSegments.push({ value: quiescentMa, color: '#6a5acd', group: 'psu' });
+  if (auxMa > 0) mainDonutSegments.push({ value: auxMa, color: '#4bb583', group: 'psu' });
+  locEl.querySelector('.main-donut').innerHTML = buildDonutSVG(mainDonutSegments, 108, 18);
+  const pctOf = v => totalMa > 0 ? ((v / totalMa) * 100).toFixed(1) : '0.0';
+  const setLeg = (sel, show, val) => { const el = locEl.querySelector(sel); if (!el) return; const row = el.closest('span') || el; row.hidden = !show; if (show) el.textContent = ` ${pctOf(val)}%`; };
+  setLeg('.pct-display', hasDispLeg, displayMa);
+  setLeg('.pct-detector', hasDetLeg, detectorMa);
+  setLeg('.pct-minilaser', mlOnlyD.length > 0, mlSegMa);
+  setLeg('.pct-asd160', asdOnlyD.length > 0, asdSegMa);
+  setLeg('.pct-quiescent', quiescentMa > 0, quiescentMa);
+  setLeg('.pct-aux', auxMa > 0, auxMa);
+  const devTitle = locEl.querySelector('.legend-dev-title');
+  const devLoad = displayMa + detectorMa + mlSegMa + asdSegMa;
+  if (devTitle){
+    const bits = [];
+    if (hasDispLeg || hasDetLeg) bits.push('ModuLaser');
+    if (mlOnlyD.length || asdOnlyD.length) bits.push('ASD');
+    devTitle.childNodes[0].textContent = (bits.join(' + ') || 'Device') + ' load — ';
+  }
+  const devMaEl = locEl.querySelector('.module-load-ma');
+  if (devMaEl) devMaEl.textContent = deviceTotalMa.toFixed(0);
+
 
   const standbyHoursInput = locEl.querySelector(".standby-hours");
   const designBasisKeyEarly = locEl.querySelector('.design-basis-select').value;
@@ -5829,12 +5913,42 @@ function recalcLocationInner(loc){
       }).join('');
     }
     locEl.querySelector('.cd-detectors-ma').textContent = `${Math.round(detectorMa)} mA`;
+    const hasDispRows = rows.some(r => { const k = (MODULE_TYPES[r.querySelector('.type-select').value] || {}).kind; return k === 'display' || k === 'command'; });
+    const hasDetRows = rows.some(r => (MODULE_TYPES[r.querySelector('.type-select').value] || {}).kind === 'detector');
+    const dispRowEl = locEl.querySelector('.cd-displays-row'); if (dispRowEl) dispRowEl.hidden = !hasDispRows;
+    const detRowEl = locEl.querySelector('.cd-detectors-row'); if (detRowEl) detRowEl.hidden = !hasDetRows;
+    const asdBox = locEl.querySelector('.cd-asd-unit-rows');
+    const mlList = (typeof mlModel === 'function') ? mlModel(locEl) : [];
+    const mlOnly = mlList.filter(x => x.kind !== 'asd160');
+    const asdOnly = mlList.filter(x => x.kind === 'asd160');
+    const mlSubMa = mlOnly.reduce((a, x) => a + (x.ma || 0), 0);
+    const asdSubMa = asdOnly.reduce((a, x) => a + (x.ma || 0), 0);
+    const asdUnitHtml = (list, kindLabel) => list.map((x, i) => {
+      const zone = x.zone || '(no zone)';
+      const model = x.model || kindLabel;
+      const fanBit = (kindLabel === 'MiniLaser') ? (x.fan ? `fan ${x.fan}` : 'fan —') : 'single speed';
+      return `<div class="cd-row cd-permodule-row cd-asd-unit"><span class="cd-label">${kindLabel} ${i + 1} — ${zone}</span><span class="cd-formula">${model} · ${fanBit}</span><span class="cd-value">${Math.round(x.ma || 0)} mA</span></div>`;
+    }).join('');
+    const subHtml = (label, formula, ma) => `<div class="cd-row"><span class="cd-label">${label}</span><span class="cd-formula">${formula}</span><span class="cd-value">${Math.round(ma)} mA</span></div>`;
+    if (asdBox){
+      asdBox.innerHTML = asdUnitHtml(mlOnly, 'MiniLaser') + (mlOnly.length ? subHtml('MiniLaser subtotal', 'Σ MiniLaser current draw (per selected fan speed)', mlSubMa) : '')
+        + asdUnitHtml(asdOnly, 'ASD-160') + (asdOnly.length ? subHtml('ASD-160 subtotal', 'Σ ASD-160 current draw (250 mA each)', asdSubMa) : '');
+    }
+    const terms = [];
+    if (hasDispRows) terms.push('Displays');
+    if (hasDetRows) terms.push('Detectors');
+    if (mlOnly.length) terms.push('MiniLasers');
+    if (asdOnly.length) terms.push('ASD-160');
+    terms.push('Quiescent', 'AUX');
+    const totalFEl = locEl.querySelector('.cd-total-formula');
+    if (totalFEl) totalFEl.textContent = terms.join(' + ');
     locEl.querySelector('.cd-quiescent-ma').textContent = `${Math.round(quiescentMa)} mA`;
     locEl.querySelector('.cd-aux-ma').textContent = `${Math.round(auxMa)} mA`;
     locEl.querySelector('.cd-aux-formula').textContent = mode === 'builtin'
       ? `${auxCircuits} circuit(s) × ${auxMaPerCircuit} mA/circuit`
       : `${auxCircuits} circuit(s) × ${auxMaPerCircuit} mA/circuit (custom)`;
     locEl.querySelector('.cd-total-ma-detail').textContent = `${Math.round(totalMa)} mA`;
+
 
     locEl.querySelector('.cd-standby-ah-detail').textContent = `${standbyAh.toFixed(2)} Ah`;
     locEl.querySelector('.cd-standby-formula').textContent = `(${Math.round(totalMa)} mA / 1000) × ${standbyHours} h`;
@@ -7371,6 +7485,14 @@ const HOWDOI_COMMON = [
     title: 'Add a MiniLaser (standalone ASD)',
     keywords: 'minilaser fhsd8075 solo standalone asd aux circuit pre-engineered dip remote alarm factor expansion 9-30520 9-30521',
     blurb: '+ Add MiniLaser in the sheet\'s Standalone ASDs table opens the Pre-engineered picker (manual ch.5) or Manual config. Never addressed; own AUX circuit (one per circuit); draw 120–365 mA by fan speed; I/O modules 0–2 (housing added automatically).',
+    target: 'qs-step-minilaser',
+    common: true,
+  },
+  {
+    id: 'move-asd',
+    title: 'Move a MiniLaser or ASD-160 to another power supply',
+    keywords: 'move minilaser asd-160 asd160 power supply sheet aux transfer dialog sticky actions create new',
+    blurb: '⇄ Move on the ASD units table (sticky Actions column) opens a dialog: pick another power supply or + Create new power supply, preview AUX and battery Ah, optionally include more units from this sheet, then confirm. Overflow warns but is still allowed.',
     target: 'qs-step-minilaser',
     common: true,
   },
@@ -10131,6 +10253,14 @@ function v2CalcSteps(m, level){
   const tempSel = (m.settings.find(s => s[0] === 'Ambient temperature') || [])[1] || '';
   const steps = [];
   const load = { title: '1. Module & supply load', rows: [] };
+  const mls = (m.miniLasers || []).filter(x => x.kind !== 'asd160');
+  const asds = (m.miniLasers || []).filter(x => x.kind === 'asd160');
+  const hasDisp = (m.modules || []).some(x => x.kind === 'display' || x.kind === 'command');
+  const hasDet = (m.modules || []).some(x => x.kind === 'detector');
+  const mlMa = mls.reduce((a, x) => a + (x.ma || 0), 0);
+  const asdMa = asds.reduce((a, x) => a + (x.ma || 0), 0);
+  const mlRes = Math.round(mlMa) + ' mA';
+  const asdRes = Math.round(asdMa) + ' mA';
   if (level === 'full'){
     m.modules.forEach((mod, i) => {
       const isDet = mod.kind === 'detector';
@@ -10138,26 +10268,44 @@ function v2CalcSteps(m, level){
         sym: isDet ? 'I = FAN_SPEED_MA[fan speed]' : `I = ${mod.type} current`,
         sub: isDet ? `I = FAN_SPEED_MA[${mod.fan || '—'}]` : `I = ${mod.model}`, res: `${mod.ma} mA`, ref: ptRef });
     });
+    mls.forEach((x, i) => {
+      load.rows.push({ label: `I MiniLaser ${i + 1} — ${x.zone || '(no zone)'}`,
+        sym: 'I = MINILASER_FAN_MA[fan speed]',
+        sub: `I = MINILASER_FAN_MA[${x.fan || '—'}]`, res: `${Math.round(x.ma || 0)} mA`, ref: ptRef });
+    });
+    asds.forEach((x, i) => {
+      load.rows.push({ label: `I ASD-160 ${i + 1} — ${x.zone || '(no zone)'}`,
+        sym: 'I = ASD160.ma',
+        sub: 'I = 250 mA (single speed, standby = alarm)', res: `${Math.round(x.ma || 0)} mA`, ref: ptRef });
+    });
   }
-  load.rows.push({ label: 'Displays subtotal', sym: 'I_disp = Σ display currents', sub: 'I_disp = ' + (m.modules.filter(x => x.kind !== 'detector').map(x => x.ma).join(' + ') || '0') + ' mA', res: c.displays, ref: ptRef });
-  load.rows.push({ label: 'Detectors subtotal', sym: 'I_det = Σ detector currents', sub: 'I_det = ' + (m.modules.filter(x => x.kind === 'detector').map(x => x.ma).join(' + ') || '0') + ' mA', res: c.detectors, ref: ptRef });
+  if (hasDisp) load.rows.push({ label: 'Displays subtotal', sym: 'I_disp = Σ display currents', sub: 'I_disp = ' + (m.modules.filter(x => x.kind !== 'detector').map(x => x.ma).join(' + ') || '0') + ' mA', res: c.displays, ref: ptRef });
+  if (hasDet) load.rows.push({ label: 'Detectors subtotal', sym: 'I_det = Σ detector currents', sub: 'I_det = ' + (m.modules.filter(x => x.kind === 'detector').map(x => x.ma).join(' + ') || '0') + ' mA', res: c.detectors, ref: ptRef });
+  if (mls.length) load.rows.push({ label: 'MiniLaser subtotal', sym: 'I_ml = Σ MiniLaser currents', sub: 'I_ml = ' + (mls.map(x => Math.round(x.ma || 0)).join(' + ') || '0') + ' mA', res: mlRes, ref: ptRef });
+  if (asds.length) load.rows.push({ label: 'ASD-160 subtotal', sym: 'I_asd = Σ ASD-160 currents', sub: 'I_asd = ' + (asds.map(x => Math.round(x.ma || 0)).join(' + ') || '0') + ' mA', res: asdRes, ref: ptRef });
   load.rows.push({ label: 'Quiescent load', sym: 'I_q = power supply quiescent draw', sub: 'I_q = ' + c.quiescent, res: c.quiescent, ref: m.mode === 'builtin' ? 'Edwards A/BPS data (this calculator)' : 'Third-party entry' });
   load.rows.push({ label: 'AUX load', sym: 'I_aux = n_aux × I_per_circuit', sub: 'I_aux = ' + c.auxF, res: c.aux, ref: m.mode === 'builtin' ? 'Edwards A/BPS data (this calculator)' : 'Third-party entry' });
-  load.rows.push({ label: 'Total load', sym: 'I_total = I_disp + I_det + I_q + I_aux', sub: `I_total = ${c.displays} + ${c.detectors} + ${c.quiescent} + ${c.aux}`, res: c.total, ref: '' });
-  if (level === 'full') steps.push(load);
-  const cap = { title: (level === 'full' ? '2' : '1') + '. Standby & alarm capacity', rows: [
+  const syms = []; const parts = [];
+  if (hasDisp){ syms.push('I_disp'); parts.push(c.displays); }
+  if (hasDet){ syms.push('I_det'); parts.push(c.detectors); }
+  if (mls.length){ syms.push('I_ml'); parts.push(mlRes); }
+  if (asds.length){ syms.push('I_asd'); parts.push(asdRes); }
+  syms.push('I_q', 'I_aux'); parts.push(c.quiescent, c.aux);
+  load.rows.push({ label: 'Total load', sym: 'I_total = ' + syms.join(' + '), sub: 'I_total = ' + parts.join(' + '), res: c.total, ref: '' });
+  steps.push(load);
+  const cap = { title: '2. Standby & alarm capacity', rows: [
     { label: 'Standby Ah', sym: 'Standby Ah = I_total × T_standby', sub: 'Standby Ah = ' + c.standbyF, res: c.standby, ref },
     { label: 'Alarm Ah', sym: m.bs ? 'Alarm Ah = I_total × T_alarm × D' : 'Alarm Ah = I_total × T_alarm', sub: 'Alarm Ah = ' + c.alarmF, res: c.alarm, ref },
     { label: 'Initial Ah', sym: 'Initial Ah = Standby Ah + Alarm Ah', sub: `Initial Ah = ${c.standby} + ${c.alarm}`, res: c.initial, ref },
   ] };
   if (m.bs && level === 'full') cap.rows.push({ label: 'De-rating factor D', sym: 'D = 1 if (C20 ÷ 20) ≥ I_alarm, else 1.75', sub: 'D = ' + (m.settings.find(s => s[0] === 'De-rating factor (D)') || [, ''])[1] + (c.deratingHint ? ' — ' + c.deratingHint : ''), res: (m.settings.find(s => s[0] === 'De-rating factor (D)') || [, ''])[1], ref });
   steps.push(cap);
-  steps.push({ title: (level === 'full' ? '3' : '2') + '. Safety margin & temperature', rows: [
+  steps.push({ title: '3. Safety margin & temperature', rows: [
     { label: 'Margin-adjusted Ah', sym: m.bs ? 'C = Initial Ah × 1.25' : 'C = Initial Ah × (1 + margin)', sub: 'C = ' + c.marginF, res: c.margin, ref },
     { label: 'Temperature multiplier', sym: 'k_T = TEMPERATURE_MULTIPLIERS[ambient]', sub: `k_T at ${tempSel} — ${c.tempF}`, res: c.temp, ref: 'Calculator de-rating table (general guidance)' },
     { label: 'Required battery capacity', sym: 'Required Ah = C × k_T', sub: `Required Ah = ${c.margin} × ${c.temp.replace('×', '')}`, res: c.required, ref },
   ] });
-  steps.push({ title: (level === 'full' ? '4' : '3') + '. Battery & supply sizing', rows: [
+  steps.push({ title: '4. Battery & supply sizing', rows: [
     { label: 'Selected battery', sym: 'Battery = smallest catalog size ≥ desired (never smaller)', sub: 'Battery = ' + c.battery, res: c.battery, ref: m.mode === 'builtin' ? 'Edwards battery catalog (this calculator)' : 'Third-party entry' },
     { label: 'Power supplies required', sym: 'N = ceil(Required Ah ÷ battery Ah)', sub: 'N = ' + c.suppliesF, res: c.supplies, ref: '' },
     { label: 'Ah per supply', sym: 'Ah per supply = Required Ah ÷ N', sub: `Ah per supply = ${c.required} ÷ ${c.supplies}`, res: c.perSupply, ref: '' },
@@ -10258,7 +10406,20 @@ function v2RenderResultsInner(m){
       ${m.mode === 'builtin' ? `<div class="rp-row"><span>Power supply</span><b>${v2Esc(m.hwSupply || '—')}</b></div><div class="rp-row"><span>Enclosure</span><b>${v2Esc(m.hwEnclosure || '—')}</b></div>` : ''}
       <div class="rp-row"><span>Supplies required</span><b>${m.psRequired}</b></div></div>
     <div class="rp-card"><div class="rp-k">Load breakdown</div>
-      <div class="rp-row"><span>ModuLaser modules</span><b>${v2Fmt(m.moduleMa - (m.mlMa || 0), 0)} mA</b></div>${m.miniLasers && m.miniLasers.length ? `<div class="rp-row"><span>MiniLaser ×${m.miniLasers.length}</span><b>${v2Fmt(m.mlMa, 0)} mA</b></div>` : ''}
+      ${(() => {
+        const mods = (m.modules || []);
+        const hasMod = mods.length > 0;
+        const mls = (m.miniLasers || []).filter(x => x.kind !== 'asd160');
+        const asds = (m.miniLasers || []).filter(x => x.kind === 'asd160');
+        const mlMa = mls.reduce((a, x) => a + (x.ma || 0), 0);
+        const asdMa = asds.reduce((a, x) => a + (x.ma || 0), 0);
+        const modMa = (m.moduleMa || 0) - (m.mlMa || 0);
+        let h = '';
+        if (hasMod) h += `<div class="rp-row"><span>ModuLaser modules</span><b>${v2Fmt(modMa, 0)} mA</b></div>`;
+        if (mls.length) h += `<div class="rp-row"><span>MiniLaser ×${mls.length}</span><b>${v2Fmt(mlMa, 0)} mA</b></div>`;
+        if (asds.length) h += `<div class="rp-row"><span>ASD-160 ×${asds.length}</span><b>${v2Fmt(asdMa, 0)} mA</b></div>`;
+        return h;
+      })()}
       <div class="rp-row"><span>Power supply (quiescent + AUX)</span><b>${v2Fmt(m.psMa, 0)} mA</b></div>
       <div class="rp-row tot"><span>Total load</span><b>${v2Fmt(m.totalMa, 0)} mA</b></div>
       <div class="rp-row"><span>Standby capacity</span><b>${v2AhU(m, m.standbyAh)}</b></div>
@@ -12286,7 +12447,7 @@ if (typeof window !== 'undefined' && typeof MLP !== 'undefined' && MLP.sfdNotice
 
 </script><!--MLP-END-->
 <!--ML-BEGIN--><script id="ml-calc">
-/* MiniLaser ASD (FHSD8075-ULF) + ASD-160 (Micra25 / Senator 25) — Battery Calculator / MASD Engineering Toolbox layer (02.02.000).
+/* MiniLaser ASD (FHSD8075-ULF) + ASD-160 (Micra25 / Senator 25) — Battery Calculator / MASD Engineering Toolbox layer (02.02.003). Move dialog + sticky Actions; granular MiniLaser/ASD-160 rows.
    02.02.000: ASD-160 rows share this table (Brent 1:47 PM CT): single speed 250 mA standby = alarm, own dedicated AUX circuit,
    Networked (addressed, SenseNET, DIP 1–127) or Standalone per unit, Remote configuration, optional relay card 33-30436A.
    Validation per plan rev 4.23b §7/§7b/§7c via MLP.asd160Evaluate. Part numbers by brand (MLP.partFor).
@@ -12311,7 +12472,56 @@ if (typeof window !== 'undefined' && typeof MLP !== 'undefined' && MLP.sfdNotice
 .ml-pe-box h3{margin:0 0 8px;font-size:15px}.ml-pe-box label{display:inline-block;margin:4px 10px 4px 0}
 .ml-pe-box table{border-collapse:collapse;margin-top:8px;width:100%}.ml-pe-box td{padding:2px 6px;border-bottom:1px solid var(--line2,#222b36)}
 .ml-pe-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-@media print{.ml-card{display:none}}`;
+.ml-table-wrap{overflow-x:auto;position:relative;border:1px solid var(--line,#2a3441);border-radius:6px}
+.ml-table{border-collapse:separate;border-spacing:0}
+.ml-table .ml-actions-col{position:sticky;right:0;z-index:2;background:var(--surface,#12171e);border-left:1px solid var(--line,#2a3441);box-shadow:-4px 0 8px rgba(11,14,18,.5);text-align:right;white-space:nowrap}
+.ml-table thead .ml-actions-col{background:var(--surface2,#1a212b);z-index:3}
+.ml-table .ml-actions-col .btn{vertical-align:middle}
+.ml-move-btn{font-size:12px;padding:3px 8px;margin-right:4px}
+.mv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:10050}
+.mv-card{width:560px;max-width:92vw;max-height:86vh;background:var(--surface,#12171e);color:var(--ink,#e6edf3);border:1px solid var(--line,#2a3441);border-radius:10px;box-shadow:0 20px 50px -10px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
+.mv-head{padding:14px 18px;border-bottom:1px solid var(--line,#2a3441);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mv-head h3{margin:0;font-size:14.5px;font-weight:600}
+.mv-body{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.mv-foot{padding:12px 18px;border-top:1px solid var(--line,#2a3441);display:flex;justify-content:flex-end;gap:8px;background:var(--surface2,#1a212b)}
+.mv-from{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.mv-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface2,#1a212b);border:1px solid var(--line,#2a3441);border-radius:6px;padding:4px 8px;font-family:var(--mono,monospace);font-size:12px}
+.mv-chip-k{font-size:10px;padding:1px 5px;border-radius:3px;border:1px solid rgba(12,119,188,.3);background:rgba(12,119,188,.16);color:var(--accent2,#3a9ad6);text-transform:uppercase;font-weight:600;font-family:var(--sans,sans-serif)}
+.mv-chip-k.asd{background:var(--surface2,#1a212b);border-color:var(--line,#2a3441);color:var(--muted,#8b98a8)}
+.mv-k{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--faint,#6b7889);margin:0 0 8px}
+.mv-targets{display:flex;flex-direction:column;gap:8px}
+.mv-area{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--faint,#6b7889);margin:6px 0 2px}
+.target-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line,#2a3441);border-radius:8px;cursor:pointer;background:var(--bg,#0b0e12);color:inherit;font:inherit;width:100%;text-align:left}
+.target-item:hover{border-color:var(--line2,#222b36)}
+.target-item.selected{border-color:var(--accent,#0c77bc);background:var(--accent-soft,rgba(12,119,188,.16))}
+.target-item.is-full{opacity:.9}
+.mv-badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
+.mv-badge-rec{background:rgba(63,185,80,.12);color:var(--pass,#3fb950);border:1px solid rgba(63,185,80,.25)}
+.mv-badge-full{background:rgba(248,81,73,.10);color:var(--fail,#f85149);border:1px solid rgba(248,81,73,.25)}
+.mv-aux{font-size:11px;color:var(--muted,#8b98a8);font-family:var(--mono,monospace);margin-top:2px}
+.mv-create-fields{display:none;gap:8px;flex-wrap:wrap;padding:8px 0 0}
+.mv-create-fields.open{display:flex}
+.mv-create-fields label{display:flex;flex-direction:column;gap:3px;font-size:10.5px;text-transform:uppercase;color:var(--faint,#6b7889);flex:1;min-width:160px}
+.mv-create-fields input{font-size:13px;padding:6px 8px;background:var(--bg,#0b0e12);color:var(--ink,#e6edf3);border:1px solid var(--line,#2a3441);border-radius:6px;text-transform:none;letter-spacing:0;font-weight:400}
+.mv-preview{background:var(--bg,#0b0e12);border:1px solid rgba(63,185,80,.3);border-radius:8px;padding:12px}
+.mv-preview.warn{border-color:rgba(210,153,34,.45)}
+.mv-preview.bad{border-color:rgba(248,81,73,.4)}
+.mv-preview-h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;margin-bottom:8px}
+.mv-preview.ok .mv-preview-h{color:var(--pass,#3fb950)}
+.mv-preview.warn .mv-preview-h{color:var(--inc,#d29922)}
+.mv-preview.bad .mv-preview-h{color:var(--fail,#f85149)}
+.mv-preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mv-metric{background:var(--surface2,#1a212b);border:1px solid var(--line,#2a3441);border-radius:6px;padding:8px 10px}
+.mv-metric .k{font-size:10.5px;text-transform:uppercase;color:var(--faint,#6b7889);margin-bottom:4px}
+.mv-metric .v{font-family:var(--mono,monospace);font-size:12.5px;display:flex;align-items:center;gap:6px}
+.mv-metric .v .after{color:var(--accent2,#3a9ad6);font-weight:600}
+.mv-warn{font-size:11.5px;color:var(--inc,#d29922);margin-top:8px;line-height:1.4}
+.mv-units label{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg,#0b0e12);border:1px solid var(--line,#2a3441);border-radius:8px;padding:8px 10px;cursor:pointer;margin:0 0 6px}
+.mv-units label:hover{border-color:var(--line2,#222b36)}
+.mv-units .left{display:flex;align-items:center;gap:8px}
+.mv-note{font-size:11px;color:var(--muted,#8b98a8);margin:6px 0 0}
+@media print{.ml-card{display:none} .mv-overlay{display:none!important}}
+`;
   document.head.appendChild(st);
 })();
 const ML_CLASSES = ['VEWFD', 'EWFD', 'SFD', 'OAP'];
@@ -12321,7 +12531,7 @@ function mlCardHtml(loc){
   return `<div class="ml-card" data-ml-card="${loc}">
     <div class="ml-h"><div class="ml-t">ASD units (MiniLaser · ASD-160)<span class="ml-chip asd-std-chip" hidden></span></div><div><button type="button" class="btn btn-sm ml-add" onclick="mlUiAdd('${loc}')">+ Add MiniLaser</button> <button type="button" class="btn btn-sm asd-add" onclick="asdUiAdd('${loc}')">+ Add ASD-160</button></div></div>
     <p class="ml-note"><b>ASD-160</b> (Micra25 / Senator 25): 250 mA standby = alarm, single speed, own dedicated AUX circuit; Networked units are addressed on SenseNET (DIP 1–127), Standalone units are never addressed; configured with Remote. <b>MiniLaser</b>: not on SenseNET and never addressed. Each MiniLaser needs its own dedicated AUX circuit (one per circuit, shared with nothing). Draw by fan speed, standby = alarm (MiniLaser manual p.65). I/O expansion modules (9-30521) add no draw; the 9-30520 housing is added to the BOM automatically.</p>
-    <div style="overflow-x:auto"><table class="ml-table"><thead><tr><th>Zone</th><th>Setup</th><th>Fan</th><th>Alarm factor</th><th>Class</th><th>Config</th><th style="text-align:right">Standby / Alarm mA</th><th>AUX circuit</th><th>Circuit source</th><th>I/O / relay card</th><th>Recommendation</th><th></th></tr></thead>
+    <div class="ml-table-wrap"><table class="ml-table"><thead><tr><th>Zone</th><th>Setup</th><th>Fan</th><th>Alarm factor</th><th>Class</th><th>Config</th><th style="text-align:right">Standby / Alarm mA</th><th>AUX circuit</th><th>Circuit source</th><th>I/O / relay card</th><th>Recommendation</th><th class="ml-actions-col">Actions</th></tr></thead>
     <tbody class="ml-body"></tbody></table></div><div class="ml-empty">No MiniLasers or ASD-160s on this sheet.</div></div>`;
 }
 (function hookTemplate(){
@@ -12346,7 +12556,7 @@ function mlAddRow(loc, data){
     <td><input class="circuit-source" value="${mlEsc(data.circuitSource || '')}" placeholder="e.g. PS-1 AUX-3"></td>
     <td><select class="ml-io" title="MiniLaser I/O Expansion Modules 9-30521 (5 latched relays 2 A @ 30 VDC + 2 supervised inputs 15 kΩ each; max 2 per housing)">${mlOpts([[0, '0'], [1, '1'], [2, '2']], data.io == null ? 0 : data.io)}</select></td>
     <td class="ml-adv"></td>
-    <td><button type="button" class="btn btn-sm ml-del" title="Remove MiniLaser">✕</button></td>`;
+    <td class="ml-actions-col"><button type="button" class="btn btn-sm ml-move-btn" title="Move this unit to another power supply" aria-label="Move to another power supply">⇄ Move</button> <button type="button" class="btn btn-sm ml-del" title="Remove MiniLaser">✕</button></td>`;
   const keep = { plKey: data.plKey || '', holes: data.holes == null ? '' : data.holes, afSrc: data.afSrc || '', bends90: data.bends90 == null ? '' : data.bends90, lengthFt: data.lengthFt == null ? '' : data.lengthFt, tees: data.tees == null ? '' : data.tees };
   Object.entries(keep).forEach(([k, v]) => { tr.dataset[k] = v; });
   if (data.pre) tr.dataset.pre = JSON.stringify(data.pre);
@@ -12374,7 +12584,7 @@ function asdAddRow(loc, data){
     <td><input class="circuit-source" value="${mlEsc(data.circuitSource || '')}" placeholder="e.g. PS-1 AUX-3"></td>
     <td><label title="Relay card 33-30436A adds Pre-Alarm, Aux and Fire 2 relays (base unit: Fire + Fault)"><input type="checkbox" class="asd-relay"${data.relayCard ? ' checked' : ''}> Relay card</label></td>
     <td class="ml-adv"></td>
-    <td><button type="button" class="btn btn-sm ml-del" title="Remove ASD-160">✕</button></td>`;
+    <td class="ml-actions-col"><button type="button" class="btn btn-sm ml-move-btn" title="Move this unit to another power supply" aria-label="Move to another power supply">⇄ Move</button> <button type="button" class="btn btn-sm ml-del" title="Remove ASD-160">✕</button></td>`;
   tr.dataset.plKey = data.plKey || ''; tr.dataset.afSrc = data.afSrc || ''; tr.dataset.clsSrc = data.clsSrc || '';
   if (data.pipe) tr.dataset.pipe = JSON.stringify(data.pipe);
   if (data.network) tr.dataset.network = String(data.network);
@@ -12382,6 +12592,7 @@ function asdAddRow(loc, data){
   if (data.circuitSourceEdited) tr.querySelector('.circuit-source').dataset.userEdited = '1';
   locEl.querySelector('.ml-body').appendChild(tr);
   const re = () => { recalcLocation(loc); if (typeof refreshAllAmber === 'function') refreshAllAmber(); scheduleSave(); if (typeof v2Refresh === 'function') v2Refresh(); };
+  mlWireMove(tr, loc);
   tr.querySelector('.ml-del').onclick = () => { tr.remove(); re(); };
   tr.querySelector('.circuit-source').addEventListener('input', e => { e.target.dataset.userEdited = '1'; });
   tr.querySelector('.ml-af').addEventListener('change', () => { tr.dataset.afSrc = 'manual'; });
@@ -12406,11 +12617,12 @@ function asdEval(tr, locEl){
 }
 function mlWireRow(tr, loc){
   const re = () => { recalcLocation(loc); if (typeof refreshAllAmber === 'function') refreshAllAmber(); scheduleSave(); if (typeof v2Refresh === 'function') v2Refresh(); };
+  mlWireMove(tr, loc);
   tr.querySelector('.ml-del').onclick = () => { tr.remove(); re(); };
   tr.querySelector('.ml-pick').onclick = () => mlOpenPicker(tr, loc);
   tr.querySelector('.circuit-source').addEventListener('input', e => { e.target.dataset.userEdited = '1'; });
   tr.querySelector('.ml-af').addEventListener('change', () => { tr.dataset.afSrc = 'manual'; delete tr.dataset.derivation; });
-  tr.querySelector('.ml-class').addEventListener('change', () => { if (tr.dataset.afSrc === 'derived' && tr.dataset.holes !== ''){ const d = MLP.deriveAlarmFactor(+tr.dataset.holes, tr.querySelector('.ml-class').value, MLP.sfdAfScope(asdPerf(), (loc.querySelector('.ps-location') || {}).value || '')); tr.querySelector('.ml-af').value = String(d.af); tr.dataset.derivation = JSON.stringify(d); } });
+  tr.querySelector('.ml-class').addEventListener('change', () => { if (tr.dataset.afSrc === 'derived' && tr.dataset.holes !== ''){ const d = MLP.deriveAlarmFactor(+tr.dataset.holes, tr.querySelector('.ml-class').value, MLP.sfdAfScope(asdPerf(), ((document.getElementById('location-' + loc) || {}).querySelector && document.getElementById('location-' + loc).querySelector('.ps-location') || {}).value || '')); tr.querySelector('.ml-af').value = String(d.af); tr.dataset.derivation = JSON.stringify(d); } });
   const pp = tr.querySelector('.ml-plpre'); if (pp) pp.addEventListener('change', () => { tr.querySelector('.ml-method').value = ''; });   // re-recommend DIP/Remote
   tr.querySelector('.ml-setup').addEventListener('change', e => { if (e.target.value === 'pre') mlOpenPicker(tr, loc); });
   tr.querySelectorAll('input, select').forEach(el => el.addEventListener('change', re));
@@ -12488,6 +12700,304 @@ function mlRecalcHook(locEl, mode, setupAux, unassignedAuxRows){
     if (rows.length + M > custom) out.flags.push(`${rows.length} ${rows.some(r => r.dataset.kind === 'asd160') ? 'MiniLaser/ASD-160 unit(s)' : 'MiniLaser(s)'} + ${M} entry point(s) need ${rows.length + M} AUX circuits; ${custom} entered for this third-party supply — use a supply with ≥${rows.length + M} AUX outputs or add one.`);
   }
   return out;
+}
+function mlWireMove(tr, loc){
+  const btn = tr.querySelector('.ml-move-btn');
+  if (btn) btn.onclick = ev => { ev.preventDefault(); ev.stopPropagation(); mlMoveOpen(tr, loc); };
+}
+function mlUnitMa(d){
+  if (d && d.kind === 'asd160') return (typeof MLP !== 'undefined' && MLP.ASD160) ? MLP.ASD160.ma : 250;
+  return (typeof MASD_ENGINE !== 'undefined' && MASD_ENGINE.miniLaserMa) ? MASD_ENGINE.miniLaserMa(d && d.fan) : 0;
+}
+function mlSheetInfo(locEl){
+  const loc = locEl.getAttribute('data-loc');
+  const ps = ((locEl.querySelector('.ps-name') || {}).value || '').trim();
+  const area = ((locEl.querySelector('.ps-location') || {}).value || '').trim();
+  return { loc, el: locEl, ps: ps || ('Sheet ' + String(loc).padStart(2, '0')), area };
+}
+function mlAuxState(locEl){
+  const mode = ((locEl.querySelector('.mode-radio:checked') || {}).value) || 'builtin';
+  const usedSet = new Set();
+  locEl.querySelectorAll('.aux-circuit-num').forEach(s => { const n = parseInt(s.value, 10); if (n >= 1) usedSet.add(n); });
+  const used = usedSet.size;
+  let max, label;
+  if (mode === 'builtin'){
+    max = (typeof MAX_AUX_BUILTIN === 'number') ? MAX_AUX_BUILTIN : 4;
+    label = used + '/' + max + ' AUX used';
+  } else {
+    max = parseFloat((locEl.querySelector('.aux-circuits-custom') || {}).value) || 0;
+    label = used + '/' + max + ' AUX used (custom)';
+  }
+  const per = mode === 'builtin' ? ((typeof AUX_MA_PER_CIRCUIT === 'number') ? AUX_MA_PER_CIRCUIT : 35)
+    : (parseFloat((locEl.querySelector('.custom-aux-ma') || {}).value) || 0);
+  const exportMode = mode === 'thirdparty' && ((locEl.querySelector('.submode-radio:checked') || {}).value === 'export');
+  return { mode, exportMode, used, max, label, open: used < max, per };
+}
+function mlAhFromTotal(locEl, totalMa){
+  if (!locEl || !(totalMa >= 0) || typeof MASD_ENGINE === 'undefined') return null;
+  const basisKey = ((locEl.querySelector('.design-basis-select') || {}).value) || '';
+  const tempKey = ((locEl.querySelector('.temperature-select') || {}).value) || '';
+  if (!basisKey || tempKey === '') return null;
+  const preset = (typeof DESIGN_BASIS_PRESETS !== 'undefined') ? DESIGN_BASIS_PRESETS[basisKey] : null;
+  const bs = !!(preset && preset.formula === 'bs5839');
+  const exportMode = ((locEl.querySelector('.mode-radio:checked') || {}).value === 'thirdparty') && ((locEl.querySelector('.submode-radio:checked') || {}).value === 'export');
+  const standbyHours = parseFloat((locEl.querySelector('.standby-hours') || {}).value) || 0;
+  const alarmMinutes = parseFloat((locEl.querySelector('.alarm-minutes') || {}).value) || 0;
+  const derating = bs ? (parseFloat((locEl.querySelector('.derating-input') || {}).value) || 1.75) : 1;
+  let margin;
+  if (bs) margin = 0.25;
+  else if (exportMode) margin = parseFloat((locEl.querySelector('.export-margin-select') || {}).value) || 0;
+  else margin = parseFloat((locEl.querySelector('.margin-select') || {}).value) || 0;
+  const out = MASD_ENGINE.batteryAh({ standbyHours, alarmMinutes, totalMa, derating, margin, temperatureF: tempKey });
+  return out && isFinite(out.requiredAh) ? out.requiredAh : null;
+}
+function mlCurrentRequiredAh(locEl){
+  if (!locEl) return null;
+  if (!locEl.querySelector('[data-role="module"],[data-role="minilaser"]')) return null;
+  const exportMode = ((locEl.querySelector('.mode-radio:checked') || {}).value === 'thirdparty') && ((locEl.querySelector('.submode-radio:checked') || {}).value === 'export');
+  const raw = locEl.querySelector(exportMode ? '.export-required-ah' : '.required-ah');
+  const n = raw && (typeof v2Num === 'function' ? v2Num(raw.textContent) : parseFloat(String(raw.textContent).replace(/[^\d.-]/g, '')));
+  return isFinite(n) ? n : mlAhFromTotal(locEl, parseFloat((locEl.querySelector(exportMode ? '.export-total-ma-2' : '.total-ma') || {}).textContent) || 0);
+}
+function mlCurrentTotalMa(locEl, aux){
+  if (!locEl) return (typeof QUIESCENT_MA === 'number' ? QUIESCENT_MA : 70);
+  if (aux && aux.exportMode) return parseFloat((locEl.querySelector('.export-total-ma-2') || {}).textContent) || 0;
+  const n = parseFloat((locEl.querySelector('.total-ma') || {}).textContent);
+  return isFinite(n) ? n : 0;
+}
+function mlSuggestPsName(){
+  let maxN = 0, any = false;
+  document.querySelectorAll('.location .ps-name').forEach(el => {
+    const m = String(el.value || '').trim().match(/^PS-(\d+)$/i);
+    if (m){ any = true; maxN = Math.max(maxN, parseInt(m[1], 10)); }
+  });
+  if (!any) maxN = document.querySelectorAll('.location').length;
+  return 'PS-' + (maxN + 1);
+}
+function mlCopySheetSettings(srcEl, destEl){
+  if (!srcEl || !destEl) return;
+  const copyVal = sel => { const a = srcEl.querySelector(sel), b = destEl.querySelector(sel); if (a && b) b.value = a.value; };
+  ['.design-basis-select', '.temperature-select', '.standby-hours', '.alarm-minutes', '.margin-select', '.nfpa72-edition-select', '.derating-input', '.ps-capacity-select', '.export-margin-select'].forEach(copyVal);
+  const mode = ((srcEl.querySelector('.mode-radio:checked') || {}).value) || 'builtin';
+  const dm = destEl.querySelector('.mode-radio[value="' + mode + '"]');
+  if (dm){ dm.checked = true; }
+  if (mode === 'thirdparty'){
+    const sub = ((srcEl.querySelector('.submode-radio:checked') || {}).value) || 'custom';
+    const ds = destEl.querySelector('.submode-radio[value="' + sub + '"]');
+    if (ds) ds.checked = true;
+    ['.custom-quiescent', '.custom-aux-ma', '.aux-circuits-custom', '.tp-supply-makemodel', '.tp-battery-ah', '.tp-battery-model', '.tp-battery-voltage', '.export-charger-ah'].forEach(copyVal);
+  }
+  if (typeof applyDesignBasis === 'function') applyDesignBasis(destEl.getAttribute('data-loc'));
+}
+function mlMovePreview(srcEl, destEl, units, inheritEl){
+  const n = units.length;
+  const extraMa = units.reduce((s, d) => s + mlUnitMa(d), 0);
+  const settingsEl = destEl || inheritEl;
+  const aux = destEl ? mlAuxState(destEl) : { mode: ((inheritEl.querySelector('.mode-radio:checked') || {}).value) || 'builtin', exportMode: false, used: 0, max: (typeof MAX_AUX_BUILTIN === 'number') ? MAX_AUX_BUILTIN : 4, per: (typeof AUX_MA_PER_CIRCUIT === 'number') ? AUX_MA_PER_CIRCUIT : 35, open: true };
+  if (!destEl){
+    if (aux.mode !== 'builtin'){
+      aux.max = parseFloat((inheritEl.querySelector('.aux-circuits-custom') || {}).value) || 0;
+      aux.per = parseFloat((inheritEl.querySelector('.custom-aux-ma') || {}).value) || 0;
+      aux.exportMode = ((inheritEl.querySelector('.submode-radio:checked') || {}).value === 'export');
+    }
+    aux.label = aux.used + '/' + aux.max + (aux.mode === 'builtin' ? ' AUX used' : ' AUX used (custom)');
+  }
+  const afterAux = aux.used + n;
+  const room = Math.max(0, aux.max - aux.used);
+  const newCircuits = aux.exportMode ? 0 : (aux.mode === 'builtin' ? Math.min(n, room) : 0);
+  const beforeTotal = destEl ? mlCurrentTotalMa(destEl, aux) : (aux.exportMode ? 0 : ((typeof QUIESCENT_MA === 'number') ? QUIESCENT_MA : 70));
+  const afterTotal = beforeTotal + extraMa + newCircuits * (aux.per || 0);
+  const beforeAh = destEl ? mlCurrentRequiredAh(destEl) : null;
+  const afterAh = mlAhFromTotal(settingsEl, afterTotal);
+  const auxOverflow = afterAux > aux.max;
+  const ahOverflow = afterAh != null && afterAh > ((typeof CHARGER_MAX_AH === 'number') ? CHARGER_MAX_AH : 65);
+  return { aux, afterAux, extraMa, beforeAh, afterAh, afterTotal, auxOverflow, ahOverflow, ok: !auxOverflow && !ahOverflow };
+}
+function mlMoveClose(){
+  const ov = document.getElementById('mv-overlay');
+  if (ov){ ov.remove(); document.removeEventListener('keydown', mlMoveEsc, true); }
+}
+function mlMoveEsc(ev){ if (ev.key === 'Escape'){ ev.preventDefault(); mlMoveClose(); } }
+function mlKindLabel(d){ return (d && d.kind === 'asd160') ? 'ASD-160' : 'MiniLaser'; }
+function mlMoveOpen(tr, loc){
+  const srcEl = document.getElementById('location-' + loc);
+  if (!srcEl || !tr) return;
+  mlMoveClose();
+  const src = mlSheetInfo(srcEl);
+  const allRows = mlRows(srcEl);
+  const clicked = tr;
+  const others = Array.from(document.querySelectorAll('.location')).filter(el => el !== srcEl).map(mlSheetInfo);
+  const rec = others.find(o => o.area === src.area && mlAuxState(o.el).open) || null;
+  const initialSel = rec ? rec.loc : (others[0] ? others[0].loc : 'new');
+  const ov = document.createElement('div');
+  ov.id = 'mv-overlay'; ov.className = 'mv-overlay'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'mv-title');
+  const titleFor = list => {
+    const kinds = new Set(list.map(mlKindLabel));
+    if (kinds.size === 1 && list.length === 1) return 'Move ' + mlKindLabel(list[0]) + ' to Power Supply';
+    return 'Move ASD Units to Power Supply';
+  };
+  const chip = d => `<span class="mv-chip"><span class="mv-chip-k${d.kind === 'asd160' ? ' asd' : ''}">${d.kind === 'asd160' ? '160' : 'ML'}</span>${mlEsc(d.zone || '(no zone)')}</span>`;
+  const areaGroups = {};
+  others.forEach(o => { const k = o.area || 'No Area/Group'; (areaGroups[k] = areaGroups[k] || []).push(o); });
+  const targetHtml = others.length ? Object.keys(areaGroups).map(area => {
+    const items = areaGroups[area].map(o => {
+      const aux = mlAuxState(o.el);
+      const isRec = rec && o.loc === rec.loc;
+      const full = !aux.open;
+      return `<label class="target-item${o.loc === initialSel ? ' selected' : ''}${full ? ' is-full' : ''}" data-mv-loc="${mlEsc(o.loc)}">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <input type="radio" name="mv-target" value="${mlEsc(o.loc)}"${o.loc === initialSel ? ' checked' : ''}>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-weight:600">${mlEsc(o.ps)}</span>
+              <span style="color:var(--muted,#8b98a8);font-size:11px">${mlEsc(o.area || 'No Area/Group')}</span>
+              ${isRec ? '<span class="mv-badge mv-badge-rec">Recommended</span>' : ''}
+              ${full ? '<span class="mv-badge mv-badge-full">Full — overflow</span>' : ''}
+            </div>
+            <div class="mv-aux">${mlEsc(aux.label)}</div>
+          </div>
+        </div>
+      </label>`;
+    }).join('');
+    return `<div class="mv-area">${mlEsc(area)}</div>${items}`;
+  }).join('') : '<div class="mv-note">No other power supply sheets yet — create one below.</div>';
+  const sug = mlSuggestPsName();
+  ov.innerHTML = `<div class="mv-card">
+    <div class="mv-head"><h3 id="mv-title">Move ASD Unit to Power Supply</h3><button type="button" class="btn btn-sm mv-x" title="Close" aria-label="Close">✕</button></div>
+    <div class="mv-body">
+      <div class="mv-from"><span class="mv-k" style="margin:0">From</span><span class="mv-from-chips"></span><span class="mv-src-tag" style="color:var(--muted,#8b98a8)">${mlEsc(src.ps)}${src.area ? ' · ' + mlEsc(src.area) : ''}</span></div>
+      <div>
+        <div class="mv-k">Target power supply</div>
+        <div class="mv-targets">${targetHtml}
+          <label class="target-item${initialSel === 'new' ? ' selected' : ''}" data-mv-loc="new" style="justify-content:flex-start;color:var(--accent2,#3a9ad6)">
+            <div style="display:flex;align-items:center;gap:10px;width:100%;flex-wrap:wrap">
+              <input type="radio" name="mv-target" value="new"${initialSel === 'new' ? ' checked' : ''}>
+              <span style="font-weight:600">+ Create new power supply</span>
+            </div>
+          </label>
+          <div class="mv-create-fields${initialSel === 'new' ? ' open' : ''}">
+            <label>Power Supply Name <input type="text" class="mv-new-name" value="${mlEsc(sug)}" maxlength="40"></label>
+            <label>Area / Group <input type="text" class="mv-new-area" value="${mlEsc(src.area)}" maxlength="80"></label>
+          </div>
+        </div>
+      </div>
+      <div class="mv-preview ok" id="mv-preview"></div>
+      <div class="mv-units" ${allRows.length < 2 ? 'hidden' : ''}></div>
+    </div>
+    <div class="mv-foot"><button type="button" class="btn mv-cancel">Cancel</button><button type="button" class="btn btn-primary mv-confirm">Move</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  const state = { srcEl, src, clicked, allRows, others, rec };
+  const selectedUnits = () => {
+    if (allRows.length < 2) return [mlRowData(clicked)];
+    return allRows.filter(r => { const c = ov.querySelector('input[data-row="' + r.id + '"]'); return c && c.checked; }).map(mlRowData);
+  };
+  const selectedTarget = () => { const r = ov.querySelector('input[name="mv-target"]:checked'); return r ? r.value : initialSel; };
+  const paint = () => {
+    const units = selectedUnits();
+    const title = titleFor(units);
+    ov.querySelector('#mv-title').textContent = title;
+    ov.querySelector('.mv-from-chips').innerHTML = units.map(chip).join('');
+    const tgt = selectedTarget();
+    const create = tgt === 'new';
+    ov.querySelector('.mv-create-fields').classList.toggle('open', create);
+    ov.querySelectorAll('.target-item').forEach(el => el.classList.toggle('selected', el.getAttribute('data-mv-loc') === tgt));
+    const destEl = create ? null : (document.getElementById('location-' + tgt));
+    const prev = mlMovePreview(srcEl, destEl, units, srcEl);
+    const destName = create ? ((ov.querySelector('.mv-new-name') || {}).value || sug).trim() || sug : (mlSheetInfo(destEl).ps);
+    const prevEl = ov.querySelector('#mv-preview');
+    const cls = (prev.auxOverflow || prev.ahOverflow) ? (prev.auxOverflow && prev.ahOverflow ? 'bad' : 'warn') : 'ok';
+    prevEl.className = 'mv-preview ' + cls;
+    const fmtAh = n => (n == null || !isFinite(n)) ? '—' : (Math.round(n * 100) / 100).toFixed(2) + ' Ah';
+    const beforeAux = prev.aux.used + '/' + prev.aux.max;
+    const afterAux = prev.afterAux + '/' + prev.aux.max;
+    let head = create ? ('New ' + destName + ' will take this move') : ('Target ' + destName + (prev.ok ? ' can accept this move' : ' — overflow warning'));
+    let warn = '';
+    if (prev.auxOverflow) warn += `<div class="mv-warn">After this move the destination would need ${prev.afterAux} AUX circuits (this supply has ${prev.aux.max}). You can still confirm — the destination sheet will show a validation flag.</div>`;
+    if (prev.ahOverflow) warn += `<div class="mv-warn">Required battery capacity would be ${fmtAh(prev.afterAh)}, over the ${typeof CHARGER_MAX_AH === 'number' ? CHARGER_MAX_AH : 65} Ah limit. You can still confirm — the destination sheet will show a validation flag.</div>`;
+    prevEl.innerHTML = `<div class="mv-preview-h">${head}</div>
+      <div class="mv-preview-grid">
+        <div class="mv-metric"><div class="k">AUX circuits</div><div class="v"><span>${beforeAux}</span> → <span class="after">${afterAux}</span></div></div>
+        <div class="mv-metric"><div class="k">Required battery</div><div class="v"><span>${fmtAh(prev.beforeAh)}</span> → <span class="after">${fmtAh(prev.afterAh)}</span></div></div>
+      </div>${warn}`;
+    const conf = ov.querySelector('.mv-confirm');
+    conf.disabled = units.length < 1;
+    if (create) conf.textContent = units.length > 1 ? (`Create ${destName} & Move ${units.length} units`) : (`Create ${destName} & Move`);
+    else conf.textContent = units.length > 1 ? (`Move ${units.length} units to ${destName}`) : (`Move to ${destName}`);
+  };
+  if (allRows.length >= 2){
+    const box = ov.querySelector('.mv-units');
+    box.innerHTML = `<div class="mv-k">Include additional units from ${mlEsc(src.ps)} in this move</div>` + allRows.map(r => {
+      const d = mlRowData(r), isC = r === clicked, ma = mlUnitMa(d);
+      const maTxt = isC ? 'In this move' : (`${ma} / ${ma} mA`);
+      return `<label><span class="left"><input type="checkbox" class="mv-u-${r.id}" data-row="${r.id}"${isC ? ' checked' : ''}><span class="mv-chip-k${d.kind === 'asd160' ? ' asd' : ''}">${d.kind === 'asd160' ? '160' : 'ML'}</span><span style="font-family:var(--mono,monospace)">${mlEsc(d.zone || '(no zone)')}</span><span style="color:var(--muted,#8b98a8);font-size:11px">${maTxt}</span></span></label>`;
+    }).join('') + `<p class="mv-note">Adding more units updates the AUX + battery preview above before you confirm.</p>`;
+    box.querySelectorAll('input[type=checkbox]').forEach(c => c.addEventListener('change', ev => {
+      const checked = box.querySelectorAll('input[type=checkbox]:checked');
+      if (!checked.length){ ev.target.checked = true; return; }
+      paint();
+    }));
+  }
+  ov.addEventListener('click', ev => { if (ev.target === ov) mlMoveClose(); });
+  ov.querySelector('.mv-x').onclick = mlMoveClose;
+  ov.querySelector('.mv-cancel').onclick = mlMoveClose;
+  ov.querySelectorAll('input[name="mv-target"]').forEach(r => r.addEventListener('change', paint));
+  ov.querySelectorAll('.target-item').forEach(el => el.addEventListener('click', ev => {
+    if (ev.target.closest('input')) return;
+    const inp = el.querySelector('input[name="mv-target"]'); if (inp){ inp.checked = true; paint(); }
+  }));
+  ov.querySelector('.mv-new-name').addEventListener('input', paint);
+  ov.querySelector('.mv-new-area').addEventListener('input', paint);
+  ov.querySelector('.mv-confirm').onclick = () => mlMoveConfirm(state, selectedUnits(), selectedTarget(), ov);
+  document.addEventListener('keydown', mlMoveEsc, true);
+  paint();
+  const focusEl = ov.querySelector('input[name="mv-target"]:checked') || ov.querySelector('.mv-confirm');
+  if (focusEl && focusEl.focus) focusEl.focus();
+}
+function mlMoveConfirm(state, units, target, ov){
+  if (!units.length) return;
+  const srcEl = state.srcEl, srcLoc = srcEl.getAttribute('data-loc');
+  let destEl = null, destLoc = null, created = false;
+  if (target === 'new'){
+    const name = ((ov.querySelector('.mv-new-name') || {}).value || '').trim() || mlSuggestPsName();
+    const area = ((ov.querySelector('.mv-new-area') || {}).value || '').trim();
+    addLocation();
+    destLoc = String(typeof locationCounter !== 'undefined' ? locationCounter : '');
+    destEl = document.getElementById('location-' + destLoc);
+    if (!destEl){ const all = document.querySelectorAll('.location'); destEl = all[all.length - 1]; destLoc = destEl && destEl.getAttribute('data-loc'); }
+    if (!destEl){ mlMoveClose(); return; }
+    destEl.querySelector('.ps-name').value = name;
+    destEl.querySelector('.ps-location').value = area;
+    mlCopySheetSettings(srcEl, destEl);
+    created = true;
+  } else {
+    destLoc = target; destEl = document.getElementById('location-' + destLoc);
+  }
+  if (!destEl){ mlMoveClose(); return; }
+  const rowEls = [];
+  if (state.allRows.length < 2) rowEls.push(state.clicked);
+  else {
+    const checkedIds = Array.from(ov.querySelectorAll('.mv-units input[type=checkbox]:checked')).map(c => c.getAttribute('data-row'));
+    if (checkedIds.length) checkedIds.forEach(id => { const r = document.getElementById(id); if (r) rowEls.push(r); });
+    else rowEls.push(state.clicked);
+  }
+  // Preserve original order as on the source sheet
+  rowEls.sort((a, b) => state.allRows.indexOf(a) - state.allRows.indexOf(b));
+  const payloads = rowEls.map(r => mlRowData(r));
+  payloads.forEach(d => {
+    const edited = !!d.circuitSourceEdited;
+    d.auxCircuitNum = '';
+    if (!edited){ d.circuitSource = ''; d.circuitSourceEdited = false; }
+    if (d.kind === 'asd160') asdAddRow(destLoc, d);
+    else mlAddRow(destLoc, d);
+  });
+  rowEls.forEach(r => r.remove());
+  mlMoveClose();
+  if (typeof recalcLocation === 'function'){ recalcLocation(srcLoc); recalcLocation(destLoc); }
+  if (typeof refreshAllAmber === 'function') refreshAllAmber();
+  if (typeof scheduleSave === 'function') scheduleSave();
+  if (typeof v2Refresh === 'function') v2Refresh();
+  if (typeof setCurrentLocation === 'function') setCurrentLocation(destEl);
 }
 /* save / restore */
 (function hookState(){
@@ -12983,7 +13493,7 @@ body[data-tb-view=config] #v2-center{width:auto!important;max-width:none!importa
    (same engine: masd-engine.js; same project file: modulaser-project.js)
    Modes · Config (design) · Legacy imports · Field-change loop · Reports
    ===================================================================== */
-const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000', '00.03.001': '02.02.001', '00.03.002': '02.02.002' };
+const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000', '00.03.001': '02.02.001', '00.03.002': '02.02.002', '00.03.003': '02.02.003' };
 let TB_LINEAGE_MISSING = false;   // QA D5: true when the lineage map has no entry for the running Toolbox revision (tests fail on it)
 const TB_CALC_LINEAGE = (() => { const l = AMENDMENTS[AMENDMENTS.length - 1], k = `${l.major}.${l.minor}.${l.rev}`; if (TB_LINEAGE_BY_REV[k]) return TB_LINEAGE_BY_REV[k];
   TB_LINEAGE_MISSING = true; console.warn(`TB_LINEAGE_BY_REV has no entry for Toolbox ${k}; calculator lineage falls back to the last mapped revision — add the entry.`);

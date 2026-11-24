@@ -14,6 +14,10 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 > Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.02.001**
 
+### What's new in 00.03.003 (pre-release, local build, not released)
+
+Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 units between power supplies (sticky Actions, Option C dialog with a live AUX and battery-Ah preview, multi-unit move, and + Create new power supply). Granular calculations, Print / Word / Excel Detail, the Load Summary donut, Live Results and the third-party export panel now show MiniLaser and ASD-160 current and hide leftover 0 mA Displays or Detectors rows when that hardware is not on the sheet.
+
 ### What's new in 00.03.001 (pre-release, local build, not released)
 
 Harmonized with Battery Calculator 02.02.001: printed Quick Start header with the larger white brand logo and the revision; light print screenshots (on-screen Help stays dark). No calculation change.
