@@ -5902,10 +5902,10 @@ function recalcLocationInner(loc){
     const permoduleContainer = locEl.querySelector('.cd-permodule-rows');
     if (permoduleContainer){
       permoduleContainer.innerHTML = rows.map(r => {
-        const addr = r.querySelector('.module-address').value || '—';
-        const zone = r.querySelector('.zone-name').value.trim();
+        const addr = v2Esc(r.querySelector('.module-address').value || '—');
+        const zone = v2Esc(r.querySelector('.zone-name').value.trim());
         const typeVal = r.querySelector('.type-select').value;
-        const model = MODULE_TYPES[typeVal] ? MODULE_TYPES[typeVal].model : typeVal;
+        const model = v2Esc(MODULE_TYPES[typeVal] ? MODULE_TYPES[typeVal].model : typeVal);
         const maText = r.querySelector('.module-ma').textContent || '0mA';
         const maNum = parseFloat(maText) || 0;
         const label = zone ? `Addr ${addr} · ${zone}` : `Addr ${addr}`;
@@ -5924,9 +5924,9 @@ function recalcLocationInner(loc){
     const mlSubMa = mlOnly.reduce((a, x) => a + (x.ma || 0), 0);
     const asdSubMa = asdOnly.reduce((a, x) => a + (x.ma || 0), 0);
     const asdUnitHtml = (list, kindLabel) => list.map((x, i) => {
-      const zone = x.zone || '(no zone)';
-      const model = x.model || kindLabel;
-      const fanBit = (kindLabel === 'MiniLaser') ? (x.fan ? `fan ${x.fan}` : 'fan —') : 'single speed';
+      const zone = v2Esc(x.zone || '(no zone)');
+      const model = v2Esc(x.model || kindLabel);
+      const fanBit = (kindLabel === 'MiniLaser') ? (x.fan ? `fan ${v2Esc(x.fan)}` : 'fan —') : 'single speed';
       return `<div class="cd-row cd-permodule-row cd-asd-unit"><span class="cd-label">${kindLabel} ${i + 1} — ${zone}</span><span class="cd-formula">${model} · ${fanBit}</span><span class="cd-value">${Math.round(x.ma || 0)} mA</span></div>`;
     }).join('');
     const subHtml = (label, formula, ma) => `<div class="cd-row"><span class="cd-label">${label}</span><span class="cd-formula">${formula}</span><span class="cd-value">${Math.round(ma)} mA</span></div>`;
@@ -10292,20 +10292,20 @@ function v2CalcSteps(m, level){
   if (asds.length){ syms.push('I_asd'); parts.push(asdRes); }
   syms.push('I_q', 'I_aux'); parts.push(c.quiescent, c.aux);
   load.rows.push({ label: 'Total load', sym: 'I_total = ' + syms.join(' + '), sub: 'I_total = ' + parts.join(' + '), res: c.total, ref: '' });
-  steps.push(load);
-  const cap = { title: '2. Standby & alarm capacity', rows: [
+  if (level === 'full') steps.push(load);
+  const cap = { title: (level === 'full' ? '2' : '1') + '. Standby & alarm capacity', rows: [
     { label: 'Standby Ah', sym: 'Standby Ah = I_total × T_standby', sub: 'Standby Ah = ' + c.standbyF, res: c.standby, ref },
     { label: 'Alarm Ah', sym: m.bs ? 'Alarm Ah = I_total × T_alarm × D' : 'Alarm Ah = I_total × T_alarm', sub: 'Alarm Ah = ' + c.alarmF, res: c.alarm, ref },
     { label: 'Initial Ah', sym: 'Initial Ah = Standby Ah + Alarm Ah', sub: `Initial Ah = ${c.standby} + ${c.alarm}`, res: c.initial, ref },
   ] };
   if (m.bs && level === 'full') cap.rows.push({ label: 'De-rating factor D', sym: 'D = 1 if (C20 ÷ 20) ≥ I_alarm, else 1.75', sub: 'D = ' + (m.settings.find(s => s[0] === 'De-rating factor (D)') || [, ''])[1] + (c.deratingHint ? ' — ' + c.deratingHint : ''), res: (m.settings.find(s => s[0] === 'De-rating factor (D)') || [, ''])[1], ref });
   steps.push(cap);
-  steps.push({ title: '3. Safety margin & temperature', rows: [
+  steps.push({ title: (level === 'full' ? '3' : '2') + '. Safety margin & temperature', rows: [
     { label: 'Margin-adjusted Ah', sym: m.bs ? 'C = Initial Ah × 1.25' : 'C = Initial Ah × (1 + margin)', sub: 'C = ' + c.marginF, res: c.margin, ref },
     { label: 'Temperature multiplier', sym: 'k_T = TEMPERATURE_MULTIPLIERS[ambient]', sub: `k_T at ${tempSel} — ${c.tempF}`, res: c.temp, ref: 'Calculator de-rating table (general guidance)' },
     { label: 'Required battery capacity', sym: 'Required Ah = C × k_T', sub: `Required Ah = ${c.margin} × ${c.temp.replace('×', '')}`, res: c.required, ref },
   ] });
-  steps.push({ title: '4. Battery & supply sizing', rows: [
+  steps.push({ title: (level === 'full' ? '4' : '3') + '. Battery & supply sizing', rows: [
     { label: 'Selected battery', sym: 'Battery = smallest catalog size ≥ desired (never smaller)', sub: 'Battery = ' + c.battery, res: c.battery, ref: m.mode === 'builtin' ? 'Edwards battery catalog (this calculator)' : 'Third-party entry' },
     { label: 'Power supplies required', sym: 'N = ceil(Required Ah ÷ battery Ah)', sub: 'N = ' + c.suppliesF, res: c.supplies, ref: '' },
     { label: 'Ah per supply', sym: 'Ah per supply = Required Ah ÷ N', sub: `Ah per supply = ${c.required} ÷ ${c.supplies}`, res: c.perSupply, ref: '' },
@@ -10583,17 +10583,33 @@ details.math-x{margin-top:6px}details.math-x summary{cursor:pointer;color:#0c77b
 /* Runs inside the print document (iframe, exported .html, Electron PDF window): makes every PSU sheet fit one
    letter page by tightening type, then moves a Standard formula block to its own appendix page if it still overflows. */
 const V2_FIT_SCRIPT = `(function(){function fits(p){return p.scrollHeight<=p.clientHeight+1}
+function runFit(){
 document.querySelectorAll('.page.psu').forEach(function(p){if(fits(p))return;p.classList.add('dense');if(fits(p))return;p.classList.add('denser');if(fits(p))return;
 var f=p.querySelector('.std-math');if(f){var a=document.createElement('section');a.className='page appendix';a.innerHTML='<div class="band"><div><h1>Calculation appendix — '+(p.getAttribute('data-tag')||'')+'</h1></div></div>';a.appendChild(f);var ft=p.querySelector('.foot');if(ft)a.appendChild(ft.cloneNode(true));p.parentNode.insertBefore(a,p.nextSibling);}
 if(!fits(p)){var rows=p.querySelectorAll('.mods tbody tr');if(rows.length>6){p.classList.add('overflowed');}}});
-document.querySelectorAll('.page.appendix').forEach(function(p){var guard=0;while(!fits(p)&&guard++<40){var t=p.querySelector('table.math');if(!t)break;var tb=t.tBodies[0];var rows=[].slice.call(tb.rows);var keep=Math.max(1,rows.length-1);
-var n=document.createElement('section');n.className='page appendix';n.innerHTML='<div class="band"><div><h1>'+(p.querySelector('h1')?p.querySelector('h1').textContent.replace(/ \\(cont\\.\\)$/,'')+' (cont.)':'Appendix (cont.)')+'</h1></div></div>';
+function splitAppendix(p){var t=p.querySelector('table.math');if(!t)return null;var tb=t.tBodies[0];if(!tb||tb.rows.length<=1)return null;
+var n=document.createElement('section');n.className='page appendix';
+var band=p.querySelector('.band');
+if(band){var b=band.cloneNode(true);var h1=b.querySelector('h1');if(h1)h1.textContent=h1.textContent.replace(/ \\(cont\\.\\)$/,'')+' (cont.)';n.appendChild(b);}
+else{n.innerHTML='<div class="band"><div><h1>Appendix (cont.)</h1></div></div>';}
 var nt=t.cloneNode(false);if(t.tHead)nt.appendChild(t.tHead.cloneNode(true));var nb=document.createElement('tbody');nt.appendChild(nb);n.appendChild(nt);
 while(!fits(p)&&tb.rows.length>1){nb.insertBefore(tb.rows[tb.rows.length-1],nb.firstChild);}
+if(!nb.rows.length)return null;
 [].slice.call(p.querySelectorAll('.after-math')).forEach(function(e){n.appendChild(e)});
-var ft=p.querySelector('.foot');if(ft)n.appendChild(ft.cloneNode(true));p.parentNode.insertBefore(n,p.nextSibling);}});
+var ft=p.querySelector('.foot');if(ft)n.appendChild(ft.cloneNode(true));p.parentNode.insertBefore(n,p.nextSibling);return n;}
+var apps=[].slice.call(document.querySelectorAll('.page.appendix'));
+for(var i=0;i<apps.length&&i<80;i++){var p=apps[i],guard=0;while(!fits(p)&&guard++<40){var n=splitAppendix(p);if(!n)break;apps.splice(i+1,0,n);}}
 var pages=document.querySelectorAll('.page');pages.forEach(function(p,i){var s=p.querySelector('.pgno');if(s)s.textContent='Page '+(i+1)+' of '+pages.length});
-document.documentElement.setAttribute('data-fit','done');})();`;
+document.documentElement.setAttribute('data-fit','done');
+}
+function whenReady(fn){
+  var imgs=[].slice.call(document.images);
+  var pending=imgs.map(function(img){return (img.decode?img.decode():Promise.resolve()).catch(function(){})});
+  var fonts=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+  Promise.all([fonts].concat(pending)).then(function(){requestAnimationFrame(function(){requestAnimationFrame(fn);});});
+}
+whenReady(runFit);
+})();`;
 
 function v2GaugeSvgPrint(m){
   if (m.noModules) return '<p style="font-size:9pt;margin:6px 0">Battery capacity: <span class="inc-flag">\u26A0 Incomplete — add modules to calculate</span></p>';   // QA r3 H1
@@ -12715,11 +12731,22 @@ function mlSheetInfo(locEl){
   const area = ((locEl.querySelector('.ps-location') || {}).value || '').trim();
   return { loc, el: locEl, ps: ps || ('Sheet ' + String(loc).padStart(2, '0')), area };
 }
+function mlEntryPointCount(locEl){
+  return Array.from(locEl.querySelectorAll('[data-role="module"]')).filter(r => {
+    const typ = (typeof MODULE_TYPES !== 'undefined' && MODULE_TYPES[r.querySelector('.type-select').value]) || {};
+    return typ.kind !== 'detector' || ((r.querySelector('.power-select') || {}).value === 'own');
+  }).length;
+}
 function mlAuxState(locEl){
   const mode = ((locEl.querySelector('.mode-radio:checked') || {}).value) || 'builtin';
-  const usedSet = new Set();
-  locEl.querySelectorAll('.aux-circuit-num').forEach(s => { const n = parseInt(s.value, 10); if (n >= 1) usedSet.add(n); });
-  const used = usedSet.size;
+  let used;
+  if (mode === 'builtin'){
+    const usedSet = new Set();
+    locEl.querySelectorAll('.aux-circuit-num').forEach(s => { const n = parseInt(s.value, 10); if (n >= 1) usedSet.add(n); });
+    used = usedSet.size;
+  } else {
+    used = mlRows(locEl).length + mlEntryPointCount(locEl);
+  }
   let max, label;
   if (mode === 'builtin'){
     max = (typeof MAX_AUX_BUILTIN === 'number') ? MAX_AUX_BUILTIN : 4;
@@ -12805,7 +12832,14 @@ function mlMovePreview(srcEl, destEl, units, inheritEl){
   const afterAux = aux.used + n;
   const room = Math.max(0, aux.max - aux.used);
   const newCircuits = aux.exportMode ? 0 : (aux.mode === 'builtin' ? Math.min(n, room) : 0);
-  const beforeTotal = destEl ? mlCurrentTotalMa(destEl, aux) : (aux.exportMode ? 0 : ((typeof QUIESCENT_MA === 'number') ? QUIESCENT_MA : 70));
+  let beforeTotal;
+  if (destEl) beforeTotal = mlCurrentTotalMa(destEl, aux);
+  else if (aux.exportMode) beforeTotal = 0;
+  else if (aux.mode === 'builtin') beforeTotal = (typeof QUIESCENT_MA === 'number') ? QUIESCENT_MA : 70;
+  else {
+    const q = parseFloat((inheritEl.querySelector('.custom-quiescent') || {}).value) || 0;
+    beforeTotal = q + (aux.max * (aux.per || 0));
+  }
   const afterTotal = beforeTotal + extraMa + newCircuits * (aux.per || 0);
   const beforeAh = destEl ? mlCurrentRequiredAh(destEl) : null;
   const afterAh = mlAhFromTotal(settingsEl, afterTotal);
@@ -12813,16 +12847,49 @@ function mlMovePreview(srcEl, destEl, units, inheritEl){
   const ahOverflow = afterAh != null && afterAh > ((typeof CHARGER_MAX_AH === 'number') ? CHARGER_MAX_AH : 65);
   return { aux, afterAux, extraMa, beforeAh, afterAh, afterTotal, auxOverflow, ahOverflow, ok: !auxOverflow && !ahOverflow };
 }
-function mlMoveClose(){
-  const ov = document.getElementById('mv-overlay');
-  if (ov){ ov.remove(); document.removeEventListener('keydown', mlMoveEsc, true); }
+let mlMovePrevFocus = null;
+function mlMoveFocusable(el){
+  if (!el || !document.contains(el)) return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden';
 }
-function mlMoveEsc(ev){ if (ev.key === 'Escape'){ ev.preventDefault(); mlMoveClose(); } }
+function mlMoveFocusables(ov){
+  return Array.from(ov.querySelectorAll('button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')).filter(mlMoveFocusable);
+}
+function mlMoveClose(opts){
+  const ov = document.getElementById('mv-overlay');
+  if (ov){ ov.remove(); document.removeEventListener('keydown', mlMoveKey, true); }
+  const prev = mlMovePrevFocus;
+  if (opts && opts.restore === false) return;
+  mlMovePrevFocus = null;
+  const restore = () => {
+    if (mlMoveFocusable(prev)){ prev.focus(); return; }
+    const fallback = document.querySelector('.location-current .ml-move-btn, .location-current .ml-add, #sb-add-btn');
+    if (fallback && typeof fallback.focus === 'function') fallback.focus();
+  };
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(restore);
+  else setTimeout(restore, 0);
+}
+function mlMoveKey(ev){
+  if (ev.key === 'Escape'){ ev.preventDefault(); mlMoveClose(); return; }
+  if (ev.key !== 'Tab') return;
+  const ov = document.getElementById('mv-overlay');
+  if (!ov) return;
+  const list = mlMoveFocusables(ov);
+  if (!list.length) return;
+  const first = list[0], last = list[list.length - 1];
+  if (ev.shiftKey){
+    if (document.activeElement === first || !ov.contains(document.activeElement)){ ev.preventDefault(); last.focus(); }
+  } else if (document.activeElement === last || !ov.contains(document.activeElement)){ ev.preventDefault(); first.focus(); }
+}
+function mlMoveEsc(ev){ mlMoveKey(ev); }
 function mlKindLabel(d){ return (d && d.kind === 'asd160') ? 'ASD-160' : 'MiniLaser'; }
 function mlMoveOpen(tr, loc){
   const srcEl = document.getElementById('location-' + loc);
   if (!srcEl || !tr) return;
-  mlMoveClose();
+  const prev = document.activeElement;
+  mlMoveClose({ restore: false });
+  mlMovePrevFocus = prev;
   const src = mlSheetInfo(srcEl);
   const allRows = mlRows(srcEl);
   const clicked = tr;
@@ -12911,7 +12978,7 @@ function mlMoveOpen(tr, loc){
     const fmtAh = n => (n == null || !isFinite(n)) ? '—' : (Math.round(n * 100) / 100).toFixed(2) + ' Ah';
     const beforeAux = prev.aux.used + '/' + prev.aux.max;
     const afterAux = prev.afterAux + '/' + prev.aux.max;
-    let head = create ? ('New ' + destName + ' will take this move') : ('Target ' + destName + (prev.ok ? ' can accept this move' : ' — overflow warning'));
+    let head = create ? ('New ' + mlEsc(destName) + ' will take this move') : ('Target ' + mlEsc(destName) + (prev.ok ? ' can accept this move' : ' — overflow warning'));
     let warn = '';
     if (prev.auxOverflow) warn += `<div class="mv-warn">After this move the destination would need ${prev.afterAux} AUX circuits (this supply has ${prev.aux.max}). You can still confirm — the destination sheet will show a validation flag.</div>`;
     if (prev.ahOverflow) warn += `<div class="mv-warn">Required battery capacity would be ${fmtAh(prev.afterAh)}, over the ${typeof CHARGER_MAX_AH === 'number' ? CHARGER_MAX_AH : 65} Ah limit. You can still confirm — the destination sheet will show a validation flag.</div>`;
@@ -12949,7 +13016,7 @@ function mlMoveOpen(tr, loc){
   ov.querySelector('.mv-new-name').addEventListener('input', paint);
   ov.querySelector('.mv-new-area').addEventListener('input', paint);
   ov.querySelector('.mv-confirm').onclick = () => mlMoveConfirm(state, selectedUnits(), selectedTarget(), ov);
-  document.addEventListener('keydown', mlMoveEsc, true);
+  document.addEventListener('keydown', mlMoveKey, true);
   paint();
   const focusEl = ov.querySelector('input[name="mv-target"]:checked') || ov.querySelector('.mv-confirm');
   if (focusEl && focusEl.focus) focusEl.focus();

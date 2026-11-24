@@ -5,7 +5,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
-## v00.03.003 — Move ASD units and granular calc cleanup (2026-11-23) · not released
+## v00.03.003 — Move ASD units and granular calc cleanup (2026-11-23)
 
 Harmonized with Battery Calculator 02.02.003.
 

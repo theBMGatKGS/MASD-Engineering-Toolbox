@@ -407,31 +407,33 @@ async def main():
         sheet = int(re.search(r'(\d+)', s['totalMa'] or s['cd']['sheetTotal'] or '').group(1)) if re.search(r'(\d+)', (s['totalMa'] or s['cd']['sheetTotal'] or '')) else None
         ok(f'{label}: on-screen Total Load equals {expect_total} mA and the sheet total',
            total==expect_total and sheet==expect_total, {'cd': s['cd']['total'], 'sheet': s['totalMa'], 'expect': expect_total})
-        # v2CalcSteps
-        for lv, row in (('full', s['I_total_full']), ('standard', s['I_total_std'])):
-            ok(f'{label}: v2CalcSteps[{lv}] I_total symbols {expect_terms.replace("MiniLasers","I_ml").replace("Displays","I_disp").replace("Detectors","I_det").replace("ASD-160","I_asd").replace("Quiescent","I_q").replace("AUX","I_aux").replace(" + "," + ")}',
-               True)  # detailed below
-            sym = row.get('sym') or ''
-            sub = row.get('sub') or ''
-            res = row.get('res') or ''
-            want_sym_bits = []
-            if 'Displays' in expect_terms: want_sym_bits.append('I_disp')
-            if 'Detectors' in expect_terms: want_sym_bits.append('I_det')
-            if 'MiniLasers' in expect_terms: want_sym_bits.append('I_ml')
-            if 'ASD-160' in expect_terms: want_sym_bits.append('I_asd')
-            want_sym_bits += ['I_q','I_aux']
-            ok(f'{label}: v2CalcSteps[{lv}] symbol list is I_total = {" + ".join(want_sym_bits)}',
-               sym == 'I_total = ' + ' + '.join(want_sym_bits), sym)
-            sm, parts = parse_ma_sum(sub)
-            resn = int(re.search(r'(\d+)', res).group(1)) if re.search(r'(\d+)', res) else None
-            ok(f'{label}: v2CalcSteps[{lv}] substitution {parts} sums to result {resn} = {expect_total}',
-               sm==resn==expect_total, {'sub': sub, 'res': res, 'sum': sm})
-            labels = [r['label'] for r in (s['loadFull'] if lv=='full' else s['loadStd'])]
-            ok(f'{label}: v2CalcSteps[{lv}] hides absent Displays/Detectors and includes present subtotals',
-               ('Displays subtotal' in labels) == (not hide_disp) and ('Detectors subtotal' in labels) == (not hide_det)
-               and (('MiniLaser subtotal' in labels) == (ml_text is not False and 'MiniLaser' in (s['cd']['asdHtml'] or '') or ('MiniLasers' in expect_terms)))
-               and (('ASD-160 subtotal' in labels) == ('ASD-160' in expect_terms)),
-               labels)
+        # v2CalcSteps: Full includes the Module & supply load table; Standard keeps the 02.02.002 layout (starts at Standby).
+        std_labels = [r['label'] for r in s['loadStd']]
+        ok(f'{label}: v2CalcSteps[standard] keeps 02.02.002 step 1 (Standby Ah), no Module & supply load table',
+           'Standby Ah' in std_labels and 'Total load' not in std_labels and 'MiniLaser subtotal' not in std_labels, std_labels)
+        row = s['I_total_full']
+        lv = 'full'
+        sym = row.get('sym') or ''
+        sub = row.get('sub') or ''
+        res = row.get('res') or ''
+        want_sym_bits = []
+        if 'Displays' in expect_terms: want_sym_bits.append('I_disp')
+        if 'Detectors' in expect_terms: want_sym_bits.append('I_det')
+        if 'MiniLasers' in expect_terms: want_sym_bits.append('I_ml')
+        if 'ASD-160' in expect_terms: want_sym_bits.append('I_asd')
+        want_sym_bits += ['I_q','I_aux']
+        ok(f'{label}: v2CalcSteps[{lv}] symbol list is I_total = {" + ".join(want_sym_bits)}',
+           sym == 'I_total = ' + ' + '.join(want_sym_bits), sym)
+        sm, parts = parse_ma_sum(sub)
+        resn = int(re.search(r'(\d+)', res).group(1)) if re.search(r'(\d+)', res) else None
+        ok(f'{label}: v2CalcSteps[{lv}] substitution {parts} sums to result {resn} = {expect_total}',
+           sm==resn==expect_total, {'sub': sub, 'res': res, 'sum': sm})
+        labels = [r['label'] for r in s['loadFull']]
+        ok(f'{label}: v2CalcSteps[{lv}] hides absent Displays/Detectors and includes present subtotals',
+           ('Displays subtotal' in labels) == (not hide_disp) and ('Detectors subtotal' in labels) == (not hide_det)
+           and (('MiniLaser subtotal' in labels) == ('MiniLasers' in expect_terms))
+           and (('ASD-160 subtotal' in labels) == ('ASD-160' in expect_terms)),
+           labels)
         if ml_text:
             ok(f'{label}: granular lists MiniLaser unit + subtotal', ml_text in s['cd']['asdHtml'] and 'MiniLaser subtotal' in s['cd']['asdHtml'], s['cd']['asdHtml'])
         if asd_text:
@@ -518,11 +520,15 @@ async def main():
       const htmlFull = (typeof v2BuildPrintHtml==='function') ? v2BuildPrintHtml(Object.assign((typeof v2PeOpts==='function'?v2PeOpts():{scope:'current',level:'full'}), {level:'full', scope:'current'})) : '';
       return {htmlStd, htmlFull, hasFn: typeof v2BuildPrintHtml};
     }''', loc)
-    ok('Print HTML (standard + full) includes MiniLaser subtotal / I_ml and 180 + 70 + 35 (or 285) and omits Displays subtotal',
-       'I_ml' in exports['htmlStd'] and 'I_ml' in exports['htmlFull'] and 'Displays subtotal' not in exports['htmlStd']
-       and ('MiniLaser subtotal' in exports['htmlStd'] or 'MiniLaser subtotal' in exports['htmlFull'])
-       and ('285 mA' in exports['htmlStd'] or '285 mA' in exports['htmlFull']),
-       {'std_has_Iml': 'I_ml' in exports['htmlStd'], 'full_has_disp': 'Displays subtotal' in exports['htmlFull'], 'len': (len(exports['htmlStd']), len(exports['htmlFull']))})
+    ok('Print HTML Full includes MiniLaser subtotal / I_ml and 285 mA and omits Displays subtotal',
+       'I_ml' in exports['htmlFull'] and 'MiniLaser subtotal' in exports['htmlFull'] and 'Displays subtotal' not in exports['htmlFull'] and '285 mA' in exports['htmlFull'],
+       {'full_has_disp': 'Displays subtotal' in exports['htmlFull'], 'len': (len(exports['htmlStd']), len(exports['htmlFull']))})
+    ok('Print HTML Standard keeps 02.02.002 layout (no Module & supply load table) and still shows the 285 mA total',
+       '1. Module & supply load' not in exports['htmlStd'] and 'MiniLaser subtotal' not in exports['htmlStd']
+       and ('1. Standby & alarm capacity' in exports['htmlStd'] or '1. Standby &amp; alarm capacity' in exports['htmlStd'])
+       and '285 mA' in exports['htmlStd'],
+       {'has_load': '1. Module & supply load' in exports['htmlStd'], 'has_285': '285 mA' in exports['htmlStd'],
+        'has_standby': ('1. Standby & alarm capacity' in exports['htmlStd'] or '1. Standby &amp; alarm capacity' in exports['htmlStd'])})
 
     # Word + Excel via builders
     async def export_text():
@@ -601,6 +607,191 @@ async def main():
        {'formula': s['cd']['formula'], 'total': total, 'sym': s['I_total_full']})
     sm, parts = parse_ma_sum(s['I_total_full'].get('sub') or '')
     ok('Full mixed v2CalcSteps substitution sums to totalMa', sm==total, {'sub': s['I_total_full'].get('sub'), 'sum': sm, 'total': total})
+
+
+    # ===================== QA re-review: M1 XSS, M2 preview, L1 AUX, L4 focus =====================
+    PAYLOAD = '<img src=x onerror="window.__xss=1">'
+    ids = await fresh(pg); loc1, loc2 = ids['loc1'], ids['loc2']
+    rid = await pg.evaluate(''' (args) => {
+      window.__xss = undefined;
+      const l1 = document.getElementById('location-' + args.loc1);
+      const l2 = document.getElementById('location-' + args.loc2);
+      l1.querySelector('.ps-name').value = args.payload;
+      l2.querySelector('.ps-name').value = 'PS-2 <">&';
+      const tr = mlAddRow(args.loc1, {setup:'manual', zone:'tmp', fan:4, af:4, method:'DIP'});
+      tr.querySelector('.ml-zone').value = args.payload;
+      addModuleRow(args.loc1, 'Standard Display');
+      const mod = l1.querySelector('[data-role=module]');
+      if (mod && mod.querySelector('.zone-name')) mod.querySelector('.zone-name').value = args.payload;
+      recalcLocation(args.loc1); recalcLocation(args.loc2);
+      if (typeof v2Refresh === 'function') v2Refresh();
+      const cb = l1.querySelector('.show-calc-detail-checkbox');
+      if (cb && !cb.checked){ cb.checked = true; if (typeof toggleCalcDetail === 'function') toggleCalcDetail(args.loc1); }
+      if (typeof setCurrentLocation === 'function') setCurrentLocation(l1);
+      return tr.id;
+    } ''', {'loc1': loc1, 'loc2': loc2, 'payload': PAYLOAD})
+    await open_move(pg, rid)
+    xss = await pg.evaluate('typeof window.__xss === "undefined" ? "undef" : window.__xss')
+    ok('M1: XSS payload in sheet name / zone does not run (window.__xss undefined)', xss == 'undef', xss)
+    inj = await pg.evaluate(''' () => ({
+      imgs: document.querySelectorAll('#mv-overlay img, #mv-preview img, .cd-asd-unit-rows img, .cd-permodule-rows img, .mv-from img').length,
+      head: (document.querySelector('.mv-preview-h')||{}).innerHTML || '',
+      headText: (document.querySelector('.mv-preview-h')||{}).textContent || '',
+      granular: (document.querySelector('.cd-asd-unit-rows')||{}).innerHTML || '',
+      modules: (document.querySelector('.cd-permodule-rows')||{}).innerHTML || '',
+      from: (document.querySelector('.mv-from')||{}).innerHTML || ''
+    }) ''')
+    ok('M1: no injected <img> nodes in the Move dialog or granular panel', inj['imgs']==0, inj['imgs'])
+    ok('M1: existing-target destName is escaped in the preview heading',
+       '&lt;' in inj['head'] and '<img' not in inj['head'] and '&amp;' in inj['head'], inj['head'][:200])
+    await pg.click('label.target-item[data-mv-loc="new"]')
+    await pg.wait_for_timeout(80)
+    await pg.fill('.mv-new-name', PAYLOAD)
+    await pg.wait_for_timeout(80)
+    head2 = await pg.evaluate("({html:(document.querySelector('.mv-preview-h')||{}).innerHTML||'', text:(document.querySelector('.mv-preview-h')||{}).textContent||'', xss: typeof window.__xss === 'undefined' ? 'undef' : window.__xss})")
+    ok('M1: +Create destName with <img onerror> is escaped and does not run',
+       head2['xss']=='undef' and '&lt;img' in head2['html'] and '<img' not in head2['html'] and 'onerror' in head2['text'], head2)
+    ok('M1: granular MiniLaser zone is escaped',
+       '&lt;img' in inj['granular'] and '<img' not in inj['granular'], inj['granular'][:240])
+    ok('M1: ModuLaser module zone in the breakdown is escaped',
+       '&lt;img' in inj['modules'] and '<img' not in inj['modules'], inj['modules'][:240])
+    await pg.keyboard.press('Escape'); await pg.wait_for_timeout(80)
+
+    # M2: + Create new preview in third-party custom (400 mA q, 6x50 mA AUX, fan-4 MiniLaser)
+    ids = await fresh(pg); loc1, loc2 = ids['loc1'], ids['loc2']
+    rid = await pg.evaluate(''' (loc) => {
+      const l = document.getElementById('location-' + loc);
+      const m = l.querySelector('.mode-radio[value=thirdparty]');
+      if (m){ m.checked = true; m.dispatchEvent(new Event('change', {bubbles:true})); }
+      const s = l.querySelector('.submode-radio[value=custom]');
+      if (s){ s.checked = true; s.dispatchEvent(new Event('change', {bubbles:true})); }
+      l.querySelector('.custom-quiescent').value = '400';
+      l.querySelector('.aux-circuits-custom').value = '6';
+      l.querySelector('.custom-aux-ma').value = '50';
+      const tr = mlAddRow(loc, {setup:'manual', zone:'ML 1', fan:4, af:4, method:'DIP'});
+      recalcLocation(loc);
+      if (typeof v2Refresh === 'function') v2Refresh();
+      return tr.id;
+    } ''', loc1)
+    await open_move(pg, rid)
+    await pg.click('label.target-item[data-mv-loc="new"]')
+    await pg.wait_for_timeout(80)
+    prev_ah = await pg.evaluate(r''' () => {
+      const t = document.querySelector('#mv-preview').innerText;
+      const m = t.match(/Required battery[\s\S]*?→\s*([0-9.]+)\s*Ah/i) || t.match(/→\s*([0-9.]+)\s*Ah/i);
+      return {text: t, ah: m ? parseFloat(m[1]) : null};
+    } ''')
+    ok('M2: third-party custom +Create preview is the real inherited load (~26.49 Ah at NFPA 25% margin; 880 mA), not the old builtin 6.02 Ah',
+       prev_ah['ah'] is not None and abs(prev_ah['ah'] - 26.49) < 0.06 and abs(prev_ah['ah'] - 6.02) > 1,
+       prev_ah)
+    await pg.click('.mv-confirm'); await pg.wait_for_timeout(500)
+    new_ah = await pg.evaluate(''' () => {
+      const l = [...document.querySelectorAll('.location')].find(el => (el.querySelector('.ps-name')||{}).value === 'PS-3');
+      if (!l) return {missing:true};
+      return {
+        total: (l.querySelector('.total-ma')||{}).textContent,
+        ah: parseFloat(String((l.querySelector('.required-ah')||{}).textContent).replace(/[^0-9.]/g,'')) || null,
+        q: (l.querySelector('.custom-quiescent')||{}).value,
+        auxN: (l.querySelector('.aux-circuits-custom')||{}).value,
+        auxMa: (l.querySelector('.custom-aux-ma')||{}).value
+      };
+    } ''')
+    ok('M2: created sheet inherited 400 mA / 6x50 mA, totals 880 mA, and required Ah matches the preview (not 6.02 Ah)',
+       new_ah.get('q')=='400' and new_ah.get('auxN')=='6' and new_ah.get('auxMa')=='50'
+       and new_ah.get('total') in ('880','880.0') and new_ah.get('ah') is not None
+       and abs(new_ah['ah'] - prev_ah['ah']) < 0.06 and abs(new_ah['ah'] - 6.02) > 1,
+       {'preview': prev_ah, 'sheet': new_ah})
+
+    # L1: third-party custom AUX counter counts units (1/6 -> 2/6), not hidden selects (0/6)
+    ids = await fresh(pg); loc1, loc2 = ids['loc1'], ids['loc2']
+    rid = await pg.evaluate(''' (locs) => {
+      const setTp = (l) => {
+        const m = l.querySelector('.mode-radio[value=thirdparty]');
+        if (m){ m.checked = true; m.dispatchEvent(new Event('change', {bubbles:true})); }
+        const s = l.querySelector('.submode-radio[value=custom]');
+        if (s){ s.checked = true; s.dispatchEvent(new Event('change', {bubbles:true})); }
+        l.querySelector('.custom-quiescent').value = '400';
+        l.querySelector('.aux-circuits-custom').value = '6';
+        l.querySelector('.custom-aux-ma').value = '50';
+      };
+      const l1 = document.getElementById('location-' + locs.loc1);
+      const l2 = document.getElementById('location-' + locs.loc2);
+      setTp(l1); setTp(l2);
+      mlAddRow(locs.loc2, {setup:'manual', zone:'DEST', fan:4, af:4, method:'DIP'});
+      const tr = mlAddRow(locs.loc1, {setup:'manual', zone:'SRC', fan:4, af:4, method:'DIP'});
+      recalcLocation(locs.loc1); recalcLocation(locs.loc2);
+      return tr.id;
+    } ''', {'loc1': loc1, 'loc2': loc2})
+    dlg = await open_move(pg, rid)
+    ps2 = next((t for t in dlg['targets'] if 'PS-2' in t['text']), None)
+    ok('L1: destination already holding 1 unit shows 1/6 AUX used (not 0/6)',
+       ps2 and '1/6' in ps2['text'] and '0/6' not in ps2['text'], ps2)
+    await pg.click('label.target-item[data-mv-loc="' + str(loc2) + '"]')
+    await pg.wait_for_timeout(80)
+    prv = await pg.evaluate("document.querySelector('#mv-preview').innerText")
+    ok('L1: preview counts 1/6 -> 2/6 in third-party custom (not 0/6 -> 1/6)',
+       '1/6' in prv and '2/6' in prv and '0/6' not in prv, prv)
+    await pg.click('.mv-confirm'); await pg.wait_for_timeout(400)
+    after = await pg.evaluate(''' (loc) => {
+      const l = document.getElementById('location-' + loc);
+      return (typeof mlAuxState === 'function') ? mlAuxState(l).label : '';
+    } ''', loc2)
+    ok('L1: after the move the destination reports 2/6 AUX used', '2/6' in after, after)
+
+    # L4: Escape/Cancel restore focus; Tab is trapped in the dialog
+    ids = await fresh(pg); loc1, loc2 = ids['loc1'], ids['loc2']
+    rid = await pg.evaluate(ADD_ML, {'loc': loc1, 'zone': 'ML 1', 'fan': 4, 'extra': {}})
+    await pg.evaluate(''' (id) => {
+      const tr = document.getElementById(id);
+      const locEl = tr.closest('.location');
+      if (typeof setCurrentLocation === 'function') setCurrentLocation(locEl);
+      const btn = tr.querySelector('.ml-move-btn');
+      btn.focus();
+      btn.click();
+    } ''', rid)
+    await pg.wait_for_timeout(150)
+    await pg.keyboard.press('Escape')
+    await pg.wait_for_timeout(80)
+    back = await pg.evaluate(''' () => {
+      const el = document.activeElement;
+      return {id: el && el.closest && (el.closest('tr')||{}).id, cls: el && el.className, tag: el && el.tagName, text: el && (el.textContent||'').slice(0,20)};
+    } ''')
+    ok('L4: Escape restores focus to the triggering Move button',
+       back.get('id')==rid and back.get('cls') and 'ml-move-btn' in back['cls'], back)
+    await pg.evaluate(''' (id) => { document.getElementById(id).querySelector('.ml-move-btn').focus(); document.getElementById(id).querySelector('.ml-move-btn').click(); } ''', rid)
+    await pg.wait_for_timeout(150)
+    trapped = True
+    inside_ids = []
+    for _ in range(20):
+        await pg.keyboard.press('Tab')
+        info = await pg.evaluate(''' () => {
+          const el = document.activeElement;
+          const ov = document.getElementById('mv-overlay');
+          return {inside: !!(ov && ov.contains(el)), tag: el && el.tagName, name: el && (el.name||el.className||'')};
+        } ''')
+        inside_ids.append(info)
+        if not info['inside']:
+            trapped = False
+            break
+    ok('L4: Tab stays trapped inside the Move dialog (20 Tab presses)', trapped, inside_ids[-3:])
+    await pg.evaluate(''' () => {
+      const ov = document.getElementById('mv-overlay');
+      const list = typeof mlMoveFocusables === 'function' ? mlMoveFocusables(ov) : [];
+      if (list[0]) list[0].focus();
+    } ''')
+    await pg.keyboard.press('Shift+Tab')
+    wrap = await pg.evaluate(''' () => {
+      const el = document.activeElement;
+      const ov = document.getElementById('mv-overlay');
+      return {inside: !!(ov && ov.contains(el)), cls: el && el.className};
+    } ''')
+    ok('L4: Shift+Tab wraps inside the dialog', wrap['inside'] is True, wrap)
+    await pg.click('.mv-cancel')
+    await pg.wait_for_timeout(80)
+    back2 = await pg.evaluate(''' () => { const el=document.activeElement; return {cls: el && el.className, id: el && el.closest && (el.closest('tr')||{}).id}; } ''')
+    ok('L4: Cancel restores focus to the triggering Move button',
+       back2.get('id')==rid and back2.get('cls') and 'ml-move-btn' in back2['cls'], back2)
+
 
     ok('no page errors', not errs, errs[:5])
     await b.close()

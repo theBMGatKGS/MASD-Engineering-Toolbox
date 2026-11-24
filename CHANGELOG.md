@@ -6,13 +6,15 @@ document owner; the revision counter increments per distinct change. Generated f
 
 ## 00.03 — 2026-11-23
 
-### 00.03.003 — 2026-11-23 (local build, not released)
+### 00.03.003 — 2026-11-23
 - Harmonized with Battery Calculator **02.02.003**.
 - **Move MiniLaser and ASD-160 between power supplies (Option C).** The ASD units table pins a sticky Actions column so **Move** and **✕** stay visible. **⇄ Move** opens a dark dialog: other sheets grouped by Area/Group, AUX usage, a Recommended badge (same-area sheet with open AUX, pre-selected when one exists), a Full — overflow badge, **+ Create new power supply**, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; the destination sheet's validation flags handle it. Circuit source auto-fills unless the user edited it. PipeCAD metadata is preserved. The source sheet is never auto-deleted. The `ml-calc` layer is byte-identical to Calculator 02.02.003.
 - **Granular calculations include MiniLaser and ASD-160.** Per-unit rows and subtotals appear on the on-screen granular panel and in Print, Word and Excel Detail. Leftover 0 mA Displays or Detectors rows are hidden when that ModuLaser hardware is not on the sheet. The Total Load formula lists only the terms that are present, so it equals `totalMa`.
 - Load Summary donut and legend, Live Results, and the third-party export panel follow the same breakdown (MiniLaser and ASD-160 shown separately; "ModuLaser modules 0 mA" and "Display load 0 mA" hidden when that hardware is absent).
 - Fixed `mlWireRow` so class-based alarm-factor derivation reads the sheet element, not the location id string.
 - Service-worker cache `masd-toolbox-00-03-003`. Lineage map: `00.03.003` → `02.02.003`.
+- Standard-level Print / Word / Excel calculation steps keep the 00.03.002 / Calculator 02.02.002 layout (1. Standby & alarm capacity, 2. Safety margin & temperature, 3. Battery & supply sizing). The “1. Module & supply load” table, including MiniLaser and ASD-160 rows, remains Full-level only. Required Ah at Standard still uses the real `totalMa`.
+- Full-detail Print / Export appendix pages keep splitting onto continuation letter pages until every page fits, so the live BRENTRONIX print-band mark plus the new MiniLaser / ASD-160 load rows cannot overflow a letter page. Continuation bands keep the BRENTRONIX mark.
 
 ## 00.03 — 2026-10-19
 
