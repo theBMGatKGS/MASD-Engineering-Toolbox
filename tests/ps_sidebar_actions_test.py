@@ -1,4 +1,4 @@
-"""02.03.001 / 00.04.001 — Sidebar delete, rename, duplicate, and reorder (Direction C).
+"""02.03.002 / 00.04.002 — Sidebar delete, rename, duplicate, and reorder (Direction C).
 Placeholder data only (PS-1 / PS-2 / PS-3, Area A / Area B, ML 1). No real project or fixture names.
 Run: python3 tests/ps_sidebar_actions_test.py
 APP=file:///.../index.html to point at another copy (Toolbox)."""
@@ -188,6 +188,24 @@ def _p1_sheet(snap, name):
 async def run_autosave_reload_tests(pg):
     """P1: MiniLaser and ASD-160 rows must survive an Auto-Save reload, with Ah and settings intact."""
     await boot_p1_fixture(pg, True)
+    await pg.add_init_script("""
+      (() => {
+        const keys = ['modulaser_calculator_state_v1', 'masd_toolbox_state_v1'];
+        const log = [];
+        const _set = localStorage.setItem.bind(localStorage);
+        localStorage.setItem = function(k, v){
+          if (keys.indexOf(k) >= 0){
+            try {
+              const st = JSON.parse(v || '{}');
+              const nMl = (st.locations || []).reduce((a, l) => a + ((l.miniLasers || []).length), 0);
+              log.push({ nMl, nLoc: (st.locations || []).length });
+            } catch (e) { log.push({ err: String(e) }); }
+          }
+          return _set(k, v);
+        };
+        window.__autosaveWriteLog = log;
+      })();
+    """)
     await pg.wait_for_timeout(200)
     before = await pg.evaluate(SNAP_AUTOSAVE)
     raw_good = await pg.evaluate('() => localStorage.getItem(SAVE_KEY)')
@@ -223,6 +241,10 @@ async def run_autosave_reload_tests(pg):
     later = await pg.evaluate(SNAP_AUTOSAVE)
     ok('P1 reload: Auto-Save still stores the three MiniLaser / ASD-160 rows after the save timer',
        later.get('nMlStored') == 3, later.get('storedLocs'))
+    writes = await pg.evaluate('() => window.__autosaveWriteLog || []')
+    stripped = [w for w in (writes or []) if w.get('nMl') == 0]
+    ok('I-2: no Auto-Save write after reload stores a stripped MiniLaser/ASD-160 payload (0 rows) before restore finishes',
+       not stripped, {'writes': writes, 'stripped': stripped})
 
     # B: a crafted older payload that still contains miniLasers, loaded into a fresh document via SAVE_KEY only
     await pg.evaluate('localStorage.clear()')
@@ -1202,6 +1224,273 @@ async def main():
         }""")
         ok('L-r2-5: refresh does not move focus to a sidebar row when the page body was focused',
            (not lr25.get('inSb')) and lr25.get('isBody'), lr25)
+
+        # ========== QA follow-up L-r2-3 / I-r3-1 / I-r3-2 / I-r3-3 (02.03.002 / 00.04.002) ==========
+        ids = await fresh(pg)
+        built = await pg.evaluate("""(locs) => {
+          const loc = locs.loc2;
+          const el = document.getElementById('location-' + loc);
+          addModuleRow(loc, 'Standard Display');
+          const row = el.querySelector('[data-role=module]');
+          if (row){
+            if (row.querySelector('.zone-name')) row.querySelector('.zone-name').value = 'Disp 2';
+            const addr = row.querySelector('.module-address'); if (addr) addr.value = '10';
+          }
+          mlAddRow(loc, {setup:'manual', zone:'ML-AUX', fan:4, af:4, method:'DIP', auxCircuitNum:'3'});
+          asdAddRow(loc, {kind:'asd160', zone:'ASD-AUX', networked:false, address:'', af:4, cls:'SFD', auxCircuitNum:'4'});
+          if (typeof recalcLocation === 'function') recalcLocation(loc);
+          const pin = (sel, n) => {
+            if (!sel) return;
+            if (![...sel.options].some(o => o.value === n)){
+              const o = document.createElement('option'); o.value = n; o.textContent = 'AUX ' + n; sel.appendChild(o);
+            }
+            sel.value = n; sel.dataset.desiredValue = n;
+          };
+          pin(row && row.querySelector('.aux-circuit-num'), '2');
+          pin(el.querySelector('[data-role=minilaser]:not([data-kind=asd160]) .aux-circuit-num'), '3');
+          pin(el.querySelector('[data-kind=asd160] .aux-circuit-num'), '4');
+          const cab = el.querySelector('.battery-cabinet-select');
+          if (cab){
+            if (![...cab.options].some(o => o.value === 'spaceage')){
+              const o = document.createElement('option'); o.value = 'spaceage'; o.textContent = 'Space Age SSU00507'; cab.appendChild(o);
+            }
+            cab.value = 'spaceage'; cab.dataset.desiredValue = 'spaceage'; cab.dataset.userSet = '1';
+          }
+          const custom = el.querySelector('.aux-circuits-custom'); if (custom) custom.value = '4';
+          el.querySelectorAll('.mode-radio').forEach(r => { r.checked = r.value === 'thirdparty'; });
+          el.querySelectorAll('.submode-radio').forEach(r => { r.checked = r.value === 'custom'; });
+          if (typeof applyVisibility === 'function') applyVisibility(el, 'thirdparty-custom');
+          if (typeof recalcLocation === 'function') recalcLocation(loc);
+          if (typeof v2Refresh === 'function') v2Refresh();
+          const ser = serializeLocation(el);
+          const ml = ser.miniLasers || [];
+          const mlAuxDom = (el.querySelector('[data-role=minilaser]:not([data-kind=asd160]) .aux-circuit-num')||{}).value
+            || ((el.querySelector('[data-role=minilaser]:not([data-kind=asd160]) .aux-circuit-num')||{}).dataset||{}).desiredValue;
+          const asdAuxDom = (el.querySelector('[data-kind=asd160] .aux-circuit-num')||{}).value
+            || ((el.querySelector('[data-kind=asd160] .aux-circuit-num')||{}).dataset||{}).desiredValue;
+          return {
+            auxCustom: (el.querySelector('.aux-circuits-custom')||{}).value,
+            cabinet: (el.querySelector('.battery-cabinet-select')||{}).value,
+            modAux: (row && row.querySelector('.aux-circuit-num')||{}).value,
+            mlAux: (ml.find(x => x.kind !== 'asd160')||{}).auxCircuitNum || mlAuxDom,
+            asdAux: (ml.find(x => x.kind === 'asd160')||{}).auxCircuitNum || asdAuxDom,
+            serCabinet: ser.batteryCabinet,
+            serAuxCustom: ser.auxCircuitsCustom,
+            serModAux: (ser.modules && ser.modules[0] && ser.modules[0].auxCircuitNum) || ''
+          };
+        }""", ids)
+        ok('L-r2-3 setup: third-party custom keeps hidden AUX 2/3/4, cabinet spaceage, and 4 custom AUX circuits in the live sheet and serialize',
+           built and built.get('auxCustom')=='4' and built.get('cabinet')=='spaceage'
+           and built.get('modAux')=='2' and str(built.get('mlAux') or '')=='3' and str(built.get('asdAux') or '')=='4'
+           and built.get('serCabinet')=='spaceage' and built.get('serAuxCustom')=='4' and built.get('serModAux')=='2',
+           built)
+
+        dup = await pg.evaluate("""(loc) => {
+          const el = document.getElementById('location-'+loc);
+          const before = new Set([...document.querySelectorAll('.location')].map(l => l.dataset.loc));
+          if (typeof psDuplicate === 'function') psDuplicate(el);
+          const copy = [...document.querySelectorAll('.location')].find(l => !before.has(l.dataset.loc));
+          if (!copy) return { missing: true };
+          if (typeof recalcLocation === 'function') recalcLocation(copy.dataset.loc);
+          const nser = serializeLocation(copy);
+          const nml = nser.miniLasers || [];
+          return {
+            name: (copy.querySelector('.ps-name')||{}).value,
+            auxCustom: (copy.querySelector('.aux-circuits-custom')||{}).value,
+            serCabinet: nser.batteryCabinet, serModAux: (nser.modules && nser.modules[0] && nser.modules[0].auxCircuitNum) || '',
+            mlAux: (nml.find(x => x.kind !== 'asd160')||{}).auxCircuitNum,
+            asdAux: (nml.find(x => x.kind === 'asd160')||{}).auxCircuitNum
+          };
+        }""", ids['loc2'])
+        ok('L-r2-3: Duplicate keeps hidden AUX numbers, custom AUX count, and cabinet',
+           (not dup.get('missing')) and dup.get('auxCustom')=='4' and dup.get('serCabinet')=='spaceage'
+           and dup.get('serModAux')=='2' and str(dup.get('mlAux') or '')=='3' and str(dup.get('asdAux') or '')=='4',
+           dup)
+
+        rt = await pg.evaluate("""(loc) => {
+          const el = document.getElementById('location-'+loc);
+          const saved = serializeLocation(el);
+          const newId = restoreLocation(saved);
+          const neu = document.getElementById('location-'+newId);
+          (saved.miniLasers||[]).forEach(d => d.kind === 'asd160' ? asdAddRow(newId, d) : mlAddRow(newId, d));
+          if (typeof recalcLocation === 'function') recalcLocation(newId);
+          if (typeof recalcLocationInner === 'function') recalcLocationInner(newId);
+          const nser = serializeLocation(neu);
+          const nml = nser.miniLasers || [];
+          return {
+            auxCustom: (neu.querySelector('.aux-circuits-custom')||{}).value,
+            cabinet: (neu.querySelector('.battery-cabinet-select')||{}).value || ((neu.querySelector('.battery-cabinet-select')||{}).dataset || {}).desiredValue,
+            serCabinet: nser.batteryCabinet, serAuxCustom: nser.auxCircuitsCustom,
+            serModAux: (nser.modules && nser.modules[0] && nser.modules[0].auxCircuitNum) || '',
+            mlAux: (nml.find(x => x.kind !== 'asd160')||{}).auxCircuitNum,
+            asdAux: (nml.find(x => x.kind === 'asd160')||{}).auxCircuitNum,
+            mode: (neu.querySelector('.mode-radio:checked')||{}).value,
+            sub: (neu.querySelector('.submode-radio:checked')||{}).value
+          };
+        }""", ids['loc2'])
+        ok('L-r2-3: serialize/restore keeps hidden AUX numbers, custom AUX count, and cabinet in third-party custom',
+           rt and rt.get('auxCustom')=='4' and rt.get('serCabinet')=='spaceage' and rt.get('cabinet')=='spaceage'
+           and rt.get('serAuxCustom')=='4' and rt.get('serModAux')=='2'
+           and str(rt.get('mlAux') or '')=='3' and str(rt.get('asdAux') or '')=='4'
+           and rt.get('mode')=='thirdparty' and rt.get('sub')=='custom', rt)
+
+        await pg.evaluate("""() => { setAutosaveActivated(true); setAutosaveEnabled(true); if (typeof performSave === 'function') performSave(); }""")
+        await pg.reload()
+        await pg.wait_for_timeout(1000)
+        reloaded = await pg.evaluate("""() => {
+          const el = [...document.querySelectorAll('.location')].find(l => (l.querySelector('.ps-name')||{}).value === 'PS-2');
+          if (!el) return { missing: true };
+          if (typeof recalcLocation === 'function') recalcLocation(el.dataset.loc);
+          const nser = serializeLocation(el);
+          const nml = nser.miniLasers || [];
+          return {
+            auxCustom: (el.querySelector('.aux-circuits-custom')||{}).value,
+            serCabinet: nser.batteryCabinet, serAuxCustom: nser.auxCircuitsCustom,
+            serModAux: (nser.modules && nser.modules[0] && nser.modules[0].auxCircuitNum) || '',
+            mlAux: (nml.find(x => x.kind !== 'asd160')||{}).auxCircuitNum,
+            asdAux: (nml.find(x => x.kind === 'asd160')||{}).auxCircuitNum,
+            ml: nml.filter(x => x.kind !== 'asd160').length,
+            asd: nml.filter(x => x.kind === 'asd160').length
+          };
+        }""")
+        ok('L-r2-3: Auto-Save reload keeps hidden AUX numbers, custom AUX count, cabinet, and MiniLaser/ASD-160 rows',
+           (not reloaded.get('missing')) and reloaded.get('auxCustom')=='4' and reloaded.get('serCabinet')=='spaceage'
+           and reloaded.get('serModAux')=='2' and str(reloaded.get('mlAux') or '')=='3' and str(reloaded.get('asdAux') or '')=='4'
+           and reloaded.get('ml')==1 and reloaded.get('asd')==1, reloaded)
+
+        # I-r3-1: merge a no-loc file whose orphan ref would otherwise bind to the host PS-2
+        ids_host = await fresh(pg)
+        await fill_ps2_units(pg, ids_host['loc2'], ids_host['loc1'])
+        host_loc2 = str(ids_host['loc2'])
+        st_noloc = await pg.evaluate("""(hostLoc2) => {
+          if (typeof addLocation === 'function') addLocation();
+          const el = [...document.querySelectorAll('.location')].pop();
+          el.querySelector('.ps-name').value = 'PS-ORPH2';
+          addModuleRow(el.dataset.loc, 'Detector');
+          const row = el.querySelector('[data-role=module]');
+          if (row){
+            row.querySelector('.zone-name').value = 'Orphan Det';
+            const cl = row.querySelector('.cluster-select');
+            const v = 'r:' + hostLoc2 + ':1';
+            if (cl){
+              if (![...cl.options].some(o => o.value === v)){
+                const opt = document.createElement('option'); opt.value = v; opt.textContent = 'Remote 01'; cl.appendChild(opt);
+              }
+              cl.value = v; cl.dataset.desiredValue = v;
+            }
+          }
+          if (typeof recalcLocation === 'function') recalcLocation(el.dataset.loc);
+          const saved = serializeLocation(el);
+          delete saved.loc;
+          el.remove();
+          return JSON.stringify({ locations: [saved] });
+        }""", host_loc2)
+        html_noloc = '<!DOCTYPE html><html><body><script type="application/json" id="embedded-state">' + st_noloc.replace('</', '<\\/') + '</script></body></html>'
+        await pg.evaluate("([h]) => { handleImportFile(new File([h], 'probe-noloc-orph.html', {type:'text/html'})); }", [html_noloc])
+        await pg.wait_for_timeout(400)
+        await dismiss_import_prompts()
+        await pg.wait_for_timeout(800)
+        ir31 = await pg.evaluate("""(hostLoc2) => {
+          const imported = [...document.querySelectorAll('.location')].filter(l => /PS-ORPH2/.test((l.querySelector('.ps-name')||{}).value));
+          const refs = imported.flatMap(l => [...l.querySelectorAll('.cluster-select')].map(s => s.value).filter(Boolean));
+          const flagged = imported.some(l => /deleted power supply|not reassigned|Deleted host/i.test(((l.querySelector('.flags-list')||{}).innerText||'')+' '+(l.innerText||''))
+            || !!l.querySelector('[data-cluster-orphan="1"]'));
+          const boundHost = refs.some(v => String(v) === ('r:' + hostLoc2 + ':1') || String(v) === String(hostLoc2));
+          return { nImp: imported.length, refs, hasSentinel: refs.some(v => String(v).indexOf('r:0:')===0), flagged, boundHost };
+        }""", host_loc2)
+        ok('I-r3-1: Import Merge of a no-loc file remaps orphan cluster refs to r:0:n (does not bind to the host PS-2)',
+           ir31.get('nImp') >= 1 and ir31.get('hasSentinel') and not ir31.get('boundHost'), ir31)
+        ok('I-r3-1: the merged no-loc orphan is flagged', ir31.get('flagged'), ir31)
+
+        # I-r3-2 + Ah: r:0:n is flagged as an orphan, not bound to PS-1, and does not change Ah
+        ids = await fresh(pg)
+        ah_info = await pg.evaluate("""() => {
+          const l1 = [...document.querySelectorAll('.location')].find(l => (l.querySelector('.ps-name')||{}).value === 'PS-1');
+          const l2 = [...document.querySelectorAll('.location')].find(l => (l.querySelector('.ps-name')||{}).value === 'PS-2');
+          addModuleRow(l1.dataset.loc, 'Standard Display');
+          const disp = l1.querySelector('[data-role=module]');
+          if (disp){ disp.querySelector('.zone-name').value = 'C01'; if (disp.dataset) disp.dataset.clusterNum = '1'; }
+          addModuleRow(l2.dataset.loc, 'Detector');
+          const det = l2.querySelector('[data-role=module]');
+          if (det){
+            det.querySelector('.zone-name').value = 'Orphan Det';
+            const cl = det.querySelector('.cluster-select');
+            const v = 'r:0:1';
+            if (cl){
+              if (![...cl.options].some(o => o.value === v)){
+                const opt = document.createElement('option'); opt.value = v; opt.textContent = 'Orphan 01'; cl.appendChild(opt);
+              }
+              cl.value = v; cl.dataset.desiredValue = v;
+            }
+          }
+          document.querySelectorAll('.location').forEach(l => { if (typeof recalcLocation==='function') recalcLocation(l.dataset.loc); });
+          const ah = el => ((el.querySelector('.required-ah')||{}).textContent || '').trim();
+          const sel = det && det.querySelector('.cluster-select');
+          const flags = ((l2.querySelector('.flags-list')||{}).innerText || '') + ' ' + (l2.innerText||'');
+          const boundPs1 = sel && (sel.value === '1' || sel.value === '01' || sel.value === ('r:' + l1.dataset.loc + ':1')
+            || /PS-1/i.test(((sel.selectedOptions[0]||{}).text || '')));
+          return {
+            ah1: ah(l1), ah2: ah(l2),
+            sel: sel && sel.value,
+            orphan: !!(det && det.dataset.clusterOrphan === '1'),
+            flagged: /deleted power supply|not reassigned|Deleted host/i.test(flags),
+            boundPs1,
+            optionText: sel && sel.selectedOptions && sel.selectedOptions[0] && sel.selectedOptions[0].text
+          };
+        }""")
+        ok('I-r3-2: r:0:n is flagged as an orphan, not bound to PS-1 C01',
+           str(ah_info.get('sel') or '').startswith('r:0:') and (ah_info.get('orphan') or ah_info.get('flagged')) and not ah_info.get('boundPs1'),
+           ah_info)
+        ah_ctrl = await pg.evaluate("""() => {
+          const l1 = [...document.querySelectorAll('.location')].find(l => (l.querySelector('.ps-name')||{}).value === 'PS-1');
+          const l2 = [...document.querySelectorAll('.location')].find(l => (l.querySelector('.ps-name')||{}).value === 'PS-2');
+          const det = l2.querySelector('[data-role=module]');
+          const cl = det && det.querySelector('.cluster-select');
+          if (cl){ cl.value = ''; delete cl.dataset.desiredValue; delete det.dataset.clusterOrphan; }
+          document.querySelectorAll('.location').forEach(l => recalcLocation(l.dataset.loc));
+          const ah = el => ((el.querySelector('.required-ah')||{}).textContent || '').trim();
+          return { ah1: ah(l1), ah2: ah(l2) };
+        }""")
+        ok('I-r3-2: r:0:n does not change required Ah on PS-1 or on the orphan sheet versus an unassigned cluster',
+           ah_info.get('ah1') == ah_ctrl.get('ah1') and ah_info.get('ah2') == ah_ctrl.get('ah2') and ah_info.get('ah1') and ah_info.get('ah2'),
+           {'orph': ah_info, 'ctrl': ah_ctrl})
+
+        # I-r3-3: settings-only edits on the auto-created last-supply blank are kept on Undo
+        await fresh(pg)
+        await pg.evaluate("""() => {
+          [...document.querySelectorAll('.location')].slice(1).forEach(e => e.remove());
+          const only = document.querySelector('.location');
+          if (only){
+            only.querySelector('.ps-name').value = 'PS-LAST';
+            if (typeof setCurrentLocation==='function') setCurrentLocation(only);
+            if (typeof v2Refresh==='function') v2Refresh();
+          }
+        }""")
+        await pg.wait_for_timeout(150)
+        await pg.click('.sb-item.current .sb-trash, .sb-item .sb-trash')
+        await confirm_delete()
+        await pg.wait_for_timeout(250)
+        await pg.evaluate("""() => {
+          const ph = document.querySelector('.location');
+          if (!ph) return;
+          const sh = ph.querySelector('.standby-hours');
+          if (sh){ sh.value = '48'; sh.dispatchEvent(new Event('change', {bubbles:true})); }
+          if (typeof recalcLocation === 'function') recalcLocation(ph.dataset.loc);
+        }""")
+        await pg.wait_for_timeout(150)
+        await pg.evaluate("() => { if (typeof psUndoRestore==='function') psUndoRestore(); }")
+        await pg.wait_for_timeout(400)
+        ir33 = await pg.evaluate("""() => {
+          const locs = [...document.querySelectorAll('.location')].map(l => ({
+            loc: l.dataset.loc, name: (l.querySelector('.ps-name')||{}).value,
+            standby: (l.querySelector('.standby-hours')||{}).value
+          }));
+          return { n: locs.length, locs, names: locs.map(x => x.name), standbys: locs.map(x => x.standby) };
+        }""")
+        ok('I-r3-3: Undo after last-supply delete keeps a settings-edited blank (standby 48) as well as the restored sheet',
+           ir33.get('n')==2 and 'PS-LAST' in (ir33.get('names') or []) and '48' in (ir33.get('standbys') or []),
+           ir33)
+
 
         await run_autosave_reload_tests(pg)
 

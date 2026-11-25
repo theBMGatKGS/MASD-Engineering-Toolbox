@@ -2838,7 +2838,7 @@ const AMENDMENTS = [
   { rev: "003", major: "00", minor: "03", date: "261123", desc: "Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 between power supplies (Option C): sticky Actions column keeps Move and ✕ visible; a dark Move dialog lists other sheets by Area/Group with AUX usage, a Recommended badge, a Full — overflow badge, + Create new power supply, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; destination validation flags handle it. Circuit source auto-fills unless the user edited it; PipeCAD metadata is preserved; the source sheet is never auto-deleted. Granular calculations now list MiniLaser and ASD-160 per-unit rows and subtotals, hide leftover 0 mA Displays or Detectors when that ModuLaser hardware is absent, and build the Total Load formula from only the terms present so it equals totalMa on screen and in Print, Word and Excel Detail. Load Summary, Live Results and the third-party export panel follow the same breakdown. Fixed mlWireRow so class-based alarm-factor derivation reads the sheet element, not the location id string." },
   { rev: "000", major: "00", minor: "04", date: "261124", desc: "Harmonized with Battery Calculator 02.03.000. Sidebar power-supply actions (Direction C): trash and a drag handle on every left-list row, with a ⋯ menu on the current row for Rename and Duplicate. Delete (sidebar trash or the existing header Remove ⌫) opens a confirm that lists ModuLaser, MiniLaser, ASD-160 and AUX counts, offers Move MiniLaser / ASD-160 first via the existing Move dialog, warns that unmoved units will also be deleted, and warns when another sheet references a cluster on the sheet being deleted. The last remaining supply can be deleted; a blank supply is created automatically with the next sheet badge, and names / Sheet NN badges are never renumbered. An Undo toast restores a serialized snapshot (including original loc ids, so Auto-Save and cluster refs survive). Duplicate copies settings and all units, names the copy with the next free PS-N, and places it right after the source in the same Area; SenseNET / ModuLaser addresses are copied as-is and flagged by existing validation; same-sheet cluster refs are rewritten to the new loc; AUX numbers are copied as-is. Drag-reorder stays within an Area/Group unless confirmed, which updates Location. Keyboard: Alt+Up / Alt+Down. Also: service-worker cache masd-toolbox-00-04-000; browser Print/PDF waits for the fit-done flag; Move-dialog focus no longer lands on + Add power supply first. The ml-calc layer is byte-identical to Calculator 02.03.000. QA follow-up: Import Merge remints loc ids and rewrites that file's cluster refs; .mlproj.json omits loc so position-based refs and the design hash stay correct; Undo restores only the deleted sheet; Duplicate uses serialize/restore; networked ASD-160 addresses are checked project-wide; orphaned cluster refs are flagged instead of silently moved; sidebar focus is kept after refresh. QA Round 2: orphaned cluster refs are written as r:0:n on .mlproj.json export and Import Merge so they stay flagged; last-supply Undo removes the unused blank; Duplicate also drops MiniLaser and ASD-160 plKey; ASD-160 address clashes flag both sides; sidebar focus is not stolen from the page body.." },
   { rev: "001", major: "00", minor: "04", date: "261125", desc: "Harmonized with Battery Calculator 02.03.001.  Auto-Save and Save As already stored MiniLaser and ASD-160 rows, but a reload ran restore before that hook was installed, so every MiniLaser and ASD-160 row was dropped and required Ah fell (QA P1).  After the hook loads, those rows are restored from the same source (the state applied at boot, else embedded state, else Auto-Save), matching restoreMlpExtras and brRestore.  A saved payload that never had those rows is left as-is.  Service-worker cache masd-toolbox-00-04-001.  Lineage 00.04.001 → 02.03.001." },
-  { rev: "002", major: "00", minor: "04", date: "261125", desc: "Harmonized with Battery Calculator 02.03.002.  Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal), and the white/light-blue set on dark and navy headers (25 Nov, 10:10 AM CT).  tbReportHtml and other color band-bx lockups on the #102645 header now embed the whiteblue compact horizontal (print-horizontal-whiteblue-dark-h75.png) with no white chip.  The black menustrip pill and the Help / About lockup on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  Light-background and print-on-white art are unchanged.  Service-worker cache masd-toolbox-00-04-002.  Lineage 00.04.002 → 02.03.002." },
+  { rev: "002", major: "00", minor: "04", date: "261125", desc: "Harmonized with Battery Calculator 02.03.002.  Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal), and the white/light-blue set on dark and navy headers (25 Nov, 10:10 AM CT).  tbReportHtml and other color band-bx lockups on the #102645 header now embed the whiteblue compact horizontal (print-horizontal-whiteblue-dark-h75.png) with no white chip.  The black menustrip pill and the Help / About lockup on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  Light-background and print-on-white art are unchanged.  Service-worker cache masd-toolbox-00-04-002.  Lineage 00.04.002 → 02.03.002.    QA follow-ups under this same revision: third-party custom hidden AUX numbers and the battery cabinet now survive serialize, restore, Duplicate, Undo, and Auto-Save reload; Auto-Save is held until MiniLaser / ASD-160 restore finishes, so a reload cannot leave a stripped payload; Import Merge of a file without loc writes unmappable cluster refs as r:0:n and flags them; r:0:n is treated as an orphan (not PS-1); and Undo keeps a last-supply blank that only had settings edits." },
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -3011,7 +3011,9 @@ function updateSaveIndicator(){
   else ind.textContent = "Auto-Save paused";
 }
 
+window.__mlRestoreDone = false;
 function scheduleSave(){
+  if (!window.__mlRestoreDone) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(performSave, 400);
 }
@@ -3026,7 +3028,7 @@ function serializeLocation(locEl){
     cluster: row.querySelector('.cluster-select').value,
     power: row.querySelector('.power-select').value,
     circuitSource: row.querySelector('.circuit-source').value,
-    auxCircuitNum: row.querySelector('.aux-circuit-num').value,
+    auxCircuitNum: row.querySelector('.aux-circuit-num').value || row.querySelector('.aux-circuit-num').dataset.desiredValue || '',
     rowId: row.id
   }));
   return {
@@ -3035,7 +3037,7 @@ function serializeLocation(locEl){
     psName: g('.ps-name').value,
     psLocation: g('.ps-location').value,
     psCapacity: g('.ps-capacity-select') ? g('.ps-capacity-select').value : '6',
-    batteryCabinet: g('.battery-cabinet-select') ? g('.battery-cabinet-select').value : 'edwards',
+    batteryCabinet: g('.battery-cabinet-select') ? (g('.battery-cabinet-select').value || g('.battery-cabinet-select').dataset.desiredValue || 'edwards') : 'edwards',
     ribbonAssignMode: g('.ribbon-assign-mode') ? g('.ribbon-assign-mode').value : 'auto',
     autoBatteryMode: g('.auto-battery-mode') ? g('.auto-battery-mode').value : 'auto',
     tpAutoBatteryMode: g('.tp-auto-battery-mode') ? g('.tp-auto-battery-mode').value : 'off',
@@ -3108,6 +3110,7 @@ function updateEmbeddedStateTag(state){
 // Save/Save-As also captures current data); only writes to localStorage when the
 // auto-save toggle has been activated and is currently on.
 function performSave(){
+  if (!window.__mlRestoreDone) return;
   const state = buildStateObject();
   updateEmbeddedStateTag(state);
   if (!isAutosaveEnabled()) return;
@@ -3145,7 +3148,14 @@ function restoreLocation(saved){
   if (saved.psName) locEl.querySelector('.ps-name').value = saved.psName;
   if (saved.psLocation) locEl.querySelector('.ps-location').value = saved.psLocation;
   if (saved.psCapacity && locEl.querySelector('.ps-capacity-select')) locEl.querySelector('.ps-capacity-select').value = saved.psCapacity;
-  if (saved.batteryCabinet && locEl.querySelector('.battery-cabinet-select')) locEl.querySelector('.battery-cabinet-select').dataset.desiredValue = saved.batteryCabinet;
+  if (saved.batteryCabinet && locEl.querySelector('.battery-cabinet-select')){
+    const cab = locEl.querySelector('.battery-cabinet-select');
+    cab.dataset.desiredValue = saved.batteryCabinet;
+    if (!Array.from(cab.options).some(o => o.value === String(saved.batteryCabinet))){
+      const opt = document.createElement('option'); opt.value = String(saved.batteryCabinet); opt.textContent = String(saved.batteryCabinet); cab.appendChild(opt);
+    }
+    cab.value = String(saved.batteryCabinet);
+  }
   if (locEl.querySelector('.ribbon-assign-mode')){
     const ram = saved.ribbonAssignMode === 'off' ? 'off' : 'auto';
     const raWrap = locEl.querySelector('.ribbon-assign-toggle');
@@ -3218,7 +3228,14 @@ function restoreLocation(saved){
     if (m.rowId) oldToNewId[m.rowId] = rowEl.id;
     if (m.address) rowEl.querySelector('.module-address').dataset.desiredValue = m.address;
     if (m.circuitSource) rowEl.querySelector('.circuit-source').value = m.circuitSource;
-    if (m.auxCircuitNum) rowEl.querySelector('.aux-circuit-num').dataset.desiredValue = m.auxCircuitNum;
+    if (m.auxCircuitNum){
+      const auxSel = rowEl.querySelector('.aux-circuit-num');
+      auxSel.dataset.desiredValue = m.auxCircuitNum;
+      if (!Array.from(auxSel.options).some(o => o.value === String(m.auxCircuitNum))){
+        const opt = document.createElement('option'); opt.value = String(m.auxCircuitNum); opt.textContent = 'AUX ' + pad2(m.auxCircuitNum); auxSel.appendChild(opt);
+      }
+      auxSel.value = String(m.auxCircuitNum);
+    }
     rowsToWire.push({ rowEl, m });
     if (m.cluster){
       if (MODULE_TYPES[m.type] && MODULE_TYPES[m.type].kind === 'display'){
@@ -4925,6 +4942,7 @@ function recalcLocationInner(loc){
   const remoteClusterOrphan = prevVal => {
     const m = /^r:(\d+):(\d+)$/.exec(String(prevVal || ''));
     if (!m) return null;
+    if (m[1] === '0' || m[1] === '00') return { locId: m[1], clusterNum: m[2] };
     if (document.getElementById('location-' + m[1])) return null;
     return { locId: m[1], clusterNum: m[2] };
   };
@@ -5106,6 +5124,14 @@ function recalcLocationInner(loc){
   function setupAuxCircuitSelect(row){
     const sel = row.querySelector('.aux-circuit-num');
     if (mode !== 'builtin'){
+      const prev = sel.value || sel.dataset.desiredValue || '';
+      delete sel.dataset.desiredValue;
+      if (prev){
+        if (!Array.from(sel.options).some(o => o.value === String(prev))){
+          sel.insertAdjacentHTML('beforeend', `<option value="${escapeAttr(String(prev))}">AUX ${pad2(prev)}</option>`);
+        }
+        sel.value = String(prev);
+      }
       sel.hidden = true;
       return;
     }
@@ -5757,6 +5783,18 @@ function recalcLocationInner(loc){
   let cabinetChoice = null;
   const hasAnyValidationIssue = batteryExceedsMax || flags.some(f => !isAdvisoryFlag(f));   // 02.01.000: advisory warnings don't withhold
   locEl.classList.toggle('recommendations-withheld', hasAnyValidationIssue);
+  if (mode !== 'builtin'){
+    const cabinetSelTp = locEl.querySelector('.battery-cabinet-select');
+    if (cabinetSelTp){
+      const prevCab = cabinetSelTp.dataset.desiredValue || cabinetSelTp.value;
+      if (prevCab){
+        if (!Array.from(cabinetSelTp.options).some(o => o.value === String(prevCab))){
+          const opt = document.createElement('option'); opt.value = String(prevCab); opt.textContent = String(prevCab); cabinetSelTp.appendChild(opt);
+        }
+        cabinetSelTp.value = String(prevCab);
+      }
+    }
+  }
   if (mode === 'builtin'){
     const cabinetRow = locEl.querySelector('.battery-cabinet-row');
     const cabinetSel = locEl.querySelector('.battery-cabinet-select');
@@ -7455,12 +7493,15 @@ async function handleImportFile(file){
     newLocIds.push(locId);
     importedPairs.push({ locId, oldLoc });
   });
-  const locMap = {};
-  importedPairs.forEach(({ locId, oldLoc }) => { if (oldLoc) locMap[oldLoc] = String(locId); });
   const hadLoc = importedPairs.some(p => p.oldLoc);
+  const locMap = {};
+  importedPairs.forEach(({ locId, oldLoc }, i) => {
+    if (oldLoc) locMap[oldLoc] = String(locId);
+    else locMap[String(i + 1)] = String(locId);
+  });
   importedPairs.forEach(({ locId }) => {
     const el = document.getElementById('location-' + locId);
-    if (el && typeof psRemapClusterRefs === 'function') psRemapClusterRefs(el, locMap, hadLoc ? '0' : undefined);
+    if (el && typeof psRemapClusterRefs === 'function') psRemapClusterRefs(el, locMap, '0');
   });
   newLocIds.forEach(loc => {
     recalcLocation(loc);
@@ -10898,12 +10939,19 @@ function psSnapshot(){
   try { return JSON.parse(JSON.stringify(buildStateObject())); } catch (e){ return buildStateObject(); }
 }
 
-function psSheetIsUntouchedBlank(el){
+function psBlankSettingsSnap(el){
+  if (!el || typeof serializeLocation !== 'function') return '';
+  const s = serializeLocation(el);
+  delete s.loc; delete s.name; delete s.psName; delete s.modules; delete s.miniLasers;
+  return JSON.stringify(s);
+}
+function psSheetIsUntouchedBlank(el, snap){
   if (!el) return false;
   if (el.querySelector('[data-role="module"]')) return false;
   if (el.querySelector('[data-role="minilaser"]')) return false;
   const name = ((el.querySelector('.ps-name') || {}).value || '').trim();
   if (name) return false;
+  if (snap) return psBlankSettingsSnap(el) === snap;
   return true;
 }
 function psUndoRestore(){
@@ -10915,7 +10963,7 @@ function psUndoRestore(){
   if (toast) toast.remove();
   if (job.placeholderLoc){
     const ph = document.getElementById('location-' + job.placeholderLoc);
-    if (ph && psSheetIsUntouchedBlank(ph)) ph.remove();
+    if (ph && psSheetIsUntouchedBlank(ph, job.placeholderSnap)) ph.remove();
     else if (job.wasLast && ph) job.beforeLoc = ph.getAttribute('data-loc');
   }
   const saved = job.saved ? JSON.parse(JSON.stringify(job.saved)) : null;
@@ -10976,6 +11024,10 @@ function psDeleteConfirm(locEl){
     PS_UNDO.wasLast = true;
   }
   psRecalcAllSheets();
+  if (PS_UNDO && PS_UNDO.wasLast && PS_UNDO.placeholderLoc){
+    const phEl = document.getElementById('location-' + PS_UNDO.placeholderLoc);
+    if (phEl) PS_UNDO.placeholderSnap = psBlankSettingsSnap(phEl);
+  }
   if (typeof refreshAllAmber === 'function') refreshAllAmber();
   if (typeof scheduleSave === 'function') scheduleSave();
   if (focusEl && typeof setCurrentLocation === 'function') setCurrentLocation(focusEl);
@@ -13512,7 +13564,7 @@ function asdRowData(tr){
   const af = q('.ml-af').value;
   return { kind: 'asd160', zone: q('.ml-zone').value, networked: q('.asd-net').value === 'networked', network: tr.dataset.network ? +tr.dataset.network : null, address: q('.asd-addr').value.trim(),
     af: af === '' ? null : +af, afSrc: tr.dataset.afSrc || '', cls: q('.ml-class').value, clsSrc: tr.dataset.clsSrc || '', relayCard: q('.asd-relay').checked,
-    circuitSource: q('.circuit-source').value, circuitSourceEdited: q('.circuit-source').dataset.userEdited === '1', auxCircuitNum: q('.aux-circuit-num').value, plKey: tr.dataset.plKey || '', pipe };
+    circuitSource: q('.circuit-source').value, circuitSourceEdited: q('.circuit-source').dataset.userEdited === '1', auxCircuitNum: q('.aux-circuit-num').value || q('.aux-circuit-num').dataset.desiredValue || '', plKey: tr.dataset.plKey || '', pipe };
 }
 function asdEval(tr, locEl){
   const d = asdRowData(tr); if (!d.pipe) return null;
@@ -13540,7 +13592,7 @@ function mlRowData(tr){
   let pre = null, der = null; try { pre = tr.dataset.pre ? JSON.parse(tr.dataset.pre) : null; } catch (e){} try { der = tr.dataset.derivation ? JSON.parse(tr.dataset.derivation) : null; } catch (e){}
   return { zone: q('.ml-zone').value, setup: q('.ml-setup').value, fan: num(q('.ml-fan').value), af: num(q('.ml-af').value), afSrc: tr.dataset.afSrc || '', cls: q('.ml-class').value,
     method: q('.ml-method').value, io: parseInt(q('.ml-io').value, 10) || 0, circuitSource: q('.circuit-source').value, circuitSourceEdited: q('.circuit-source').dataset.userEdited === '1',
-    auxCircuitNum: q('.aux-circuit-num').value, plKey: tr.dataset.plKey || '', holes: num(tr.dataset.holes), lengthFt: num(tr.dataset.lengthFt), bends90: num(tr.dataset.bends90), tees: num(tr.dataset.tees), plPre: !!(q('.ml-plpre') && q('.ml-plpre').checked), pre, derivation: der };
+    auxCircuitNum: q('.aux-circuit-num').value || q('.aux-circuit-num').dataset.desiredValue || '', plKey: tr.dataset.plKey || '', holes: num(tr.dataset.holes), lengthFt: num(tr.dataset.lengthFt), bends90: num(tr.dataset.bends90), tees: num(tr.dataset.tees), plPre: !!(q('.ml-plpre') && q('.ml-plpre').checked), pre, derivation: der };
 }
 function mlRows(locEl){ return Array.from(locEl.querySelectorAll('[data-role="minilaser"]')); }
 function mlCountIn(locs){ return (locs || []).reduce((n, loc) => n + document.querySelectorAll(`#location-${loc} [data-role="minilaser"]`).length, 0); }
@@ -13560,7 +13612,17 @@ function mlRecalcHook(locEl, mode, setupAux, unassignedAuxRows){
       out.ma += ma; tr.querySelector('.ml-ma').textContent = `${ma} / ${ma}`;
       const auxSel = tr.querySelector('.aux-circuit-num');
       if (mode === 'builtin'){ setupAux(tr); const i = unassignedAuxRows.indexOf(tr); if (i >= 0){ unassignedAuxRows.splice(i, 1); overflow.push(tr); }
-        const c = parseInt(auxSel.value, 10); if (c >= 1) out.auxMa[c] = (out.auxMa[c] || 0) + ma; } else { auxSel.hidden = true; }
+        const c = parseInt(auxSel.value, 10); if (c >= 1) out.auxMa[c] = (out.auxMa[c] || 0) + ma; } else {
+        const prevAux = auxSel.value || auxSel.dataset.desiredValue || '';
+        delete auxSel.dataset.desiredValue;
+        if (prevAux){
+          if (!Array.from(auxSel.options).some(o => o.value === String(prevAux))){
+            const opt = document.createElement('option'); opt.value = String(prevAux); opt.textContent = 'AUX ' + pad2(prevAux); auxSel.appendChild(opt);
+          }
+          auxSel.value = String(prevAux);
+        }
+        auxSel.hidden = true;
+      }
       if (!String(tr.querySelector('.circuit-source').value).trim() && mode === 'builtin' && parseInt(auxSel.value, 10) >= 1) out.flags.push(`ASD-160 ${label}: circuit source missing (e.g., "PS-1 AUX-3").`);
       if (d.networked){ const a = parseInt(d.address, 10);
         if (!(a >= 1 && a <= 127) || String(a) !== d.address) out.flags.push(`ASD-160 ${label}: networked units need a DIP address 1–127.`);
@@ -13600,7 +13662,17 @@ function mlRecalcHook(locEl, mode, setupAux, unassignedAuxRows){
       setupAux(tr);
       const i = unassignedAuxRows.indexOf(tr); if (i >= 0){ unassignedAuxRows.splice(i, 1); overflow.push(tr); }
       const c = parseInt(auxSel.value, 10); if (c >= 1) out.auxMa[c] = (out.auxMa[c] || 0) + ma;
-    } else { auxSel.hidden = true; }
+    } else {
+        const prevAux = auxSel.value || auxSel.dataset.desiredValue || '';
+        delete auxSel.dataset.desiredValue;
+        if (prevAux){
+          if (!Array.from(auxSel.options).some(o => o.value === String(prevAux))){
+            const opt = document.createElement('option'); opt.value = String(prevAux); opt.textContent = 'AUX ' + pad2(prevAux); auxSel.appendChild(opt);
+          }
+          auxSel.value = String(prevAux);
+        }
+        auxSel.hidden = true;
+      }
     const adv = (d.fan && d.af != null) ? MLP.miniLaserAdvice({ fan: d.fan, af: d.af, preEngineered: (d.setup === 'pre' && !!d.pre) || (d.setup === 'pl' && d.plPre) }) : null;
     tr.querySelector('.ml-adv').innerHTML = adv ? mlEsc(d.setup === 'pre' && d.pre ? `DIP — pre-engineered ${d.pre.shape}-shape, fan ${d.pre.fan}, ${d.pre.holes} holes (${d.pre.cite})` : adv.text) : '<span class="inc-flag">\u26A0 Incomplete — set fan speed and alarm factor</span>';
     if (adv && !tr.querySelector('.ml-method').value){ tr.querySelector('.ml-method').value = adv.method; }
@@ -14144,27 +14216,36 @@ mlEnsureCards();
    (the state already applied at boot, else embedded state, else autosave)
    so they survive a reload — the same pattern as restoreMlpExtras and brRestore. */
 (function restoreMiniLasers(){
-  let st = window.__lastLoadedState || null;
-  if (!st){
-    try {
-      const tag = document.getElementById('embedded-state');
-      if (tag && tag.textContent.trim()){
-        const parsed = JSON.parse(tag.textContent);
-        if (parsed && Array.isArray(parsed.locations) && parsed.locations.length) st = parsed;
-      }
-    } catch (e) {}
+  try {
+    let st = window.__lastLoadedState || null;
+    if (!st || !Array.isArray(st.locations) || !st.locations.length){
+      st = null;
+      try {
+        const tag = document.getElementById('embedded-state');
+        if (tag && tag.textContent.trim()){
+          const parsed = JSON.parse(tag.textContent);
+          if (parsed && Array.isArray(parsed.locations) && parsed.locations.length) st = parsed;
+        }
+      } catch (e) {}
+    }
+    if (!st || !Array.isArray(st.locations) || !st.locations.length){
+      try { st = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
+    }
+    if (st && Array.isArray(st.locations)){
+      const locs = st.locations;
+      document.querySelectorAll('.location').forEach((el, i) => {
+        const saved = locs[i];
+        if (!saved || !saved.miniLasers || !saved.miniLasers.length) return;
+        if (typeof mlRows === 'function' && mlRows(el).length) return;
+        const loc = el.getAttribute('data-loc');
+        saved.miniLasers.forEach(d => d.kind === 'asd160' ? asdAddRow(loc, d) : mlAddRow(loc, d));
+        if (typeof recalcLocationInner === 'function') recalcLocationInner(loc);
+      });
+    }
+  } finally {
+    window.__mlRestoreDone = true;
+    if (typeof scheduleSave === 'function') scheduleSave();
   }
-  if (!st){ try { st = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {} }
-  if (!st || !Array.isArray(st.locations)) return;
-  const locs = st.locations;
-  document.querySelectorAll('.location').forEach((el, i) => {
-    const saved = locs[i];
-    if (!saved || !saved.miniLasers || !saved.miniLasers.length) return;
-    if (typeof mlRows === 'function' && mlRows(el).length) return;
-    const loc = el.getAttribute('data-loc');
-    saved.miniLasers.forEach(d => d.kind === 'asd160' ? asdAddRow(loc, d) : mlAddRow(loc, d));
-    if (typeof recalcLocationInner === 'function') recalcLocationInner(loc);
-  });
 })();
 
 </script><!--ML-END-->

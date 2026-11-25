@@ -8,6 +8,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 ## v00.04.002 — Final BRENTRONIX portrait pack (2026-11-25)
 
 Harmonized with Battery Calculator 02.03.002.  The 25 Nov 2026 navy/teal portrait has stronger contrast, a seam down the split, and the dark disc kept on light art.  About, app icons (64 px and up), and print horizontal-light files are updated.  Pills, 16/32 px marks, and one-color art are unchanged.  `tbReportHtml` and other color lockups on the `#102645` header now embed the whiteblue compact horizontal with no white chip.  The menustrip pill and Help / About on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  Service-worker cache remains `masd-toolbox-00-04-002`.
+- **QA follow-ups under this same revision (no cache bump).**  Hidden AUX numbers and the battery cabinet in third-party custom mode are kept on load, Duplicate, Undo, and Auto-Save reload.  Auto-Save no longer writes a stripped copy before MiniLaser / ASD-160 rows are restored.  The `00.04.000` changelog entry is under the 00.04 heading.  Merging a file that has no `loc` flags unmappable cluster refs as `r:0:n` instead of pointing them at a host sheet.  `r:0:n` is an orphan, not PS-1, and does not change required Ah.  Undo keeps a last-supply blank that only had settings edits.
 
 ## v00.04.001 — Auto-Save reload keeps MiniLaser and ASD-160 rows (2026-11-25)
 
