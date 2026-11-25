@@ -21,7 +21,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 ### What's new in 00.04.002
 
-Harmonized with Battery Calculator 02.03.002.  Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal), and the white/light-blue set on dark and navy headers (25 Nov, 10:10 AM CT).  `tbReportHtml` and other color lockups on the `#102645` header now embed the whiteblue compact horizontal with no white chip.  The menustrip pill and Help / About on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  The menustrip fallback square now reads ET (the Edwards or Kidde logo still replaces it at runtime).  Web-app and Electron icons use the ET square in the same amber IBM Plex Mono style as the header mark.  Service-worker cache is `masd-toolbox-00-04-003` so installed PWAs pick up the new icons.
+Harmonized with Battery Calculator 02.03.002.  Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal), and the white/light-blue set on dark and navy headers (25 Nov, 10:10 AM CT).  `tbReportHtml` and other color lockups on the `#102645` header now embed the whiteblue compact horizontal with no white chip.  The menustrip pill and Help / About on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  The menustrip fallback square now reads ET (the Edwards or Kidde logo still replaces it at runtime).  Web-app and Electron icons use the ET square in the Brentronix navy-teal primary, in bold IBM Plex Mono that stays readable at 16px.  Service-worker cache is `masd-toolbox-00-04-004` so installed PWAs pick up the new icons.
 
 ### What's new in 00.04.001
 

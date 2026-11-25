@@ -404,11 +404,11 @@ def test_sw_versions():
         dm = re.search(r"CACHE_VERSION = '([^']+)'", d)
         pm = re.search(r"CACHE_VERSION = '([^']+)'", p)
         ok('PP-L1 docs/sw.js and pwa/sw.js CACHE_VERSION match', dm and pm and dm.group(1) == pm.group(1), (dm.group(1) if dm else None, pm.group(1) if pm else None))
-        ok('PP-L1 Calculator CACHE_VERSION is modulaser-calc-v60', dm and dm.group(1) == 'modulaser-calc-v60', dm.group(1) if dm else None)
+        ok('PP-L1 Calculator CACHE_VERSION is modulaser-calc-v61', dm and dm.group(1) == 'modulaser-calc-v61', dm.group(1) if dm else None)
     elif tb.exists():
         t = tb.read_text()
         tm = re.search(r"CACHE_VERSION = '([^']+)'", t)
-        ok('Toolbox CACHE_VERSION is masd-toolbox-00-04-003', tm and tm.group(1) == 'masd-toolbox-00-04-003', tm.group(1) if tm else None)
+        ok('Toolbox CACHE_VERSION is masd-toolbox-00-04-004', tm and tm.group(1) == 'masd-toolbox-00-04-004', tm.group(1) if tm else None)
     else:
         ok('service worker file present', False, ROOT)
 
