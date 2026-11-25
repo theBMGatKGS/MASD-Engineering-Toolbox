@@ -5,6 +5,10 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.04.000 — Sidebar delete, rename, duplicate, and reorder (2026-11-24)
+
+Harmonized with Battery Calculator 02.03.000. Delete, rename, duplicate, and reorder power supplies from the left sidebar (Direction C: trash and a drag handle on every row, ⋯ on the current row for Rename and Duplicate). Header Remove ⌫ uses the same confirm and Undo toast. The last remaining supply can be deleted; a blank supply is created automatically and Sheet badges are not renumbered. Duplicate copies settings and all units and is named with the next free PS-N. Dragging into a different Area/Group asks for confirm and updates Location.
+
 ## v00.03.003 — Move ASD units and granular calc cleanup (2026-11-23)
 
 Harmonized with Battery Calculator 02.02.003.

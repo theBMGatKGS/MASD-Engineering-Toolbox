@@ -14,6 +14,10 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 > Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.02.001**
 
+### What's new in 00.04.000
+
+Harmonized with Battery Calculator 02.03.000. Delete, rename, duplicate, and reorder power supplies from the left sidebar (Direction C). Header Remove ⌫ uses the same confirm and Undo toast. The last remaining supply can be deleted; a blank supply is created automatically and Sheet badges are not renumbered. Duplicate copies settings and all units and is named with the next free PS-N. Dragging into a different Area/Group asks for confirm and updates Location.
+
 ### What's new in 00.03.003
 
 Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 units between power supplies (sticky Actions, Option C dialog with a live AUX and battery-Ah preview, multi-unit move, and + Create new power supply). Granular calculations, Print / Word / Excel Detail, the Load Summary donut, Live Results and the third-party export panel now show MiniLaser and ASD-160 current and hide leftover 0 mA Displays or Detectors rows when that hardware is not on the sheet.

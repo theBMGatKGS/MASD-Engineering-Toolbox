@@ -6,7 +6,12 @@ document owner; the revision counter increments per distinct change. Generated f
 
 ## 00.03 — 2026-11-23
 
-### 00.03.003 — 2026-11-23
+### 00.04.000 — 2026-11-24
+- Harmonized with Battery Calculator **02.03.000**.
+- **Sidebar power-supply actions (Direction C).** Trash and a drag handle on every left-list row; ⋯ on the current row for Rename and Duplicate. Header **Remove ⌫** uses the same confirm + Undo. The confirm lists unit counts, offers Move MiniLaser / ASD-160 first, warns that unmoved units will also be deleted, and warns about other-sheet cluster references. The last supply can be deleted (a blank supply is auto-created). Names and Sheet badges are not renumbered. Duplicate copies settings and all units, uses the next free PS-N, and sits after the source in the same Area. Addresses are copied as-is and flagged by existing validation. Drag-reorder across Area/Group asks for confirm and updates Location. Keyboard: Alt+Up / Alt+Down.
+- Service-worker cache `masd-toolbox-00-04-000`. Lineage map: `00.04.000` → `02.03.000`. Browser Print / PDF waits for the fit-done flag. After Move, focus no longer lands on + Add power supply first. The `ml-calc` layer is byte-identical to Calculator 02.03.000.
+
+## 00.03.003 — 2026-11-23
 - Harmonized with Battery Calculator **02.02.003**.
 - **Move MiniLaser and ASD-160 between power supplies (Option C).** The ASD units table pins a sticky Actions column so **Move** and **✕** stay visible. **⇄ Move** opens a dark dialog: other sheets grouped by Area/Group, AUX usage, a Recommended badge (same-area sheet with open AUX, pre-selected when one exists), a Full — overflow badge, **+ Create new power supply**, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; the destination sheet's validation flags handle it. Circuit source auto-fills unless the user edited it. PipeCAD metadata is preserved. The source sheet is never auto-deleted. The `ml-calc` layer is byte-identical to Calculator 02.02.003.
 - **Granular calculations include MiniLaser and ASD-160.** Per-unit rows and subtotals appear on the on-screen granular panel and in Print, Word and Excel Detail. Leftover 0 mA Displays or Detectors rows are hidden when that ModuLaser hardware is not on the sheet. The Total Load formula lists only the terms that are present, so it equals `totalMa`.

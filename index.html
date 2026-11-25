@@ -1287,6 +1287,40 @@ body.v2 .location{ border-radius:8px; margin-bottom:14px; }
 #sb-add-btn:hover{ border-color:var(--accent2); background:var(--surface2); }
 .sb-legend{ display:grid; grid-template-columns:1fr 1fr; gap:4px 8px; margin-top:10px; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
 .sb-legend span{ display:flex; align-items:center; gap:6px; }
+.sb-item{ padding:4px 4px 4px 2px; gap:4px; }
+.sb-item-main{ display:flex; align-items:center; gap:7px; flex:1; min-width:0; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer; padding:2px 4px; }
+.sb-grip,.sb-trash,.sb-more{ flex:none; width:22px; height:22px; border:0; background:none; color:var(--muted); cursor:pointer; border-radius:4px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+.sb-grip{ cursor:grab; color:var(--faint); }
+.sb-grip:active{ cursor:grabbing; }
+.sb-grip-dots{ width:10px; height:14px; background-image:radial-gradient(currentColor 1.1px, transparent 1.5px); background-size:5px 5px; display:block; opacity:.75; }
+.sb-trash{ color:#f85149; font-size:13px; }
+.sb-grip:hover,.sb-trash:hover,.sb-more:hover{ background:var(--surface2); color:var(--ink); }
+.sb-trash:hover{ color:#f85149; background:rgba(248,81,73,.12); }
+.sb-item.dragging{ opacity:.55; }
+.sb-item.sb-drop{ box-shadow:inset 0 2px 0 #0c77bc; }
+.sb-group.sb-drop-area{ outline:1px dashed #f85149; outline-offset:2px; }
+.sb-rename{ width:72px; background:var(--surface2); border:1px solid var(--accent); color:var(--accent2); font:600 12.5px var(--mono); border-radius:4px; padding:1px 4px; }
+.sb-menu{ position:absolute; z-index:60; min-width:148px; background:#12171e; border:1px solid #2a3441; border-radius:8px; padding:4px 0; box-shadow:0 8px 24px rgba(0,0,0,.45); }
+.sb-menu button{ display:flex; width:100%; text-align:left; gap:8px; background:none; border:0; color:var(--ink); padding:6px 12px; font:13px var(--sans); cursor:pointer; }
+.sb-menu button:hover,.sb-menu button:focus{ background:var(--surface2); outline:none; }
+.ps-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:80; display:none; align-items:center; justify-content:center; }
+.ps-overlay.open{ display:flex; }
+.ps-card{ background:#12171e; border:1px solid #2a3441; border-radius:10px; width:min(600px, calc(100% - 32px)); box-shadow:0 20px 60px rgba(0,0,0,.6); color:var(--ink); overflow:hidden; }
+.ps-card-h{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid #2a3441; }
+.ps-card-h h2{ margin:0; font:600 15px var(--sans); }
+.ps-card-x{ background:none; border:0; color:var(--muted); cursor:pointer; font-size:18px; }
+.ps-card-b{ padding:20px; display:flex; flex-direction:column; gap:14px; font-size:13px; }
+.ps-counts{ display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; }
+.ps-counts .k{ display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); }
+.ps-counts .v{ font-family:var(--mono); }
+.ps-warn{ border-radius:6px; padding:10px 12px; }
+.ps-warn-amber{ background:rgba(210,153,34,.12); border:1px solid rgba(210,153,34,.35); color:#d29922; }
+.ps-warn-red{ background:rgba(248,81,73,.1); border:1px solid rgba(248,81,73,.35); color:#f85149; font-weight:600; }
+.ps-card-f{ display:flex; justify-content:flex-end; gap:10px; padding:12px 20px; border-top:1px solid #2a3441; background:#1a212b; }
+#ps-undo-toast{ position:fixed; left:50%; bottom:28px; transform:translateX(-50%); z-index:90; background:#1a212b; color:#e6edf3; border:1px solid #2a3441; border-radius:6px; padding:9px 14px; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,.45); display:flex; align-items:center; gap:12px; }
+#ps-undo-toast button.link{ background:none; border:0; color:#0c77bc; font:600 13px var(--sans); cursor:pointer; }
+#ps-undo-toast button.link:hover{ color:#3a9ad6; }
+@media print{ .sb-grip,.sb-trash,.sb-more,.sb-menu,.ps-overlay,#ps-undo-toast{ display:none !important; } }
 /* results panel */
 .rp-head{ display:flex; align-items:center; justify-content:space-between; font:700 11px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
 #rp-close-btn{ background:none; border:0; color:var(--muted); cursor:pointer; font-size:14px; }
@@ -1698,7 +1732,7 @@ body.v2 .model-cell{ font-size:10.5px; }
           <div class="qs-step-num">3</div>
           <div class="qs-step-body">
             <div class="qs-step-title" id="qs-step-sidebar">Add power supply sheets and use the sidebar</div>
-            <p>Each sheet = one power supply. Add one with <b>+ Add power supply</b> at the bottom of the sidebar, <b>+ Add Location</b> in the quick row, or <b>Edit → + Add Location</b>. Click a sheet in the sidebar to show it. Sheets are grouped by their <b>Location</b> (the Area/Group name; an Import .pl fills it from the PipeCAD floor). Each shows its required Ah and a status dot: <b>green</b> complete, <b>amber</b> needs entry (amber-outlined fields left), <b>red</b> error (an INVALID CALCULATION condition or a Validation Error; the red count shows how many), and an extra <b>blue</b> dot when the sheet overrides the project settings. At the top of the sheet fill in the <b>Power Supply Name</b> (e.g. <span class="mono-inline">PS-1</span>) and <b>Location</b> (e.g. <span class="mono-inline">Riser Closet A</span>); use <b>Remove ⌫</b> on the sheet to delete it. <b>New sheets start with no modules</b> (02.00.004): an empty sheet shows a guide with two choices — <b>Import .pl…</b> to bring modules in from PipeCAD, or <b>+ Add Display</b> / <b>+ Add Detector</b> to add them by hand. An empty sheet shows <i>Needs entry</i> and INCOMPLETE until it has modules.</p>
+            <p>Each sheet = one power supply. Add one with <b>+ Add power supply</b> at the bottom of the sidebar, <b>+ Add Location</b> in the quick row, or <b>Edit → + Add Location</b>. Click a sheet in the sidebar to show it. Sheets are grouped by their <b>Location</b> (the Area/Group name; an Import .pl fills it from the PipeCAD floor). Each shows its required Ah and a status dot: <b>green</b> complete, <b>amber</b> needs entry (amber-outlined fields left), <b>red</b> error (an INVALID CALCULATION condition or a Validation Error; the red count shows how many), and an extra <b>blue</b> dot when the sheet overrides the project settings. At the top of the sheet fill in the <b>Power Supply Name</b> (e.g. <span class="mono-inline">PS-1</span>) and <b>Location</b> (e.g. <span class="mono-inline">Riser Closet A</span>); use the trash button on a sidebar row or <b>Remove ⌫</b> on the sheet to delete it — both open the same confirm (counts, a chance to <b>Move MiniLaser / ASD-160 first</b>, a warning that unmoved units will also be deleted, and a warning if another sheet references a cluster on it), then a short Undo toast.  The last remaining supply can be deleted; a blank supply is created automatically and Sheet badges are not renumbered.  This is different from <b>Edit → Clear…</b> (reset this sheet or wipe the file) and <b>File → New…</b> (start a new file).  On the current sidebar row, <b>⋯</b> offers <b>Rename</b> and <b>Duplicate</b> (Duplicate copies settings and all units, names the copy with the next free PS-N, and places it just after the source in the same Area).  Drag the handle, or press Alt+Up / Alt+Down, to reorder sheets; dropping into a different Area/Group asks you to confirm, because that updates the supply Location. <b>New sheets start with no modules</b> (02.00.004): an empty sheet shows a guide with two choices — <b>Import .pl…</b> to bring modules in from PipeCAD, or <b>+ Add Display</b> / <b>+ Add Detector</b> to add them by hand. An empty sheet shows <i>Needs entry</i> and INCOMPLETE until it has modules.</p>
             <figure class="qs-figure"><img data-qs-slot="2-add-location" data-shot="02.02.000" src="data:image/jpeg;base64,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" alt="Sidebar"><figcaption>Example data (02.02.000): sheet sidebar with status dots and + Add power supply</figcaption></figure>
           </div>
         </div>
@@ -2783,7 +2817,7 @@ function brModuleMfr(t){ return brMlpReady() ? MLP.manufacturerFor(brCurrentSafe
 //         change made in chat, until the minor version above is next revised
 //   YYMMDD = the actual calendar date the revision was made
 const APP_MAJOR = "00";
-const APP_MINOR = "03";
+const APP_MINOR = "04";
 const APP_AUTHOR = "The BMG";
 
 // Running amendment log. Each entry is one distinct logical change.
@@ -2799,7 +2833,8 @@ const AMENDMENTS = [
   { rev: "000", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.000. <b>Brand selector (Edwards | Kidde Commercial)</b> — project-level, first in Project information; part numbers, supply labels, BOM, logos and report titles follow the brand; the remembered default seeds new projects. Per-sheet supply <b>variant</b> (120 V / 220–230 V / ULC), tamper and seismic accessories, and <b>FACU powers these ASDs</b> with a power-source prompt (in-house / third-party / unidentified; unidentified makes the sheet Incomplete). <b>ASD-160 (Micra25 / Senator 25)</b> rows in the ASD table: 250 mA, dedicated AUX circuit, networked address 1–127, PipeCAD .pl import (MICRA25), Remote configuration, UL/non-UL alarm-factor rules (1.28 cap on UL SFD/OAP, R-AF7). Battery 12V6A5 (7.2 Ah) is manual-only with a too-small advisory. AUX/ribbon rules: max 4 AUX per power supply; each ribbon run holds max 4 detectors + 1 display; a detector-started run counts that detector; hybrid clusters may have any number of runs; own-AUX modules are not runs. Help revised with current screenshots; new printable Quick Start (Help ▸ Print Quick Start). MLP 1.6.0, engine 1.2.0. Config: ASD-160 branch — Remote configuration levels (Aux < Pre-Alarm < Fire < Fire 2) seeded from the Alarm Factor worksheet; Fire 2 0.00914–7.62 %obs/ft; ASD-160s are no longer listed as MiniLasers. Report band: brand logo and brand label; Excel report header gets a Brand row (no fills). Quick Start one-pager (quickstart.html) and in-app Toolbox Quick Start carry current screenshots. `tools/build.py` is marked retired (index.html is the source of truth); `src/toolbox.js` and `src/tb-asd160.js` are exact copies of the inline blocks (tested). Manual battery or capacity pick turns Auto Battery Sizing off (with a toast); the controls stay selectable in Auto. Networked ASD-160s count toward the 127-module SenseNET limit and share the network's addresses (duplicates flagged). Unidentified power source → ⚠ Incomplete everywhere: sheet status and amber dot, side panel, print stamp and project file; the Report adds a blank “Power source identified” item to every power supply sheet and an amber banner. A manual alarm factor on an ASD-160 row is what gets validated (\"alarm factor N … exceeds … — lower the alarm factor\"). Excel Detail sheet: Brand row under Project (no fills). Brand logo in the KGS print band (PDF / HTML / print preview)." },
   { rev: "001", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.001 (Brent 10-19 5:56 PM). <b>Printed Quick Start</b> (Help ▸ Print Quick Start): larger white brand logo (Edwards or Kidde Commercial) in the header with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages. No battery-calculation change (MLP 1.6.3, engine 1.2.0). Printed Quick Start Step 1 is a full-width row (Brent 6:28 PM); Calculator lineage reads 02.02.001 in About, README, Help and the Quick Start. Every printed step is a full-width row with its screenshot on the right (Brent 7:07 PM); step numbers run continuously across pages; Step 3 sub-steps lettered a, b, c. Printed Toolbox Quick Start screenshots (Config, Battery calc) re-captured at 2× with tighter crops at full image width so they are legible (≤ 1.9 source px per print px); Toolbox print pages are now steps 1–2 and 3–5 (still 2 pages). <b>SFD/OAP design target</b> (Brent 2026-10-20 6:39–6:49 AM CT: “SFD/OAP for Engineering Toolbox must be revised from 2.5% obs/ft to 2.0% obs/ft. Make this the target for any UL-driven SFD or OAP requirement. FM and other non-UL targets can remain at 2.5% obs/ft. Allow toolbox a means of adjusting the default % obs/ft to different values for SFD for baseline configurations that apply project-wide but remain within the published limits of the respective detector.” · “UL limit is 1.71% to 2.18%. Target 2.0% for practical purposes.” · “Adjustable for FM too.” · “Allow per-Area/Group overrides too.” · “Yes, for projects requiring UL compliance. All others can remain at 2.5% by default.” · “Reject it with a message.” · “Yes, require a reference and initials.” · “Fold it into 02.02.001.”): the SFD/OAP design target is 2.0 %obs/ft for UL-driven scopes and 2.5 %obs/ft for FM and other standards; adjustable project-wide and per Area/Group (UL and FM), within each detector's published limits (UL: ModuLaser and MiniLaser 1.70–2.18; FM: ModuLaser and MiniLaser ≤2.50, ASD-160 ≤3.5; the ASD-160 UL 1.28 cap always governs). Out-of-range or non-numeric entries are rejected with a message, never clamped; a non-default target needs a reference and the engineer's initials. On UL scopes the SFD Fire 1 seed follows the target; otherwise it stays 2.5. Pass/fail is unchanged (UL Open Area 1.70–2.18 %obs/ft, ≤43 s; FM 3230 ≤2.50, ≤120 s). Older projects adopt the default with a one-time notice. modulaser-project.js 1.6.1. Then (Brent 2026-10-20 7:09 AM CT): “Keep 1.70, per the manual” (UL lower limit unchanged) and “Yes, follow the target”: the MiniLaser alarm-factor rule for SFD and OAP now uses the scope's SFD/OAP target (Area/Group override → project → default; UL default 2.0, FM default 2.5) instead of a fixed 2.18 (OAP) / 2.0 (SFD). FM targets accepted up to 2.50 inclusive. modulaser-project.js 1.6.2. QA SFD/OAP delta: a stored out-of-range target (hand-edited or imported) stays flagged and blocks export, but the Fire 1 seed and the MiniLaser alarm factor use the nearest published limit instead; the one-time notice also shows in the Calculator and the Report; the Report validates the target against the linked design's device kinds (an FM project with only ASD-160s may use up to 3.5 without a false deficiency). modulaser-project.js 1.6.3." },
   { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.1, MASD engine 1.3.1 (same-named floors keyed ‘ #2’, ‘ #3’…; unique names unchanged; older projects re-keyed per floor on Check link, configuration and logged changes follow); wizard region parity." },
-  { rev: "003", major: "00", minor: "03", date: "261123", desc: "Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 between power supplies (Option C): sticky Actions column keeps Move and ✕ visible; a dark Move dialog lists other sheets by Area/Group with AUX usage, a Recommended badge, a Full — overflow badge, + Create new power supply, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; destination validation flags handle it. Circuit source auto-fills unless the user edited it; PipeCAD metadata is preserved; the source sheet is never auto-deleted. Granular calculations now list MiniLaser and ASD-160 per-unit rows and subtotals, hide leftover 0 mA Displays or Detectors when that ModuLaser hardware is absent, and build the Total Load formula from only the terms present so it equals totalMa on screen and in Print, Word and Excel Detail. Load Summary, Live Results and the third-party export panel follow the same breakdown. Fixed mlWireRow so class-based alarm-factor derivation reads the sheet element, not the location id string." }
+  { rev: "003", major: "00", minor: "03", date: "261123", desc: "Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 between power supplies (Option C): sticky Actions column keeps Move and ✕ visible; a dark Move dialog lists other sheets by Area/Group with AUX usage, a Recommended badge, a Full — overflow badge, + Create new power supply, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; destination validation flags handle it. Circuit source auto-fills unless the user edited it; PipeCAD metadata is preserved; the source sheet is never auto-deleted. Granular calculations now list MiniLaser and ASD-160 per-unit rows and subtotals, hide leftover 0 mA Displays or Detectors when that ModuLaser hardware is absent, and build the Total Load formula from only the terms present so it equals totalMa on screen and in Print, Word and Excel Detail. Load Summary, Live Results and the third-party export panel follow the same breakdown. Fixed mlWireRow so class-based alarm-factor derivation reads the sheet element, not the location id string." },
+  { rev: "000", major: "00", minor: "04", date: "261124", desc: "Harmonized with Battery Calculator 02.03.000. Sidebar power-supply actions (Direction C): trash and a drag handle on every left-list row, with a ⋯ menu on the current row for Rename and Duplicate. Delete (sidebar trash or the existing header Remove ⌫) opens a confirm that lists ModuLaser, MiniLaser, ASD-160 and AUX counts, offers Move MiniLaser / ASD-160 first via the existing Move dialog, warns that unmoved units will also be deleted, and warns when another sheet references a cluster on the sheet being deleted. The last remaining supply can be deleted; a blank supply is created automatically with the next sheet badge, and names / Sheet NN badges are never renumbered. An Undo toast restores a serialized snapshot (including original loc ids, so Auto-Save and cluster refs survive). Duplicate copies settings and all units, names the copy with the next free PS-N, and places it right after the source in the same Area; SenseNET / ModuLaser addresses are copied as-is and flagged by existing validation; same-sheet cluster refs are rewritten to the new loc; AUX numbers are copied as-is. Drag-reorder stays within an Area/Group unless confirmed, which updates Location. Keyboard: Alt+Up / Alt+Down. Also: service-worker cache masd-toolbox-00-04-000; browser Print/PDF waits for the fit-done flag; Move-dialog focus no longer lands on + Add power supply first. The ml-calc layer is byte-identical to Calculator 02.03.000." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -2991,6 +3026,7 @@ function serializeLocation(locEl){
     rowId: row.id
   }));
   return {
+    loc: locEl.getAttribute('data-loc'),
     name: g('.location-name').value,
     psName: g('.ps-name').value,
     psLocation: g('.ps-location').value,
@@ -3086,8 +3122,15 @@ function performSave(){
 }
 
 function restoreLocation(saved){
-  locationCounter++;
-  const loc = locationCounter;
+  const savedLoc = saved && saved.loc != null ? parseInt(saved.loc, 10) : NaN;
+  let loc;
+  if (isFinite(savedLoc) && savedLoc > 0){
+    loc = savedLoc;
+    locationCounter = Math.max(locationCounter, loc);
+  } else {
+    locationCounter++;
+    loc = locationCounter;
+  }
   const container = document.getElementById("locations-container");
   const wrap = document.createElement("div");
   wrap.innerHTML = locationTemplate(loc);
@@ -3938,11 +3981,14 @@ function addLocation(){
 function removeLocation(loc){
   const el = document.getElementById(`location-${loc}`);
   if (!el) return;
+  if (typeof psDeleteOpen === 'function'){ psDeleteOpen(el, document.activeElement); return; }
   const remaining = document.querySelectorAll(".location").length;
   if (remaining <= 1){ alert("At least one location is required."); return; }
   el.remove();
   scheduleSave();
 }
+
+
 
 function addModuleRow(loc, type){
   const locEl = document.getElementById(`location-${loc}`);
@@ -7590,8 +7636,16 @@ const HOWDOI_COMMON = [
   {
     id: 'sidebar',
     title: 'Switch sheets / read the status dots',
-    keywords: 'sidebar sheet list status dot green amber red blue add power supply area group',
-    blurb: 'Click a sheet in the left sidebar to show it. Green = complete, amber = needs entry, red = error (count shown), blue = overrides the project settings. + Add power supply adds a sheet.',
+    keywords: 'sidebar sheet list status dot green amber red blue add power supply area group delete trash rename duplicate reorder drag',
+    blurb: 'Click a sheet in the left sidebar to show it. Green = complete, amber = needs entry, red = error (count shown), blue = overrides the project settings. + Add power supply adds a sheet. Each row has a drag handle and a trash button; the current row also has ⋯ for Rename and Duplicate. Trash and header Remove ⌫ share one confirm and an Undo toast. Delete is not the same as Edit → Clear… or File → New….',
+    target: 'qs-step-sidebar',
+    common: true,
+  },
+  {
+    id: 'delete-ps',
+    title: 'Delete, rename, duplicate, or reorder a power supply',
+    keywords: 'delete remove trash undo last remaining supply rename duplicate drag reorder area group location alt arrow confirm cluster move minilaser',
+    blurb: 'Trash on a sidebar row or Remove ⌫ on the sheet opens a confirm with unit counts, Move MiniLaser / ASD-160 first, a warning that unmoved units will also be deleted, and a warning if another sheet references a cluster on it. Confirm, then Undo if needed. The last supply can be deleted; a blank one is created and Sheet badges are not renumbered. ⋯ Rename or Duplicate (next free PS-N, same Area, right after the source, settings and all units). Drag or Alt+Up / Alt+Down to reorder; changing Area/Group asks for confirm and updates Location. This is not Edit → Clear… or File → New….',
     target: 'qs-step-sidebar',
     common: true,
   },
@@ -7647,7 +7701,7 @@ const HOWDOI_COMMON = [
     id: 'clear',
     title: 'Clear a sheet or the entire file',
     keywords: 'clear wipe reset blank header',
-    blurb: 'Edit → Clear… asks This sheet only (reset current power-supply sheet) or Entire file (then keep or clear project header fields). Both paths confirm before destructive action.',
+    blurb: 'Edit → Clear… asks This sheet only (reset current power-supply sheet) or Entire file (then keep or clear project header fields). Both paths confirm before destructive action. This is not the same as deleting one power supply from the sidebar (trash or Remove ⌫, which has its own confirm and Undo) or File → New… (start a new file).',
     target: 'qs-step-clear',
     common: true,
   },
@@ -10357,18 +10411,35 @@ function v2Refresh(){
 }
 function v2RenderSidebar(models, cur){
   const list = document.getElementById('sb-list'); if (!list) return;
+  if (window.__psRenaming) return;
   const groups = []; const byName = {};
   models.forEach(m => { const k = m.area || 'No Area/Group'; if (!byName[k]){ byName[k] = []; groups.push(k); } byName[k].push(m); });
   const dotTitle = { complete: 'Complete', needs: 'Needs entry', error: 'Error — see validation messages' };
-  list.innerHTML = models.length ? groups.map(gname => `<div class="sb-group"><div class="sb-gh" title="Area/Group (Power Supply Location)">${v2Esc(gname)}</div>${byName[gname].map(m =>
-    `<button type="button" class="sb-item${m.el === cur ? ' current' : ''}" data-loc="${m.loc}" title="${v2Esc(v2PsTag(m) + ' — ' + dotTitle[m.dot] + (m.overrides.length ? ' · overrides: ' + m.overrides.join(', ') : ''))}">
-      <span class="dot st-${m.dot}" aria-label="${dotTitle[m.dot]}"></span>${m.overrides.length ? '<span class="dot st-overridden" aria-label="Overridden"></span>' : ''}
-      <span class="sb-name">${v2Esc(v2PsTag(m))}${addrSchemeOf(m.el) === 'networked' ? `<span class="sb-net" title="SenseNET network ${sheetSenseNet(m.el)}">SN${sheetSenseNet(m.el)}</span>` : ''}</span>
-      ${(() => { const n = m.flags.filter(t => !isAdvisoryFlag(t)).length + m.invalidList.length; return n ? `<span class="sb-cnt">${n}</span>` : ''; })()}
-      <span class="sb-ah">${m.noModules ? '<span class="inc-flag">\u26A0 Incomplete</span>' : (isFinite(m.requiredAh) ? v2AhFmt(m, m.requiredAh, 1) + ' Ah' : '')}</span></button>`).join('')}</div>`).join('')
+  const closeMenu = typeof psCloseRowMenu === 'function' ? psCloseRowMenu : function(){};
+  closeMenu();
+  list.innerHTML = models.length ? groups.map(gname => `<div class="sb-group" data-area="${v2Esc(gname)}"><div class="sb-gh" title="Area/Group (Power Supply Location)">${v2Esc(gname)}</div>${byName[gname].map(m => {
+    const isCur = m.el === cur;
+    const tag = v2PsTag(m);
+    const n = m.flags.filter(tt => !isAdvisoryFlag(tt)).length + m.invalidList.length;
+    const ah = m.noModules ? '<span class="inc-flag">\u26A0 Incomplete</span>' : (isFinite(m.requiredAh) ? v2AhFmt(m, m.requiredAh, 1) + ' Ah' : '');
+    const net = addrSchemeOf(m.el) === 'networked' ? `<span class="sb-net" title="SenseNET network ${sheetSenseNet(m.el)}">SN${sheetSenseNet(m.el)}</span>` : '';
+    const more = isCur ? `<button type="button" class="sb-more" aria-label="More actions for ${v2Esc(tag)}" aria-haspopup="menu" aria-expanded="false" title="More">\u22ef</button>` : '';
+    return `<div class="sb-item${isCur ? ' current' : ''}" data-loc="${v2Esc(m.loc)}" tabindex="0" title="${v2Esc(tag + ' — ' + dotTitle[m.dot] + (m.overrides.length ? ' · overrides: ' + m.overrides.join(', ') : ''))}">
+      <button type="button" class="sb-grip" draggable="true" aria-label="Reorder ${v2Esc(tag)}" title="Drag to reorder, or Alt+Up / Alt+Down"><span class="sb-grip-dots" aria-hidden="true"></span></button>
+      <button type="button" class="sb-item-main" data-loc="${v2Esc(m.loc)}">
+        <span class="dot st-${m.dot}" aria-label="${dotTitle[m.dot]}"></span>${m.overrides.length ? '<span class="dot st-overridden" aria-label="Overridden"></span>' : ''}
+        <span class="sb-name">${v2Esc(tag)}${net}</span>
+        ${n ? `<span class="sb-cnt">${n}</span>` : ''}
+        <span class="sb-ah">${ah}</span>
+      </button>
+      <button type="button" class="sb-trash" data-loc="${v2Esc(m.loc)}" aria-label="Delete ${v2Esc(tag)}" title="Delete ${v2Esc(tag)}">\u232b</button>
+      ${more}
+    </div>`;
+  }).join('')}</div>`).join('')
     : '<p class="sb-empty">No power supply sheets yet. Click <b>+ Add power supply</b> or <b>Import .pl</b>.</p>';
   const c = document.getElementById('sb-count'); if (c) c.textContent = models.length + (models.length === 1 ? ' sheet' : ' sheets');
 }
+
 function v2GaugeSvgDark(m){
   const req = isFinite(m.ahPerSupply) ? m.ahPerSupply : 0, bat = m.batteryAh || 0, init = isFinite(m.initialAh) ? m.initialAh / (m.psRequired || 1) : 0;
   const max = Math.ceil(Math.max(CHARGER_MAX_AH, req, bat) * 1.08 / 10) * 10, W = 280, x = v => 4 + (W - 8) * Math.min(v, max) / max;
@@ -10501,6 +10572,599 @@ function v2ToggleSettings(force){
   try { localStorage.setItem('ml_v2_settings', open ? '1' : '0'); } catch (e) {}
   v2SyncViewChecks();
 }
+/* ===== 02.03.000 — sidebar delete / rename / duplicate / reorder (Direction C) ===== */
+let PS_UNDO = null, PS_UNDO_TIMER = null, psDlgPrevFocus = null, psDragLoc = null, psPendingArea = null;
+function psLocEl(loc){ return document.getElementById('location-' + loc); }
+function psNameOf(el){ if (!el) return 'this power supply'; const n = ((el.querySelector('.ps-name') || {}).value || '').trim(); return n || ('Sheet ' + String(el.getAttribute('data-loc') || '').padStart(2, '0')); }
+function psAreaOf(el){ return ((el && el.querySelector('.ps-location') || {}).value || '').trim() || 'No Area/Group'; }
+function psSheetList(){ return Array.from(document.querySelectorAll('.location')); }
+function psFocusRow(loc){
+  const row = document.querySelector('#sb-list .sb-item[data-loc="' + loc + '"]');
+  const main = row && (row.querySelector('.sb-item-main') || row);
+  if (main && typeof main.focus === 'function') main.focus();
+}
+function psDlgFocusable(el){
+  if (!el || !document.contains(el)) return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden';
+}
+function psDlgFocusables(ov){
+  return Array.from(ov.querySelectorAll('button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')).filter(psDlgFocusable);
+}
+function psDlgKey(ev){
+  const ov = document.querySelector('.ps-overlay.open');
+  if (!ov) return;
+  if (ev.key === 'Escape'){ ev.preventDefault(); ev.stopPropagation(); psDlgClose(ov); return; }
+  if (ev.key !== 'Tab') return;
+  const list = psDlgFocusables(ov);
+  if (!list.length) return;
+  const first = list[0], last = list[list.length - 1];
+  if (ev.shiftKey){
+    if (document.activeElement === first || !ov.contains(document.activeElement)){ ev.preventDefault(); last.focus(); }
+  } else if (document.activeElement === last || !ov.contains(document.activeElement)){ ev.preventDefault(); first.focus(); }
+}
+function psEnsureOverlay(id){
+  let ov = document.getElementById(id);
+  if (!ov){
+    ov = document.createElement('div');
+    ov.id = id; ov.className = 'ps-overlay'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+    ov.addEventListener('click', e => { if (e.target === ov) psDlgClose(ov); });
+    document.body.appendChild(ov);
+  }
+  return ov;
+}
+function psDlgClose(ov, opts){
+  if (!ov) ov = document.querySelector('.ps-overlay.open');
+  if (!ov) return;
+  ov.classList.remove('open'); ov.hidden = true; ov.innerHTML = '';
+  document.removeEventListener('keydown', psDlgKey, true);
+  const prev = psDlgPrevFocus;
+  if (opts && opts.restore === false) return;
+  psDlgPrevFocus = null;
+  const restore = () => { if (psDlgFocusable(prev)) prev.focus(); };
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(restore); else setTimeout(restore, 0);
+}
+function psDlgOpen(ov, html, labelledBy){
+  psDlgPrevFocus = document.activeElement;
+  ov.innerHTML = html;
+  ov.setAttribute('aria-labelledby', labelledBy);
+  ov.hidden = false; ov.classList.add('open');
+  document.addEventListener('keydown', psDlgKey, true);
+  const focusEl = ov.querySelector('[data-ps-focus]') || ov.querySelector('button, input, [href]');
+  if (focusEl && focusEl.focus) focusEl.focus();
+}
+
+function psSheetCounts(locEl){
+  const mods = Array.from(locEl.querySelectorAll('[data-role="module"]'));
+  let displays = 0, detectors = 0;
+  mods.forEach(r => {
+    const t = ((r.querySelector('.type-select') || {}).value || '');
+    const kind = (typeof MODULE_TYPES !== 'undefined' && MODULE_TYPES[t] && MODULE_TYPES[t].kind) || (/detect/i.test(t) ? 'detector' : 'display');
+    if (kind === 'detector') detectors++; else displays++;
+  });
+  const allMl = (typeof mlRows === 'function') ? mlRows(locEl) : Array.from(locEl.querySelectorAll('[data-role="minilaser"]'));
+  const minis = [], asds = [];
+  allMl.forEach(tr => {
+    const kind = tr.getAttribute('data-kind') || 'minilaser';
+    const z = (((tr.querySelector('.ml-zone, .asd-zone, .zone-name') || {}).value) || '').trim();
+    if (kind === 'asd160') asds.push(z); else minis.push(z);
+  });
+  locEl.querySelectorAll('tr[data-kind="asd160"]').forEach(tr => {
+    if (asds.length && allMl.indexOf(tr) >= 0) return;
+    if (asds.indexOf((((tr.querySelector('.asd-zone, .ml-zone, .zone-name') || {}).value) || '').trim()) < 0){
+      /* already counted via mlRows in typical builds */
+    }
+  });
+  let auxUsed = 0, auxMax = (typeof MAX_AUX_BUILTIN === 'number') ? MAX_AUX_BUILTIN : 4;
+  if (typeof mlAuxState === 'function'){ const a = mlAuxState(locEl); auxUsed = a.used; auxMax = a.max; }
+  else {
+    const used = new Set();
+    locEl.querySelectorAll('.aux-circuit-num').forEach(s => { if (s.value) used.add(s.value); });
+    auxUsed = used.size;
+  }
+  return { displays, detectors, modules: mods.length, minis, asds, auxUsed, auxMax };
+}
+function psClusterHits(locEl){
+  const loc = String(locEl.getAttribute('data-loc'));
+  const prefix = 'r:' + loc + ':';
+  const names = [];
+  psSheetList().forEach(l => {
+    if (l === locEl) return;
+    let n = 0;
+    l.querySelectorAll('.cluster-select').forEach(s => {
+      const vals = [s.value, s.dataset.desiredValue, s.getAttribute('data-desired-value')];
+      if (vals.some(v => String(v || '').indexOf(prefix) === 0)) n++;
+    });
+    l.querySelectorAll('[data-role="module"]').forEach(row => {
+      const cv = row.dataset.cluster || row.getAttribute('data-cluster') || '';
+      if (String(cv).indexOf(prefix) === 0) n++;
+    });
+    if (n) names.push({ name: psNameOf(l), n });
+  });
+  return names;
+}
+
+function psDeleteOpen(locEl, trigger){
+  if (!locEl) return;
+  const loc = locEl.getAttribute('data-loc');
+  const name = psNameOf(locEl);
+  const remaining = psSheetList().length;
+  const last = remaining <= 1;
+  const c = psSheetCounts(locEl);
+  const hits = psClusterHits(locEl);
+  const ov = psEnsureOverlay('ps-del-overlay');
+  if (trigger) psDlgPrevFocus = trigger;
+  const mlLabel = c.minis.length ? ('\u00d7' + c.minis.length + (c.minis.some(Boolean) ? ' (' + c.minis.map(z => z || '—').join(', ') + ')' : '')) : '\u00d70';
+  const asdLabel = c.asds.length ? ('\u00d7' + c.asds.length + (c.asds.some(Boolean) ? ' (' + c.asds.map(z => z || '—').join(', ') + ')' : '')) : '\u00d70';
+  const modLabel = c.modules ? (c.displays + ' display' + (c.displays===1?'':'s') + ', ' + c.detectors + ' detector' + (c.detectors===1?'':'s')) : 'none (0 displays, 0 detectors)';
+  const moveBtn = (c.minis.length || c.asds.length) ? '<button type="button" class="btn btn-sm" id="ps-del-move">Move MiniLaser / ASD-160 first\u2026</button>' : '';
+  const cluster = hits.length ? ('<div class="ps-warn ps-warn-amber">' + v2Esc(hits.map(h => h.n + ' module' + (h.n===1?'':'s') + ' on ' + h.name + ' reference' + (h.n===1?'s':'') + ' a cluster on ' + name).join(' ')) + '</div>') : '';
+  const lastCopy = last ? '<p>A blank new power supply will be created automatically. Sheet badges are not renumbered.</p>' : '';
+  const title = last ? 'Delete the last power supply?' : ('Delete power supply ' + name + '?');
+  const confirmLabel = last ? 'Delete and create a blank supply' : ('Delete ' + name);
+  const html = '<div class="ps-card"><div class="ps-card-h"><h2 id="ps-del-title">' + v2Esc(title) + '</h2><button type="button" class="ps-card-x" data-ps-close aria-label="Close">\u2715</button></div><div class="ps-card-b">'
+    + lastCopy
+    + '<div class="ps-counts"><div><span class="k">ModuLaser modules</span><span class="v">' + v2Esc(modLabel) + '</span></div>'
+    + '<div><span class="k">MiniLaser</span><span class="v">' + v2Esc(mlLabel) + '</span></div>'
+    + '<div><span class="k">ASD-160</span><span class="v">' + v2Esc(asdLabel) + '</span></div>'
+    + '<div><span class="k">AUX circuits</span><span class="v">' + v2Esc(c.auxUsed + '/' + c.auxMax + ' used') + '</span></div></div>'
+    + moveBtn + cluster
+    + '<div class="ps-warn ps-warn-red">Unmoved units will also be deleted.</div></div>'
+    + '<div class="ps-card-f"><button type="button" class="btn btn-ghost" data-ps-close>Cancel</button>'
+    + '<button type="button" class="btn btn-danger-ghost btn-primary" id="ps-del-confirm" data-ps-focus style="background:#f85149;border-color:#f85149;color:#fff;">' + v2Esc(confirmLabel) + '</button></div></div>';
+  psDlgOpen(ov, html, 'ps-del-title');
+  ov.querySelectorAll('[data-ps-close]').forEach(b => b.addEventListener('click', () => psDlgClose(ov)));
+  const conf = ov.querySelector('#ps-del-confirm');
+  if (conf) conf.addEventListener('click', () => psDeleteConfirm(locEl));
+  const mv = ov.querySelector('#ps-del-move');
+  if (mv) mv.addEventListener('click', () => psDeleteMoveFirst(locEl));
+}
+
+function psDeleteMoveFirst(locEl){
+  const loc = locEl.getAttribute('data-loc');
+  const rows = (typeof mlRows === 'function') ? mlRows(locEl) : [];
+  const first = rows[0];
+  psDlgClose(document.getElementById('ps-del-overlay'), { restore: false });
+  if (first && typeof mlMoveOpen === 'function'){
+    const _close = typeof mlMoveClose === 'function' ? mlMoveClose : null;
+    mlMoveOpen(first, loc);
+    const ov = document.getElementById('mv-overlay');
+    if (ov){
+      // pre-check all units when the multi-select list exists
+      ov.querySelectorAll('.mv-units input[type=checkbox]').forEach(c => { c.checked = true; });
+    }
+    const reopen = () => {
+      document.removeEventListener('keydown', watch, true);
+      const still = psLocEl(loc);
+      if (still) psDeleteOpen(still, still.querySelector('.ps-name') || still);
+    };
+    const watch = ev => {
+      if (ev.key === 'Escape') setTimeout(() => { if (!document.getElementById('mv-overlay')) reopen(); }, 0);
+    };
+    document.addEventListener('keydown', watch, true);
+    const obs = new MutationObserver(() => {
+      if (!document.getElementById('mv-overlay')){ obs.disconnect(); setTimeout(reopen, 0); }
+    });
+    obs.observe(document.body, { childList: true });
+  }
+}
+
+function psNeighborLoc(removedEl){
+  const all = psSheetList();
+  const i = all.indexOf(removedEl);
+  const prev = i > 0 ? all[i - 1] : null;
+  const next = i >= 0 && i < all.length - 1 ? all[i + 1] : (all[0] !== removedEl ? all[0] : null);
+  const target = prev || next;
+  return target ? target.getAttribute('data-loc') : null;
+}
+
+function psSnapshot(){
+  try { return JSON.parse(JSON.stringify(buildStateObject())); } catch (e){ return buildStateObject(); }
+}
+
+function psUndoRestore(){
+  if (!PS_UNDO) return false;
+  const state = PS_UNDO;
+  PS_UNDO = null;
+  clearTimeout(PS_UNDO_TIMER);
+  const toast = document.getElementById('ps-undo-toast');
+  if (toast) toast.remove();
+  if (typeof applyLoadedState === 'function') applyLoadedState(state);
+  if (typeof scheduleSave === 'function') scheduleSave();
+  if (typeof v2Refresh === 'function') v2Refresh();
+  const first = document.querySelector('.location');
+  if (first && typeof setCurrentLocation === 'function') setCurrentLocation(first);
+  if (typeof v2Refresh === 'function') v2Refresh();
+  if (first) psFocusRow(first.getAttribute('data-loc'));
+  return true;
+}
+
+function psShowUndo(name){
+  let t = document.getElementById('ps-undo-toast');
+  if (t) t.remove();
+  t = document.createElement('div');
+  t.id = 'ps-undo-toast';
+  t.setAttribute('role', 'status');
+  t.innerHTML = '<span>Deleted ' + v2Esc(name) + '.</span><button type="button" class="link" id="ps-undo-btn">Undo</button><button type="button" class="ps-card-x" id="ps-undo-x" aria-label="Dismiss">\u2715</button>';
+  document.body.appendChild(t);
+  t.querySelector('#ps-undo-btn').addEventListener('click', () => psUndoRestore());
+  t.querySelector('#ps-undo-x').addEventListener('click', () => t.remove());
+  clearTimeout(PS_UNDO_TIMER);
+  PS_UNDO_TIMER = setTimeout(() => { if (t.parentNode) t.remove(); }, 8000);
+}
+
+function psDeleteConfirm(locEl){
+  if (!locEl || !locEl.parentNode) return;
+  const loc = locEl.getAttribute('data-loc');
+  const name = psNameOf(locEl);
+  const last = psSheetList().length <= 1;
+  const focusLoc = last ? null : psNeighborLoc(locEl);
+  PS_UNDO = psSnapshot();
+  psDlgClose(document.getElementById('ps-del-overlay'), { restore: false });
+  locEl.remove();
+  let focusEl = focusLoc ? psLocEl(focusLoc) : null;
+  if (last){
+    if (typeof addLocation === 'function') addLocation();
+    const all = psSheetList();
+    focusEl = all[all.length - 1] || null;
+  }
+  if (typeof scheduleSave === 'function') scheduleSave();
+  if (focusEl && typeof setCurrentLocation === 'function') setCurrentLocation(focusEl);
+  if (typeof v2Refresh === 'function') v2Refresh();
+  if (focusEl) psFocusRow(focusEl.getAttribute('data-loc'));
+  psShowUndo(name);
+}
+
+function psCloseRowMenu(){
+  const m = document.getElementById('sb-row-menu');
+  if (m) m.remove();
+  document.querySelectorAll('.sb-more[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+}
+
+function psOpenRowMenu(btn, loc){
+  psCloseRowMenu();
+  btn.setAttribute('aria-expanded', 'true');
+  const menu = document.createElement('div');
+  menu.id = 'sb-row-menu'; menu.className = 'sb-menu'; menu.setAttribute('role', 'menu');
+  menu.innerHTML = '<button type="button" role="menuitem" data-act="rename">Rename</button><button type="button" role="menuitem" data-act="duplicate">Duplicate</button>';
+  document.body.appendChild(menu);
+  const r = btn.getBoundingClientRect();
+  menu.style.top = (r.bottom + 4) + 'px';
+  menu.style.left = Math.max(8, r.right - 148) + 'px';
+  menu.querySelectorAll('button').forEach(b => b.addEventListener('click', ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    const act = b.getAttribute('data-act');
+    psCloseRowMenu();
+    const el = psLocEl(loc);
+    if (act === 'rename') psRenameStart(el);
+    if (act === 'duplicate') psDuplicate(el);
+  }));
+  const dismiss = ev => {
+    if (menu.contains(ev.target) || ev.target === btn) return;
+    psCloseRowMenu(); document.removeEventListener('mousedown', dismiss, true);
+  };
+  setTimeout(() => document.addEventListener('mousedown', dismiss, true), 0);
+}
+
+function psRenameStart(locEl){
+  if (!locEl) return;
+  window.__psRenaming = true;
+  const loc = locEl.getAttribute('data-loc');
+  const row = document.querySelector('#sb-list .sb-item[data-loc="' + loc + '"]');
+  const nameEl = row && row.querySelector('.sb-name');
+  if (!nameEl){ window.__psRenaming = false; return; }
+  const cur = ((locEl.querySelector('.ps-name') || {}).value || '').trim();
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.className = 'sb-rename'; inp.value = cur; inp.setAttribute('data-sb-rename', '1'); inp.setAttribute('aria-label', 'Power supply name');
+  nameEl.replaceWith(inp);
+  inp.focus(); inp.select();
+  const commit = () => {
+    if (!window.__psRenaming) return;
+    window.__psRenaming = false;
+    const v = inp.value.trim();
+    const field = locEl.querySelector('.ps-name');
+    if (field) field.value = v;
+    if (typeof scheduleSave === 'function') scheduleSave();
+    if (typeof v2Refresh === 'function') v2Refresh();
+  };
+  const cancel = () => { window.__psRenaming = false; if (typeof v2Refresh === 'function') v2Refresh(); };
+  inp.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter'){ ev.preventDefault(); commit(); }
+    if (ev.key === 'Escape'){ ev.preventDefault(); cancel(); }
+  });
+  inp.addEventListener('blur', () => setTimeout(commit, 0));
+}
+
+function psRewriteClusterVal(v, srcLoc, destLoc){
+  const s = String(v || '');
+  if (s.indexOf('r:' + srcLoc + ':') === 0) return 'r:' + destLoc + ':' + s.slice(('r:' + srcLoc + ':').length);
+  return s;
+}
+
+function psCopyModules(srcEl, destEl){
+  const srcLoc = srcEl.getAttribute('data-loc'), destLoc = destEl.getAttribute('data-loc');
+  destEl.querySelectorAll('[data-role="module"]').forEach(r => r.remove());
+  const saved = (typeof serializeLocation === 'function') ? serializeLocation(srcEl) : { modules: [] };
+  (saved.modules || []).forEach(m => {
+    const type = m.type || 'Standard Display';
+    if (typeof addModuleRow === 'function') addModuleRow(destLoc, type);
+    const row = destEl.querySelector('.devices-body [data-role="module"]:last-child') || destEl.querySelector('[data-role="module"]:last-child');
+    if (!row) return;
+    if (m.zone && row.querySelector('.zone-name')) row.querySelector('.zone-name').value = m.zone;
+    if (m.address && row.querySelector('.module-address')) row.querySelector('.module-address').value = m.address;
+    if (m.fan && row.querySelector('.fanspeed-select')) row.querySelector('.fanspeed-select').value = m.fan;
+    if (row.querySelector('.cluster-select')){
+      const cv = psRewriteClusterVal(m.cluster, srcLoc, destLoc);
+      const cl = row.querySelector('.cluster-select');
+      if (cv && !Array.from(cl.options).some(o => o.value === cv)){
+        const opt = document.createElement('option'); opt.value = cv; opt.textContent = cv; cl.appendChild(opt);
+      }
+      cl.value = cv || '';
+    }
+    if (m.power && row.querySelector('.power-select')) row.querySelector('.power-select').value = m.power.indexOf('follow:') === 0 ? 'own' : m.power;
+    if (m.circuitSource && row.querySelector('.circuit-source')){
+      const edited = !!(m.circuitSourceEdited || (row.querySelector('.circuit-source') || {}).dataset.userEdited === '1');
+      /* serializeLocation does not currently store circuitSourceEdited; treat auto text as refreshable later */
+      row.querySelector('.circuit-source').value = m.circuitSource;
+    }
+    if (m.auxCircuitNum && row.querySelector('.aux-circuit-num')) row.querySelector('.aux-circuit-num').value = m.auxCircuitNum;
+  });
+  (saved.miniLasers || []).forEach(d => {
+    const copy = Object.assign({}, d);
+    if (copy.cluster) copy.cluster = psRewriteClusterVal(copy.cluster, srcLoc, destLoc);
+    const edited = !!copy.circuitSourceEdited;
+    const newName = ((destEl.querySelector('.ps-name') || {}).value || '').trim();
+    if (!edited && copy.circuitSource){
+      copy.circuitSource = '';
+      copy.circuitSourceEdited = false;
+    }
+    /* AUX numbers copy as-is */
+    if (copy.kind === 'asd160' && typeof asdAddRow === 'function') asdAddRow(destLoc, copy);
+    else if (typeof mlAddRow === 'function') mlAddRow(destLoc, copy);
+  });
+  /* Refresh unedited circuit sources that still mention the source name */
+  const srcName = ((srcEl.querySelector('.ps-name') || {}).value || '').trim();
+  const destName = ((destEl.querySelector('.ps-name') || {}).value || '').trim();
+  if (srcName && destName && srcName !== destName){
+    destEl.querySelectorAll('.circuit-source').forEach(inp => {
+      if (inp.dataset.userEdited === '1') return;
+      if (inp.value && inp.value.indexOf(srcName) >= 0) inp.value = inp.value.split(srcName).join(destName);
+    });
+  }
+}
+
+function psCopyAllSettings(srcEl, destEl){
+  if (typeof mlCopySheetSettings === 'function') mlCopySheetSettings(srcEl, destEl);
+  const copyVal = sel => { const a = srcEl.querySelector(sel), b = destEl.querySelector(sel); if (a && b) b.value = a.value; };
+  ['.location-name', '.ps-capacity-select', '.battery-cabinet-select', '.battery-size-select', '.battery-size-custom',
+   '.tp-battery-model', '.tp-battery-ah', '.tp-battery-voltage', '.export-charger-ah', '.export-margin-select',
+   '.aux-circuits-custom', '.custom-quiescent', '.custom-aux-ma', '.tp-supply-makemodel'].forEach(copyVal);
+  const scheme = srcEl.querySelector('.addr-scheme-radio[value="standalone"]:checked') ? 'standalone' : 'networked';
+  const r = destEl.querySelector('.addr-scheme-radio[value="' + scheme + '"]');
+  if (r) r.checked = true;
+  if (typeof sheetSenseNet === 'function') destEl.dataset.senseNet = String(sheetSenseNet(srcEl) || destEl.dataset.senseNet || 1);
+  const mode = ((srcEl.querySelector('.mode-radio:checked') || {}).value) || 'builtin';
+  const dm = destEl.querySelector('.mode-radio[value="' + mode + '"]'); if (dm) dm.checked = true;
+}
+
+function psDuplicate(srcEl){
+  if (!srcEl) return;
+  const name = (typeof mlSuggestPsName === 'function') ? mlSuggestPsName() : 'PS-1';
+  const area = psAreaOf(srcEl);
+  if (typeof addLocation === 'function') addLocation();
+  const all = psSheetList();
+  const destEl = all[all.length - 1];
+  if (!destEl) return;
+  destEl.querySelector('.ps-name').value = name;
+  destEl.querySelector('.ps-location').value = area;
+  psCopyAllSettings(srcEl, destEl);
+  psCopyModules(srcEl, destEl);
+  srcEl.after(destEl);
+  const destLoc = destEl.getAttribute('data-loc');
+  if (typeof recalcLocation === 'function') recalcLocation(destLoc);
+  if (typeof refreshAllAmber === 'function') refreshAllAmber();
+  if (typeof scheduleSave === 'function') scheduleSave();
+  if (typeof setCurrentLocation === 'function') setCurrentLocation(destEl);
+  if (typeof v2Refresh === 'function') v2Refresh();
+  psFocusRow(destLoc);
+}
+
+function psPlaceSheet(el, destArea, beforeEl){
+  if (!el) return;
+  const field = el.querySelector('.ps-location');
+  if (field && destArea != null) field.value = destArea;
+  const container = document.getElementById('locations-container');
+  if (beforeEl && beforeEl.parentNode === container) container.insertBefore(el, beforeEl);
+  else if (beforeEl === null && container) container.appendChild(el);
+  if (typeof scheduleSave === 'function') scheduleSave();
+  if (typeof v2Refresh === 'function') v2Refresh();
+}
+
+function psAreaSiblings(area){
+  return psSheetList().filter(l => psAreaOf(l) === area);
+}
+
+function psReorderRelative(el, delta){
+  const area = psAreaOf(el);
+  const sibs = psAreaSiblings(area);
+  const i = sibs.indexOf(el);
+  const j = i + delta;
+  if (i < 0) return false;
+  if (j >= 0 && j < sibs.length){
+    const target = sibs[j];
+    if (delta > 0) target.after(el); else target.before(el);
+    if (typeof scheduleSave === 'function') scheduleSave();
+    if (typeof v2Refresh === 'function') v2Refresh();
+    psFocusRow(el.getAttribute('data-loc'));
+    return true;
+  }
+  /* at group boundary: propose adjacent group */
+  const groups = [];
+  const seen = {};
+  psSheetList().forEach(l => { const a = psAreaOf(l); if (!seen[a]){ seen[a] = true; groups.push(a); } });
+  const gi = groups.indexOf(area);
+  const nextG = delta > 0 ? groups[gi + 1] : groups[gi - 1];
+  if (nextG){ psProposeAreaMove(el, nextG, delta > 0 ? 'start' : 'end'); return true; }
+  return false;
+}
+
+function psProposeAreaMove(el, destArea, edge){
+  if (!el) return;
+  const name = psNameOf(el);
+  const srcArea = psAreaOf(el);
+  if (srcArea === destArea) return;
+  psPendingArea = { el, destArea, edge: edge || 'start' };
+  const ov = psEnsureOverlay('ps-area-overlay');
+  const html = '<div class="ps-card"><div class="ps-card-h"><h2 id="ps-area-title">Move ' + v2Esc(name) + ' to ' + v2Esc(destArea) + '?</h2><button type="button" class="ps-card-x" data-ps-close aria-label="Close">\u2715</button></div>'
+    + '<div class="ps-card-b"><p>This will update the supply\'s Location from ' + v2Esc(srcArea) + ' to ' + v2Esc(destArea) + '.</p></div>'
+    + '<div class="ps-card-f"><button type="button" class="btn btn-ghost" data-ps-close>Cancel</button>'
+    + '<button type="button" class="btn btn-primary" id="ps-area-confirm" data-ps-focus>Move to ' + v2Esc(destArea) + '</button></div></div>';
+  psDlgOpen(ov, html, 'ps-area-title');
+  ov.querySelectorAll('[data-ps-close]').forEach(b => b.addEventListener('click', () => { psPendingArea = null; psDlgClose(ov); }));
+  ov.querySelector('#ps-area-confirm').addEventListener('click', () => psConfirmAreaMove());
+}
+
+function psConfirmAreaMove(el, destArea){
+  const job = psPendingArea || (el ? { el, destArea, edge: 'start' } : null);
+  psPendingArea = null;
+  psDlgClose(document.getElementById('ps-area-overlay'), { restore: false });
+  if (!job || !job.el) return;
+  const area = destArea || job.destArea;
+  if (job.beforeEl && job.beforeEl.parentNode){
+    const field = job.el.querySelector('.ps-location');
+    if (field) field.value = area;
+    job.beforeEl.before(job.el);
+    if (typeof scheduleSave === 'function') scheduleSave();
+    if (typeof v2Refresh === 'function') v2Refresh();
+  } else {
+  const sibs = psAreaSiblings(area);
+  const before = job.edge === 'end' && sibs.length ? null : (sibs[0] || null);
+  let beforeEl = before;
+  if (job.edge === 'end'){
+    const last = sibs[sibs.length - 1];
+    if (last){ last.after(job.el); beforeEl = 'done'; }
+    else beforeEl = null;
+  }
+  if (beforeEl !== 'done') psPlaceSheet(job.el, area, beforeEl);
+  else {
+    const field = job.el.querySelector('.ps-location');
+    if (field) field.value = area;
+    if (typeof scheduleSave === 'function') scheduleSave();
+    if (typeof v2Refresh === 'function') v2Refresh();
+  }
+  }
+  if (typeof setCurrentLocation === 'function') setCurrentLocation(job.el);
+  if (typeof v2Refresh === 'function') v2Refresh();
+  psFocusRow(job.el.getAttribute('data-loc'));
+}
+
+function psSelectSheet(loc){
+  const el = psLocEl(loc); if (!el) return;
+  if (typeof setCurrentLocation === 'function') setCurrentLocation(el);
+  if (typeof v2Refresh === 'function') v2Refresh();
+  const center = document.getElementById('v2-center'); if (center) center.scrollTop = 0;
+  window.scrollTo(0, 0);
+  if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches && typeof v2SetPanel === 'function') v2SetPanel('sidebar', false);
+}
+
+function psOnSidebarClick(e){
+  if (e.target.closest('.sb-menu')) return;
+  const trash = e.target.closest('.sb-trash');
+  if (trash){
+    e.preventDefault(); e.stopPropagation();
+    const el = psLocEl(trash.getAttribute('data-loc') || trash.closest('.sb-item').getAttribute('data-loc'));
+    if (el) psDeleteOpen(el, trash);
+    return;
+  }
+  const more = e.target.closest('.sb-more');
+  if (more){
+    e.preventDefault(); e.stopPropagation();
+    const loc = more.closest('.sb-item').getAttribute('data-loc');
+    if (more.getAttribute('aria-expanded') === 'true') psCloseRowMenu();
+    else psOpenRowMenu(more, loc);
+    return;
+  }
+  if (e.target.closest('.sb-grip') || e.target.closest('.sb-rename')) return;
+  const item = e.target.closest('.sb-item');
+  if (!item) return;
+  psSelectSheet(item.getAttribute('data-loc'));
+}
+
+function psOnSidebarKey(e){
+  const item = e.target.closest('.sb-item');
+  if (!item) return;
+  const loc = item.getAttribute('data-loc');
+  const el = psLocEl(loc);
+  if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.altKey){
+    e.preventDefault();
+    if (el) psReorderRelative(el, e.key === 'ArrowDown' ? 1 : -1);
+    return;
+  }
+  if (e.key === 'Enter' || e.key === ' '){
+    if (e.target.classList.contains('sb-item') || e.target.classList.contains('sb-item-main')){
+      e.preventDefault(); psSelectSheet(loc);
+    }
+  }
+  if (e.key === 'Delete' || e.key === 'Backspace'){
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault(); if (el) psDeleteOpen(el, e.target);
+  }
+}
+
+function psOnDragStart(e){
+  const grip = e.target.closest('.sb-grip');
+  const item = e.target.closest('.sb-item');
+  if (!item) return;
+  if (!grip && e.target !== item) { /* allow drag only from grip */ if (!e.target.classList.contains('sb-grip-dots')) { e.preventDefault(); return; } }
+  psDragLoc = item.getAttribute('data-loc');
+  item.classList.add('dragging');
+  if (e.dataTransfer){ e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', psDragLoc); }
+}
+function psOnDragOver(e){
+  if (!psDragLoc) return;
+  e.preventDefault();
+  document.querySelectorAll('.sb-drop, .sb-drop-area').forEach(n => { n.classList.remove('sb-drop'); n.classList.remove('sb-drop-area'); });
+  const item = e.target.closest('.sb-item');
+  const group = e.target.closest('.sb-group');
+  if (item) item.classList.add('sb-drop');
+  else if (group) group.classList.add('sb-drop-area');
+}
+function psOnDragEnd(){
+  document.querySelectorAll('.dragging, .sb-drop, .sb-drop-area').forEach(n => { n.classList.remove('dragging'); n.classList.remove('sb-drop'); n.classList.remove('sb-drop-area'); });
+  psDragLoc = null;
+}
+function psOnDrop(e){
+  e.preventDefault();
+  const srcLoc = psDragLoc || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
+  const srcEl = srcLoc ? psLocEl(srcLoc) : null;
+  const item = e.target.closest('.sb-item');
+  const group = e.target.closest('.sb-group');
+  psOnDragEnd();
+  if (!srcEl) return;
+  const srcArea = psAreaOf(srcEl);
+  if (item){
+    const destEl = psLocEl(item.getAttribute('data-loc'));
+    if (!destEl || destEl === srcEl) return;
+    const destArea = psAreaOf(destEl);
+    if (destArea === srcArea){
+      destEl.before(srcEl);
+      if (typeof scheduleSave === 'function') scheduleSave();
+      if (typeof v2Refresh === 'function') v2Refresh();
+      psFocusRow(srcLoc);
+    } else {
+      psProposeAreaMove(srcEl, destArea, 'start');
+      /* remember to insert before destEl on confirm: stash */
+      if (psPendingArea) psPendingArea.beforeEl = destEl;
+    }
+    return;
+  }
+  if (group){
+    const destArea = group.getAttribute('data-area') || '';
+    if (destArea && destArea !== srcArea) psProposeAreaMove(srcEl, destArea, 'end');
+  }
+}
+
+
 function wireV2Shell(){
   document.body.classList.add('v2');
   const setTop = () => { const t = document.querySelector('.topbar.v2-top'); if (t) document.documentElement.style.setProperty('--v2-top', t.offsetHeight + 'px'); };
@@ -10513,12 +11177,12 @@ function wireV2Shell(){
   v2SyncViewChecks();
   document.getElementById('proj-settings-toggle').addEventListener('click', () => v2ToggleSettings());
   document.getElementById('proj-settings').addEventListener('click', e => { const b = e.target.closest('[data-goto]'); if (b){ const el = document.getElementById('location-' + b.dataset.goto); if (el){ setCurrentLocation(el); v2Refresh(); } } });
-  document.getElementById('sb-list').addEventListener('click', e => {
-    const b = e.target.closest('.sb-item'); if (!b) return;
-    const el = document.getElementById('location-' + b.dataset.loc); if (!el) return;
-    setCurrentLocation(el); v2Refresh(); document.getElementById('v2-center').scrollTop = 0; window.scrollTo(0, 0);
-    if (window.matchMedia('(max-width: 820px)').matches) v2SetPanel('sidebar', false);
-  });
+  document.getElementById('sb-list').addEventListener('click', psOnSidebarClick);
+  document.getElementById('sb-list').addEventListener('keydown', psOnSidebarKey);
+  document.getElementById('sb-list').addEventListener('dragstart', psOnDragStart);
+  document.getElementById('sb-list').addEventListener('dragover', psOnDragOver);
+  document.getElementById('sb-list').addEventListener('drop', psOnDrop);
+  document.getElementById('sb-list').addEventListener('dragend', psOnDragEnd);
   document.getElementById('sb-add-btn').addEventListener('click', () => { addLocation(); v2Refresh(); });
   const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
   on('view-settings-btn', () => v2ToggleSettings());
@@ -10752,7 +11416,20 @@ async function v2ExportPdf(){
     document.getElementById('pe-status').textContent = r ? 'Saved ' + r : 'PDF cancelled'; return;
   }
   const fr = document.createElement('iframe'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(fr);
-  fr.onload = () => { setTimeout(() => { fr.contentWindow.focus(); fr.contentWindow.print(); setTimeout(() => fr.remove(), 2000); }, 150); };
+  fr.onload = () => {
+    const start = Date.now();
+    const tick = () => {
+      let done = false;
+      try { done = !!(fr.contentDocument && fr.contentDocument.documentElement && fr.contentDocument.documentElement.getAttribute('data-fit') === 'done'); } catch (e) { done = true; }
+      if (done || (Date.now() - start > 5000)){
+        try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) {}
+        setTimeout(() => fr.remove(), 2000);
+        return;
+      }
+      setTimeout(tick, 50);
+    };
+    tick();
+  };
   fr.srcdoc = html;
   document.getElementById('pe-status').textContent = 'Choose “Save as PDF” in the print window (Letter, margins none).';
 }
@@ -12864,8 +13541,11 @@ function mlMoveClose(opts){
   mlMovePrevFocus = null;
   const restore = () => {
     if (mlMoveFocusable(prev)){ prev.focus(); return; }
-    const fallback = document.querySelector('.location-current .ml-move-btn, .location-current .ml-add, #sb-add-btn');
-    if (fallback && typeof fallback.focus === 'function') fallback.focus();
+    const sels = ['.location-current .ml-move-btn', '.location-current .ml-add', '#sb-add-btn'];
+    for (let i = 0; i < sels.length; i++){
+      const fallback = document.querySelector(sels[i]);
+      if (fallback && typeof fallback.focus === 'function' && (typeof mlMoveFocusable !== 'function' || mlMoveFocusable(fallback))){ fallback.focus(); return; }
+    }
   };
   if (typeof requestAnimationFrame === 'function') requestAnimationFrame(restore);
   else setTimeout(restore, 0);
@@ -13560,7 +14240,7 @@ body[data-tb-view=config] #v2-center{width:auto!important;max-width:none!importa
    (same engine: masd-engine.js; same project file: modulaser-project.js)
    Modes · Config (design) · Legacy imports · Field-change loop · Reports
    ===================================================================== */
-const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000', '00.03.001': '02.02.001', '00.03.002': '02.02.002', '00.03.003': '02.02.003' };
+const TB_LINEAGE_BY_REV = { '00.01.000': '02.00.002', '00.01.001': '02.00.003', '00.01.002': '02.00.004', '00.01.003': '02.00.005', '00.02.000': '02.01.000', '00.03.000': '02.02.000', '00.03.001': '02.02.001', '00.03.002': '02.02.002', '00.03.003': '02.02.003', '00.04.000': '02.03.000' };
 let TB_LINEAGE_MISSING = false;   // QA D5: true when the lineage map has no entry for the running Toolbox revision (tests fail on it)
 const TB_CALC_LINEAGE = (() => { const l = AMENDMENTS[AMENDMENTS.length - 1], k = `${l.major}.${l.minor}.${l.rev}`; if (TB_LINEAGE_BY_REV[k]) return TB_LINEAGE_BY_REV[k];
   TB_LINEAGE_MISSING = true; console.warn(`TB_LINEAGE_BY_REV has no entry for Toolbox ${k}; calculator lineage falls back to the last mapped revision — add the entry.`);
