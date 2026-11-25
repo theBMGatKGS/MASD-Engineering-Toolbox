@@ -481,6 +481,332 @@ async def main():
            'data-fit' in src and 'done' in src and ('wait' in src.lower() or 'poll' in src.lower() or 'requestAnimationFrame' in src or 'while' in src or 'setTimeout' in src),
            src[src.find('fr.onload') if 'fr.onload' in src else 0: src.find('fr.onload')+400 if 'fr.onload' in src else 200])
 
+        # ========== QA follow-up H1 / H2 / M1 / M2 / M3 / L1-L4 ==========
+        async def dismiss_import_prompts():
+            for _ in range(8):
+                info = await pg.evaluate("""() => {
+                  const o = document.getElementById('prompt-overlay');
+                  if (!o || !o.classList.contains('open')) return null;
+                  return [document.getElementById('prompt-title') && document.getElementById('prompt-title').textContent,
+                          [...document.querySelectorAll('#prompt-actions button')].map(b => b.textContent)];
+                }""")
+                if not info:
+                    return
+                pick = next((x for x in info[1] if x in (
+                    'Merge sheets', 'Manually address', 'Import anyway', 'Keep both (rename)', 'OK'
+                )), info[1][0] if info[1] else None)
+                if not pick:
+                    return
+                await pg.evaluate("([t]) => [...document.querySelectorAll('#prompt-actions button')].find(b => b.textContent === t).click()", [pick])
+                await pg.wait_for_timeout(350)
+
+        async def confirm_delete():
+            await pg.wait_for_timeout(150)
+            await pg.evaluate("""() => {
+              const btn = [...document.querySelectorAll('#ps-del-overlay button, [role=dialog] button')].find(b => /Delete/i.test(b.textContent) && !/Cancel/.test(b.textContent));
+              if (btn) btn.click();
+            }""")
+            await pg.wait_for_timeout(400)
+
+        # H1: Import Calc -> Merge with colliding loc ids
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        st = await pg.evaluate("""() => {
+          const s = buildStateObject();
+          s.locations.forEach((l, i) => { l.psName = 'PS-IMP' + (i + 1); });
+          return JSON.stringify(s);
+        }""")
+        html = '<!DOCTYPE html><html><body><script type="application/json" id="embedded-state">' + st.replace('</', '<\\/') + '</script></body></html>'
+        await pg.evaluate("([h]) => { handleImportFile(new File([h], 'probe-import.html', {type:'text/html'})); }", [html])
+        await pg.wait_for_timeout(400)
+        await dismiss_import_prompts()
+        await pg.wait_for_timeout(600)
+        h1 = await pg.evaluate("""() => {
+          const locRoots = [...document.querySelectorAll('.location')];
+          const allIds = locRoots.flatMap(l => [l, ...l.querySelectorAll('[id]')].map(e => e.id).filter(Boolean));
+          const dups = [...new Set(allIds.filter((x, i, a) => a.indexOf(x) !== i))];
+          const locs = [...document.querySelectorAll('.location')].map(l => ({
+            loc: l.dataset.loc, name: l.querySelector('.ps-name').value,
+            ah: (l.querySelector('.required-ah') || {}).textContent || ''
+          }));
+          const locIds = locs.map(l => l.loc);
+          const imported = locs.filter(l => l.name.indexOf('PS-IMP') === 0);
+          const ahOk = imported.every(l => !/^\\s*0(\\.0+)?\\s*Ah/.test(l.ah) || /Incomplete/i.test(l.ah));
+          const imp1 = [...document.querySelectorAll('#sb-list .sb-item')].find(i => /PS-IMP1/.test(i.textContent));
+          return { nDup: dups.length, dups: dups.slice(0, 8), uniqueLocs: new Set(locIds).size === locIds.length,
+                   imported: imported.length, ahOk, locs, imp1loc: imp1 && imp1.dataset.loc };
+        }""")
+        ok('H1: merge does not create duplicate element ids', h1.get('nDup', 1) == 0, h1)
+        ok('H1: merged loc ids are unique and imported sheets were added', h1.get('uniqueLocs') and h1.get('imported', 0) >= 3, h1)
+        ok('H1: imported sheets calculated Ah (not 0.00 from an id clash)', h1.get('ahOk'), h1)
+        if h1.get('imp1loc'):
+            await pg.evaluate("""() => { const r=[...document.querySelectorAll('#sb-list .sb-item')].find(i => /PS-IMP1/.test(i.textContent)); if (r) r.querySelector('.sb-trash').click(); }""")
+            await pg.wait_for_timeout(200)
+            title = await pg.evaluate("() => (document.getElementById('ps-del-title')||{}).textContent || ''")
+            ok('H1: trash on imported PS-IMP1 names that sheet, not a pre-existing one', 'PS-IMP1' in title, title)
+            await pg.keyboard.press('Escape')
+            await pg.wait_for_timeout(150)
+        else:
+            ok('H1: trash on imported PS-IMP1 names that sheet, not a pre-existing one', False, h1)
+
+        # H2: .mlproj.json omits loc; remote refs and design hash survive a no-edit round trip; schemaVersion 1
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        txt1 = await pg.evaluate("""() => {
+          const doc = MLP.blank();
+          doc.project = mlpProjectInfo();
+          doc.design = mlpBuildDesign();
+          return MLP.stringify(doc, 'ModuLaser Battery Calculator', (typeof mlpCalcRev==='function'?mlpCalcRev():runningRevisionFull()), '');
+        }""")
+        import json as _json
+        doc1 = _json.loads(txt1)
+        st1 = (((doc1.get('design') or {}).get('calc') or {}).get('state') or {})
+        locs_have_loc = any(('loc' in (l or {})) for l in st1.get('locations') or [])
+        hash1 = (doc1.get('design') or {}).get('hash')
+        await pg.evaluate("() => clearEntireDocument({clearHeaders:true})")
+        await pg.wait_for_timeout(200)
+        await pg.evaluate("([t]) => { mlpImportProjectText(t, 'probe.mlproj.json'); if (window.__mlpApply) window.__mlpApply(); }", [txt1])
+        await pg.wait_for_timeout(800)
+        h2after = await pg.evaluate("""() => {
+          return [...document.querySelectorAll('.location')].flatMap(l => [...l.querySelectorAll('.cluster-select')].map(s => {
+            const v = s.value || '';
+            if (v.indexOf('r:') !== 0) return null;
+            const host = document.getElementById('location-' + v.split(':')[1]);
+            return { from: l.querySelector('.ps-name').value, host: host && host.querySelector('.ps-name').value };
+          }).filter(Boolean));
+        }""")
+        txt2 = await pg.evaluate("""() => {
+          const doc = MLP.blank();
+          doc.project = mlpProjectInfo();
+          doc.design = mlpBuildDesign();
+          return MLP.stringify(doc, 'ModuLaser Battery Calculator', (typeof mlpCalcRev==='function'?mlpCalcRev():runningRevisionFull()), '');
+        }""")
+        doc2 = _json.loads(txt2)
+        hash2 = (doc2.get('design') or {}).get('hash')
+        hosts_ok = any(r.get('from') == 'PS-1' and r.get('host') == 'PS-2' for r in (h2after or []))
+        ok('H2: mlpStableCalcState omits loc on locations', not locs_have_loc, {'hasLoc': locs_have_loc, 'keys': list((st1.get('locations') or [{}])[0].keys())[:12]})
+        ok('H2: schemaVersion is 1', doc1.get('schemaVersion') == 1 and doc2.get('schemaVersion') == 1, {'s1': doc1.get('schemaVersion'), 's2': doc2.get('schemaVersion'), 'keys': list(doc1.keys())[:12]})
+        ok('H2: remote cluster refs still point at the original host after a no-edit round trip', hosts_ok, h2after)
+        ok('H2: no-edit Export, Import, Export keeps the design hash', bool(hash1) and hash1 == hash2, {'h1': hash1, 'h2': hash2})
+
+        # M1: Undo restores only the deleted sheet; later edits are kept
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.click('.sb-item[data-loc="%s"] .sb-trash' % ids['loc2'])
+        await confirm_delete()
+        await pg.evaluate("""(locs) => {
+          const l1 = document.getElementById('location-' + locs.loc1);
+          const l3 = document.getElementById('location-' + locs.loc3);
+          if (l3) l3.querySelector('.ps-name').value = 'PS-3-Edited';
+          addModuleRow(locs.loc1, 'Detector');
+          const last = [...l1.querySelectorAll('[data-role=module]')].pop();
+          if (last && last.querySelector('.zone-name')) last.querySelector('.zone-name').value = 'Det-Added';
+          const f = last && last.querySelector('.fanspeed-select');
+          if (f && [...f.options].some(o => o.value === '4')) f.value = '4';
+          if (typeof recalcLocation === 'function'){ recalcLocation(locs.loc1); recalcLocation(locs.loc3); }
+          if (typeof v2Refresh === 'function') v2Refresh();
+        }""", ids)
+        await pg.wait_for_timeout(300)
+        await pg.click('#ps-undo-btn')
+        await pg.wait_for_timeout(500)
+        m1 = await pg.evaluate("""(locs) => {
+          const names = [...document.querySelectorAll('.location')].map(l => l.querySelector('.ps-name').value);
+          const locsNow = [...document.querySelectorAll('.location')].map(l => l.dataset.loc);
+          const zones = [...document.getElementById('location-'+locs.loc1).querySelectorAll('.zone-name')].map(z => z.value);
+          const curLoc = (document.querySelector('#sb-list .sb-item.current')||{}).dataset && document.querySelector('#sb-list .sb-item.current').dataset.loc;
+          return { names, locsNow, zones, curLoc, hasPS2: names.includes('PS-2') };
+        }""", ids)
+        ok('M1: Undo restores the deleted sheet', m1.get('hasPS2') and ids['loc2'] in m1.get('locsNow', []), m1)
+        ok('M1: later rename and added detector are preserved', 'PS-3-Edited' in m1.get('names', []) and 'Det-Added' in m1.get('zones', []), m1)
+        ok('M1: Undo selects the restored sheet', str(m1.get('curLoc')) == str(ids['loc2']), m1)
+
+        # L1: focus survives the delayed sidebar re-render; repeated Alt+Arrow works
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.click('.sb-item[data-loc="%s"] .sb-trash' % ids['loc2'])
+        await confirm_delete()
+        await pg.wait_for_timeout(250)
+        l1f = await pg.evaluate("""() => {
+          const ae = document.activeElement;
+          const item = ae && ae.closest && ae.closest('#sb-list .sb-item');
+          return { tag: ae && ae.tagName, id: ae && ae.id, loc: item && item.dataset.loc,
+                   isBody: ae === document.body || ae === document.documentElement };
+        }""")
+        ok('L1: after delete, focus stays on a remaining sheet row, not the body', (not l1f.get('isBody')) and l1f.get('loc') in (ids['loc1'], ids['loc3']), l1f)
+        await pg.click('#ps-undo-btn')
+        await pg.wait_for_timeout(400)
+        l1u = await pg.evaluate("""() => {
+          const cur = document.querySelector('#sb-list .sb-item.current');
+          const aeItem = document.activeElement && document.activeElement.closest && document.activeElement.closest('#sb-list .sb-item');
+          return { cur: cur && cur.dataset.loc, ae: aeItem && aeItem.dataset.loc };
+        }""")
+        ok('L1: after Undo, the restored sheet is current and focused', str(l1u.get('cur') or l1u.get('ae')) == str(ids['loc2']), l1u)
+        await pg.evaluate("""(loc) => {
+          const row = document.querySelector('#sb-list .sb-item[data-loc="'+loc+'"]');
+          const main = row && (row.querySelector('.sb-item-main') || row);
+          if (main) main.focus();
+        }""", ids['loc2'])
+        await pg.keyboard.press('Alt+ArrowUp')
+        await pg.wait_for_timeout(250)
+        await pg.keyboard.press('Alt+ArrowDown')
+        await pg.wait_for_timeout(250)
+        l1k = await pg.evaluate("""() => {
+          const ae = document.activeElement;
+          const item = ae && ae.closest && ae.closest('#sb-list .sb-item');
+          return { loc: item && item.dataset.loc, isBody: ae === document.body };
+        }""")
+        ok('L1: repeated Alt+Arrow keeps focus in the sidebar (second step works)', (not l1k.get('isBody')) and bool(l1k.get('loc')), l1k)
+
+        # L4: deleting a host cluster flags remote detectors instead of silently reassigning them
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.click('.sb-item[data-loc="%s"] .sb-trash' % ids['loc2'])
+        await confirm_delete()
+        await pg.wait_for_timeout(200)
+        l4 = await pg.evaluate("""(locs) => {
+          const l1 = document.getElementById('location-' + locs.loc1);
+          const sels = [...l1.querySelectorAll('.cluster-select')].map(s => s.value);
+          const flagBlock = ((l1.querySelector('.flags-list') || {}).innerText || '') + ' ' + ((document.getElementById('rp-msgs') || {}).innerText || '') + ' ' + l1.innerText;
+          const stillRemote = sels.some(v => v && v.indexOf('r:' + locs.loc2 + ':') === 0);
+          const movedToPS1 = sels.some(v => v === '1' || v === '01' || (v.indexOf('r:') === 0 && v.split(':')[1] === String(locs.loc1)));
+          const orphaned = !!l1.querySelector('[data-cluster-orphan="1"]') || /deleted power supply|orphaned|not reassigned|Deleted host/i.test(flagBlock);
+          return { sels, stillRemote, movedToPS1, orphaned, flagBlock: flagBlock.slice(0, 400) };
+        }""", ids)
+        ok('L4: detectors keep the deleted-host cluster ref instead of being silently moved', l4.get('stillRemote') and not l4.get('movedToPS1'), l4)
+        ok('L4: the remaining sheet is flagged for the orphaned cluster ref', l4.get('orphaned'), l4)
+
+        # M2: Duplicate via serialize/restore copies voltage, seismic/tamper, manual battery, ribbon, assumed origin
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.evaluate("""(locs) => {
+          const el = document.getElementById('location-' + locs.loc2);
+          const btn = [...el.querySelectorAll('.ps-variant button')].find(b => b.dataset.v && b.dataset.v !== '120');
+          if (btn){ el.querySelectorAll('.ps-variant button').forEach(b => b.setAttribute('aria-pressed', String(b === btn))); }
+          const t = el.querySelector('.ps-tamper'); if (t) t.checked = true;
+          const s = el.querySelector('.ps-seismic'); if (s) s.checked = true;
+          const ab = el.querySelector('.auto-battery-mode');
+          if (ab){
+            ab.value = 'off';
+            const wrap = el.querySelector('.builtin-auto-battery-toggle');
+            if (wrap){
+              const a = wrap.querySelector('.ra-auto'), o = wrap.querySelector('.ra-off');
+              if (a) a.classList.remove('active'); if (o) o.classList.add('active');
+            }
+          }
+          const ram = el.querySelector('.ribbon-assign-mode');
+          if (ram){
+            ram.value = 'off';
+            const wrap = el.querySelector('.ribbon-assign-toggle');
+            if (wrap){
+              const a = wrap.querySelector('.ra-auto'), o = wrap.querySelector('.ra-off');
+              if (a) a.classList.remove('active'); if (o) o.classList.add('active');
+            }
+          }
+          const det = el.querySelector('.show-calc-detail-checkbox'); if (det){ det.checked = true; el.classList.add('show-calc-detail'); }
+          const row = el.querySelector('[data-role=module]');
+          if (row){ row.dataset.origin = 'assumed'; row.dataset.assumption = JSON.stringify({why:'placeholder'}); }
+          if (typeof recalcLocation === 'function') recalcLocation(locs.loc2);
+          if (typeof setCurrentLocation === 'function') setCurrentLocation(el);
+          if (typeof v2Refresh === 'function') v2Refresh();
+        }""", ids)
+        await pg.wait_for_timeout(200)
+        await pg.evaluate("(loc) => { const el = document.getElementById('location-'+loc); if (typeof psDuplicate === 'function') psDuplicate(el); }", ids['loc2'])
+        await pg.wait_for_timeout(500)
+        m2 = await pg.evaluate("""(locs) => {
+          const src = document.getElementById('location-' + locs.loc2);
+          const copy = [...document.querySelectorAll('.location')].find(l => (l.querySelector('.ps-name')||{}).value === 'PS-4');
+          if (!copy) return { missing: true };
+          const variant = (el) => { const b = el.querySelector('.ps-variant button[aria-pressed="true"]'); return b ? b.dataset.v : '120'; };
+          const ab = el => (el.querySelector('.auto-battery-mode')||{}).value;
+          const ram = el => (el.querySelector('.ribbon-assign-mode')||{}).value;
+          const tamper = el => !!(el.querySelector('.ps-tamper')||{}).checked;
+          const seismic = el => !!(el.querySelector('.ps-seismic')||{}).checked;
+          const origin = el => (el.querySelector('[data-role=module]')||{}).dataset && el.querySelector('[data-role=module]').dataset.origin;
+          const plKey = el => (el.querySelector('[data-role=module]')||{}).dataset && el.querySelector('[data-role=module]').dataset.plKey;
+          return {
+            src: { v: variant(src), ab: ab(src), ram: ram(src), t: tamper(src), s: seismic(src), origin: origin(src) },
+            copy: { v: variant(copy), ab: ab(copy), ram: ram(copy), t: tamper(copy), s: seismic(copy), origin: origin(copy), plKey: plKey(copy), name: copy.querySelector('.ps-name').value, loc: copy.dataset.loc }
+          };
+        }""", ids)
+        ok('M2: Duplicate copies voltage, seismic/tamper, manual battery, ribbon, and assumed origin',
+           (not m2.get('missing')) and m2['copy']['v'] == m2['src']['v'] and m2['src']['v'] != '120' and m2['copy']['t'] and m2['copy']['s'] and m2['copy']['ab'] == 'off' and m2['copy']['ram'] == 'off' and m2['copy']['origin'] == 'assumed',
+           m2)
+        ok('M2: Duplicate uses a new loc, is named PS-4, and does not keep plKey',
+           (not m2.get('missing')) and m2['copy']['name'] == 'PS-4' and m2['copy']['loc'] != ids['loc2'] and not m2['copy'].get('plKey'),
+           m2)
+
+        # L2: Rename recalculates auto AUX circuit source labels
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.evaluate("""(loc) => {
+          const el = document.getElementById('location-'+loc);
+          if (typeof setCurrentLocation==='function') setCurrentLocation(el);
+          if (typeof v2Refresh==='function') v2Refresh();
+        }""", ids['loc2'])
+        await pg.wait_for_timeout(150)
+        await pg.click('.sb-item.current .sb-more')
+        await pg.wait_for_timeout(100)
+        await pg.evaluate("() => { const b=[...document.querySelectorAll('.sb-menu button, [role=menuitem]')].find(x => /Rename/i.test(x.textContent)); if (b) b.click(); }")
+        await pg.wait_for_timeout(150)
+        await pg.fill('.sb-rename', 'PS-2-Renamed')
+        await pg.keyboard.press('Enter')
+        await pg.wait_for_timeout(400)
+        l2 = await pg.evaluate("""(loc) => {
+          const el = document.getElementById('location-'+loc);
+          const name = el.querySelector('.ps-name').value;
+          const srcs = [...el.querySelectorAll('.circuit-source')].map(s => s.value);
+          return { name, srcs, updated: srcs.some(s => /PS-2-Renamed/.test(s)), stale: srcs.some(s => /^PS-2 AUX/.test(s) && s.indexOf('Renamed') < 0) };
+        }""", ids['loc2'])
+        ok('L2: Rename recalculates so auto AUX circuit sources use the new name', l2.get('name')=='PS-2-Renamed' and (l2.get('updated') or not l2.get('stale')), l2)
+
+        # L3: Rename warns on a duplicate name; Cancel keeps the original
+        await pg.evaluate("(loc) => { const el=document.getElementById('location-'+loc); if (typeof setCurrentLocation==='function') setCurrentLocation(el); if (typeof v2Refresh==='function') v2Refresh(); }", ids['loc2'])
+        await pg.wait_for_timeout(150)
+        await pg.click('.sb-item.current .sb-more')
+        await pg.wait_for_timeout(100)
+        await pg.evaluate("() => { const b=[...document.querySelectorAll('.sb-menu button, [role=menuitem]')].find(x => /Rename/i.test(x.textContent)); if (b) b.click(); }")
+        await pg.wait_for_timeout(150)
+        await pg.fill('.sb-rename', 'PS-1')
+        await pg.keyboard.press('Enter')
+        await pg.wait_for_timeout(300)
+        l3 = await pg.evaluate("""() => {
+          const o = document.getElementById('prompt-overlay');
+          const open = !!(o && o.classList.contains('open'));
+          const title = (document.getElementById('prompt-title')||{}).textContent || '';
+          return { open, title, txt: o ? o.innerText : '' };
+        }""")
+        ok('L3: Rename to an existing name opens a warning',
+           l3.get('open') and re.search(r'already used|already exists', (l3.get('title') or '') + ' ' + (l3.get('txt') or ''), re.I), l3)
+        if l3.get('open'):
+            await pg.evaluate("""() => {
+              const b = [...document.querySelectorAll('#prompt-actions button, #prompt-overlay button')].find(x => /Cancel/i.test(x.textContent));
+              if (b) b.click();
+            }""")
+            await pg.wait_for_timeout(300)
+        l3b = await pg.evaluate("(loc) => document.getElementById('location-'+loc).querySelector('.ps-name').value", ids['loc2'])
+        ok('L3: Cancel on the duplicate-name warning keeps the original name', l3b == 'PS-2-Renamed', l3b)
+
+        # M3: networked ASD-160 address clash is flagged on both sheets of the same SenseNET
+        ids = await fresh(pg)
+        await pg.evaluate("""(locs) => {
+          asdAddRow(locs.loc1, {kind:'asd160', zone:'ASD-A', networked:true, address:'20', af:4, cls:'SFD'});
+          asdAddRow(locs.loc2, {kind:'asd160', zone:'ASD-B', networked:true, address:'20', af:4, cls:'SFD'});
+          document.querySelectorAll('.location').forEach(l => recalcLocation(l.dataset.loc));
+          if (typeof v2Refresh==='function') v2Refresh();
+        }""", ids)
+        await pg.wait_for_timeout(400)
+        m3 = await pg.evaluate("""(locs) => {
+          const flags = loc => {
+            const el = document.getElementById('location-'+loc);
+            return ((el.querySelector('.flags-list')||{}).innerText || '') + ' ' + ((document.getElementById('rp-msgs')||{}).innerText || '') + ' ' + (el.innerText||'');
+          };
+          const f1 = flags(locs.loc1), f2 = flags(locs.loc2);
+          const re = /ASD-160.*address 20 is already used on this SenseNET/i;
+          return { f1hit: re.test(f1), f2hit: re.test(f2), f1: f1.slice(0, 400), f2: f2.slice(0, 400) };
+        }""", ids)
+        ok('M3: networked ASD-160 address 20 is flagged on both sheets of the same SenseNET', m3.get('f1hit') and m3.get('f2hit'), m3)
+
+
         await browser.close()
 
     print('---')

@@ -2834,7 +2834,7 @@ const AMENDMENTS = [
   { rev: "001", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.001 (Brent 10-19 5:56 PM). <b>Printed Quick Start</b> (Help ▸ Print Quick Start): larger white brand logo (Edwards or Kidde Commercial) in the header with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages. No battery-calculation change (MLP 1.6.3, engine 1.2.0). Printed Quick Start Step 1 is a full-width row (Brent 6:28 PM); Calculator lineage reads 02.02.001 in About, README, Help and the Quick Start. Every printed step is a full-width row with its screenshot on the right (Brent 7:07 PM); step numbers run continuously across pages; Step 3 sub-steps lettered a, b, c. Printed Toolbox Quick Start screenshots (Config, Battery calc) re-captured at 2× with tighter crops at full image width so they are legible (≤ 1.9 source px per print px); Toolbox print pages are now steps 1–2 and 3–5 (still 2 pages). <b>SFD/OAP design target</b> (Brent 2026-10-20 6:39–6:49 AM CT: “SFD/OAP for Engineering Toolbox must be revised from 2.5% obs/ft to 2.0% obs/ft. Make this the target for any UL-driven SFD or OAP requirement. FM and other non-UL targets can remain at 2.5% obs/ft. Allow toolbox a means of adjusting the default % obs/ft to different values for SFD for baseline configurations that apply project-wide but remain within the published limits of the respective detector.” · “UL limit is 1.71% to 2.18%. Target 2.0% for practical purposes.” · “Adjustable for FM too.” · “Allow per-Area/Group overrides too.” · “Yes, for projects requiring UL compliance. All others can remain at 2.5% by default.” · “Reject it with a message.” · “Yes, require a reference and initials.” · “Fold it into 02.02.001.”): the SFD/OAP design target is 2.0 %obs/ft for UL-driven scopes and 2.5 %obs/ft for FM and other standards; adjustable project-wide and per Area/Group (UL and FM), within each detector's published limits (UL: ModuLaser and MiniLaser 1.70–2.18; FM: ModuLaser and MiniLaser ≤2.50, ASD-160 ≤3.5; the ASD-160 UL 1.28 cap always governs). Out-of-range or non-numeric entries are rejected with a message, never clamped; a non-default target needs a reference and the engineer's initials. On UL scopes the SFD Fire 1 seed follows the target; otherwise it stays 2.5. Pass/fail is unchanged (UL Open Area 1.70–2.18 %obs/ft, ≤43 s; FM 3230 ≤2.50, ≤120 s). Older projects adopt the default with a one-time notice. modulaser-project.js 1.6.1. Then (Brent 2026-10-20 7:09 AM CT): “Keep 1.70, per the manual” (UL lower limit unchanged) and “Yes, follow the target”: the MiniLaser alarm-factor rule for SFD and OAP now uses the scope's SFD/OAP target (Area/Group override → project → default; UL default 2.0, FM default 2.5) instead of a fixed 2.18 (OAP) / 2.0 (SFD). FM targets accepted up to 2.50 inclusive. modulaser-project.js 1.6.2. QA SFD/OAP delta: a stored out-of-range target (hand-edited or imported) stays flagged and blocks export, but the Fire 1 seed and the MiniLaser alarm factor use the nearest published limit instead; the one-time notice also shows in the Calculator and the Report; the Report validates the target against the linked design's device kinds (an FM project with only ASD-160s may use up to 3.5 without a false deficiency). modulaser-project.js 1.6.3." },
   { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.1, MASD engine 1.3.1 (same-named floors keyed ‘ #2’, ‘ #3’…; unique names unchanged; older projects re-keyed per floor on Check link, configuration and logged changes follow); wizard region parity." },
   { rev: "003", major: "00", minor: "03", date: "261123", desc: "Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 between power supplies (Option C): sticky Actions column keeps Move and ✕ visible; a dark Move dialog lists other sheets by Area/Group with AUX usage, a Recommended badge, a Full — overflow badge, + Create new power supply, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; destination validation flags handle it. Circuit source auto-fills unless the user edited it; PipeCAD metadata is preserved; the source sheet is never auto-deleted. Granular calculations now list MiniLaser and ASD-160 per-unit rows and subtotals, hide leftover 0 mA Displays or Detectors when that ModuLaser hardware is absent, and build the Total Load formula from only the terms present so it equals totalMa on screen and in Print, Word and Excel Detail. Load Summary, Live Results and the third-party export panel follow the same breakdown. Fixed mlWireRow so class-based alarm-factor derivation reads the sheet element, not the location id string." },
-  { rev: "000", major: "00", minor: "04", date: "261124", desc: "Harmonized with Battery Calculator 02.03.000. Sidebar power-supply actions (Direction C): trash and a drag handle on every left-list row, with a ⋯ menu on the current row for Rename and Duplicate. Delete (sidebar trash or the existing header Remove ⌫) opens a confirm that lists ModuLaser, MiniLaser, ASD-160 and AUX counts, offers Move MiniLaser / ASD-160 first via the existing Move dialog, warns that unmoved units will also be deleted, and warns when another sheet references a cluster on the sheet being deleted. The last remaining supply can be deleted; a blank supply is created automatically with the next sheet badge, and names / Sheet NN badges are never renumbered. An Undo toast restores a serialized snapshot (including original loc ids, so Auto-Save and cluster refs survive). Duplicate copies settings and all units, names the copy with the next free PS-N, and places it right after the source in the same Area; SenseNET / ModuLaser addresses are copied as-is and flagged by existing validation; same-sheet cluster refs are rewritten to the new loc; AUX numbers are copied as-is. Drag-reorder stays within an Area/Group unless confirmed, which updates Location. Keyboard: Alt+Up / Alt+Down. Also: service-worker cache masd-toolbox-00-04-000; browser Print/PDF waits for the fit-done flag; Move-dialog focus no longer lands on + Add power supply first. The ml-calc layer is byte-identical to Calculator 02.03.000." }
+  { rev: "000", major: "00", minor: "04", date: "261124", desc: "Harmonized with Battery Calculator 02.03.000. Sidebar power-supply actions (Direction C): trash and a drag handle on every left-list row, with a ⋯ menu on the current row for Rename and Duplicate. Delete (sidebar trash or the existing header Remove ⌫) opens a confirm that lists ModuLaser, MiniLaser, ASD-160 and AUX counts, offers Move MiniLaser / ASD-160 first via the existing Move dialog, warns that unmoved units will also be deleted, and warns when another sheet references a cluster on the sheet being deleted. The last remaining supply can be deleted; a blank supply is created automatically with the next sheet badge, and names / Sheet NN badges are never renumbered. An Undo toast restores a serialized snapshot (including original loc ids, so Auto-Save and cluster refs survive). Duplicate copies settings and all units, names the copy with the next free PS-N, and places it right after the source in the same Area; SenseNET / ModuLaser addresses are copied as-is and flagged by existing validation; same-sheet cluster refs are rewritten to the new loc; AUX numbers are copied as-is. Drag-reorder stays within an Area/Group unless confirmed, which updates Location. Keyboard: Alt+Up / Alt+Down. Also: service-worker cache masd-toolbox-00-04-000; browser Print/PDF waits for the fit-done flag; Move-dialog focus no longer lands on + Add power supply first. The ml-calc layer is byte-identical to Calculator 02.03.000. QA follow-up: Import Merge remints loc ids and rewrites that file's cluster refs; .mlproj.json omits loc so position-based refs and the design hash stay correct; Undo restores only the deleted sheet; Duplicate uses serialize/restore; networked ASD-160 addresses are checked project-wide; orphaned cluster refs are flagged instead of silently moved; sidebar focus is kept after refresh." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -3124,7 +3124,7 @@ function performSave(){
 function restoreLocation(saved){
   const savedLoc = saved && saved.loc != null ? parseInt(saved.loc, 10) : NaN;
   let loc;
-  if (isFinite(savedLoc) && savedLoc > 0){
+  if (isFinite(savedLoc) && savedLoc > 0 && !document.getElementById('location-' + savedLoc)){
     loc = savedLoc;
     locationCounter = Math.max(locationCounter, loc);
   } else {
@@ -4917,6 +4917,13 @@ function recalcLocationInner(loc){
   const existingCounts = {};
   clusterInfo.forEach(c => { existingCounts[c.num] = 0; });
   let unassignedDetectorCount = 0;
+  const orphanedDetectors = [];
+  const remoteClusterOrphan = prevVal => {
+    const m = /^r:(\d+):(\d+)$/.exec(String(prevVal || ''));
+    if (!m) return null;
+    if (document.getElementById('location-' + m[1])) return null;
+    return { locId: m[1], clusterNum: m[2] };
+  };
   detectorRowsList.forEach(d => {
     const v = parseInt(d.row.querySelector('.cluster-select').value);
     if (numToIdx[v] !== undefined) existingCounts[v]++;
@@ -4934,9 +4941,13 @@ function recalcLocationInner(loc){
       d.row.querySelector('.cluster-remote-hint').textContent = '';
       const prevVal = select.value || select.dataset.desiredValue || '';
       delete select.dataset.desiredValue;
+      const orphan = remoteClusterOrphan(prevVal);
       const prevNum = parseInt(prevVal);
-      const isValidPrev = numToIdx[prevNum] !== undefined;
+      const isValidPrev = !orphan && numToIdx[prevNum] !== undefined;
       let opts = '';
+      if (orphan){
+        opts += `<option value="${prevVal}" data-short="${pad2(orphan.clusterNum)}">Cluster ${pad2(orphan.clusterNum)} on a deleted power supply — reassign</option>`;
+      }
       clusterInfo.forEach(c => {
         const i = c.num;
         const selfCount = (isValidPrev && prevNum === i) ? 1 : 0;
@@ -4949,9 +4960,15 @@ function recalcLocationInner(loc){
       select.disabled = false;
 
       let finalVal;
-      if (isValidPrev && (existingCounts[prevNum] - 1 + remoteClaimCounts[prevNum]) < MAX_DETECTORS_PER_CLUSTER){
+      if (orphan){
+        finalVal = prevVal;
+        d.row.dataset.clusterOrphan = '1';
+        orphanedDetectors.push(d.row);
+      } else if (isValidPrev && (existingCounts[prevNum] - 1 + remoteClaimCounts[prevNum]) < MAX_DETECTORS_PER_CLUSTER){
+        delete d.row.dataset.clusterOrphan;
         finalVal = String(prevNum);
       } else {
+        delete d.row.dataset.clusterOrphan;
         let found = null;
         for (const c of clusterInfo){
           const cnt = existingCounts[c.num] - ((isValidPrev && prevNum === c.num) ? 1 : 0) + remoteClaimCounts[c.num];
@@ -4983,7 +5000,18 @@ function recalcLocationInner(loc){
       const hint = d.row.querySelector('.cluster-remote-hint');
       const prevVal = select.value || select.dataset.desiredValue || '';
       delete select.dataset.desiredValue;
+      const orphan = remoteClusterOrphan(prevVal);
       const remoteCounts = countRemoteAssignments(d.row.id);
+
+      if (orphan && allClusters.length === 0){
+        select.innerHTML = `<option value="${prevVal}" data-short="${pad2(orphan.clusterNum)}">Cluster ${pad2(orphan.clusterNum)} on a deleted power supply — reassign</option>`;
+        select.disabled = false;
+        select.value = prevVal;
+        d.row.dataset.clusterOrphan = '1';
+        orphanedDetectors.push(d.row);
+        if (hint){ hint.textContent = 'Deleted host — reassign'; hint.title = 'This detector referenced a cluster on a power supply that was deleted. It was not moved to another cluster.'; }
+        return;
+      }
 
       if (allClusters.length === 0){
         select.innerHTML = `<option value="" data-short="—">No cluster display defined on any page</option>`;
@@ -4996,6 +5024,9 @@ function recalcLocationInner(loc){
 
       let opts = '';
       let prevStillValid = false;
+      if (orphan){
+        opts += `<option value="${prevVal}" data-short="${pad2(orphan.clusterNum)}">Cluster ${pad2(orphan.clusterNum)} on a deleted power supply — reassign</option>`;
+      }
       allClusters.forEach(c => {
         const key = `r:${c.locId}:${c.clusterNum}`;
         const homeCount = getClusterHomeCount(c.locId, c.clusterNum);
@@ -5012,9 +5043,15 @@ function recalcLocationInner(loc){
       select.disabled = false;
 
       let finalVal;
-      if (prevStillValid){
+      if (orphan){
+        finalVal = prevVal;
+        d.row.dataset.clusterOrphan = '1';
+        orphanedDetectors.push(d.row);
+      } else if (prevStillValid){
+        delete d.row.dataset.clusterOrphan;
         finalVal = prevVal;
       } else {
+        delete d.row.dataset.clusterOrphan;
         const found = allClusters.find(c => {
           const key = `r:${c.locId}:${c.clusterNum}`;
           const total = getClusterHomeCount(c.locId, c.clusterNum) + (remoteCounts[key] || 0);
@@ -5030,7 +5067,10 @@ function recalcLocationInner(loc){
       }
       select.value = finalVal;
 
-      if (finalVal){
+      if (orphan){
+        hint.textContent = 'Deleted host — reassign';
+        hint.title = 'This detector referenced a cluster on a power supply that was deleted. It was not moved to another cluster.';
+      } else if (finalVal){
         const parts = finalVal.split(':');
         const foundCluster = allClusters.find(c => c.locId === parts[1] && String(c.clusterNum) === parts[2]);
         hint.textContent = foundCluster ? `↳ ${foundCluster.locName}` : '';
@@ -5299,6 +5339,13 @@ function recalcLocationInner(loc){
   if (emptyClusters.length){
     const plural = emptyClusters.length > 1;
     flags.push(`Cluster${plural ? 's' : ''} ${emptyClusters.map(pad2).join(', ')} ${plural ? 'have' : 'has'} no detector modules assigned — every cluster requires at least 1 and no more than ${MAX_DETECTORS_PER_CLUSTER} Detector Modules (assigned locally or from another page).`);
+  }
+  if (orphanedDetectors.length){
+    const labels = orphanedDetectors.map(row => {
+      const z = ((row.querySelector('.zone-name') || {}).value || '').trim();
+      return z || 'Detector';
+    });
+    flags.push(orphanedDetectors.length + ' detector(s) reference a cluster on a deleted power supply and were not reassigned (' + labels.join(', ') + ') — reassign them.');
   }
   if (clusterCount === 0 && unassignedDetectorCount > 0){
     flags.push(`Detector modules present with no Standard or Minimum Display and no cluster assigned — correlate detector modules to a cluster display module, local or on another page.`);
@@ -7382,14 +7429,24 @@ async function handleImportFile(file){
     addLocation();
   }
   const newLocIds = [];
+  const importedPairs = [];
   toAdd.forEach(({ saved, renameTo }) => {
     const clone = JSON.parse(JSON.stringify(saved));
     if (renameTo){
       if ((clone.psName || '').trim()) clone.psName = renameTo;
       else clone.name = renameTo;
     }
+    const oldLoc = clone.loc != null ? String(clone.loc) : null;
+    delete clone.loc;
     const locId = restoreLocation(clone);
     newLocIds.push(locId);
+    importedPairs.push({ locId, oldLoc });
+  });
+  const locMap = {};
+  importedPairs.forEach(({ locId, oldLoc }) => { if (oldLoc) locMap[oldLoc] = String(locId); });
+  importedPairs.forEach(({ locId }) => {
+    const el = document.getElementById('location-' + locId);
+    if (el && typeof psRemapClusterRefs === 'function') psRemapClusterRefs(el, locMap);
   });
   newLocIds.forEach(loc => {
     recalcLocation(loc);
@@ -7645,7 +7702,7 @@ const HOWDOI_COMMON = [
     id: 'delete-ps',
     title: 'Delete, rename, duplicate, or reorder a power supply',
     keywords: 'delete remove trash undo last remaining supply rename duplicate drag reorder area group location alt arrow confirm cluster move minilaser',
-    blurb: 'Trash on a sidebar row or Remove ⌫ on the sheet opens a confirm with unit counts, Move MiniLaser / ASD-160 first, a warning that unmoved units will also be deleted, and a warning if another sheet references a cluster on it. Confirm, then Undo if needed. The last supply can be deleted; a blank one is created and Sheet badges are not renumbered. ⋯ Rename or Duplicate (next free PS-N, same Area, right after the source, settings and all units). Drag or Alt+Up / Alt+Down to reorder; changing Area/Group asks for confirm and updates Location. This is not Edit → Clear… or File → New….',
+    blurb: 'Trash on a sidebar row or Remove ⌫ on the sheet opens a confirm with unit counts, Move MiniLaser / ASD-160 first, a warning that unmoved units will also be deleted, and a warning if another sheet references a cluster on it. Detectors that referenced a deleted host cluster are flagged and are not silently moved to another cluster. Confirm, then Undo if needed. The last supply can be deleted; a blank one is created and Sheet badges are not renumbered. ⋯ Rename or Duplicate (next free PS-N, same Area, right after the source, settings and all units). Drag or Alt+Up / Alt+Down to reorder; changing Area/Group asks for confirm and updates Location. This is not Edit → Clear… or File → New….',
     target: 'qs-step-sidebar',
     common: true,
   },
@@ -10408,6 +10465,7 @@ function v2Refresh(){
     if (b){ b.hidden = !m.overrides.length; b.textContent = 'Overrides project settings: ' + m.overrides.join(' · '); b.title = 'This sheet differs from the setting most sheets use (shown in Project Settings).'; }
     v2EnsureZoneCounters(m.el);
   });
+  if (typeof v2RestoreSidebarFocus === 'function') v2RestoreSidebarFocus();
 }
 function v2RenderSidebar(models, cur){
   const list = document.getElementById('sb-list'); if (!list) return;
@@ -10579,9 +10637,66 @@ function psNameOf(el){ if (!el) return 'this power supply'; const n = ((el.query
 function psAreaOf(el){ return ((el && el.querySelector('.ps-location') || {}).value || '').trim() || 'No Area/Group'; }
 function psSheetList(){ return Array.from(document.querySelectorAll('.location')); }
 function psFocusRow(loc){
+  window.__psFocusLoc = loc != null ? String(loc) : null;
   const row = document.querySelector('#sb-list .sb-item[data-loc="' + loc + '"]');
   const main = row && (row.querySelector('.sb-item-main') || row);
   if (main && typeof main.focus === 'function') main.focus();
+}
+function v2RestoreSidebarFocus(){
+  const loc = window.__psFocusLoc;
+  if (!loc) return;
+  const ae = document.activeElement;
+  if (ae && ae !== document.body && ae !== document.documentElement && ae.closest){
+    if (ae.closest('#sb-list .sb-item[data-loc="' + loc + '"]')) return;
+    if (ae.closest('.sb-rename, .ps-overlay, #prompt-overlay, #ps-undo-toast, [role=dialog]')) return;
+    if (!ae.closest('#sb-list') && ae.closest('.location, #v2-center, .menubar, input, select, textarea, button')) return;
+  }
+  const row = document.querySelector('#sb-list .sb-item[data-loc="' + loc + '"]');
+  const main = row && (row.querySelector('.sb-item-main') || row);
+  if (main && typeof main.focus === 'function') main.focus();
+}
+function psRemapClusterRefs(locEl, locMap){
+  if (!locEl || !locMap) return;
+  const fix = v => {
+    const s = String(v || '');
+    const m = /^r:(\d+):(\d+)$/.exec(s);
+    if (!m) return s;
+    const neu = locMap[m[1]];
+    return neu != null ? ('r:' + neu + ':' + m[2]) : s;
+  };
+  const applySel = sel => {
+    if (!sel) return;
+    const src = sel.dataset.desiredValue || sel.value;
+    const nv = fix(src);
+    if (sel.dataset.desiredValue) sel.dataset.desiredValue = nv;
+    if (nv && !Array.from(sel.options).some(o => o.value === nv)){
+      const opt = document.createElement('option'); opt.value = nv; opt.textContent = nv; sel.appendChild(opt);
+    }
+    if (nv) sel.value = nv;
+  };
+  locEl.querySelectorAll('.cluster-select').forEach(applySel);
+  locEl.querySelectorAll('[data-cluster]').forEach(el => { if (el.dataset.cluster) el.dataset.cluster = fix(el.dataset.cluster); });
+  locEl.querySelectorAll('[data-role="minilaser"], [data-kind="asd160"]').forEach(tr => {
+    if (tr.dataset.cluster) tr.dataset.cluster = fix(tr.dataset.cluster);
+    applySel(tr.querySelector('.cluster-select, .ml-cluster'));
+  });
+}
+function psRecalcAllSheets(){
+  document.querySelectorAll('.location').forEach(l => {
+    const id = l.getAttribute('data-loc');
+    if (typeof recalcLocation === 'function') recalcLocation(id);
+  });
+}
+function psInsertSheet(el, beforeLoc, area){
+  if (!el) return;
+  if (beforeLoc){
+    const sib = document.getElementById('location-' + beforeLoc);
+    if (sib && sib.parentNode){ sib.before(el); return; }
+  }
+  if (area && typeof psAreaSiblings === 'function'){
+    const group = psAreaSiblings(area).filter(x => x !== el);
+    if (group.length){ group[group.length - 1].after(el); return; }
+  }
 }
 function psDlgFocusable(el){
   if (!el || !document.contains(el)) return false;
@@ -10764,18 +10879,30 @@ function psSnapshot(){
 
 function psUndoRestore(){
   if (!PS_UNDO) return false;
-  const state = PS_UNDO;
+  const job = PS_UNDO;
   PS_UNDO = null;
   clearTimeout(PS_UNDO_TIMER);
   const toast = document.getElementById('ps-undo-toast');
   if (toast) toast.remove();
-  if (typeof applyLoadedState === 'function') applyLoadedState(state);
+  const saved = job.saved ? JSON.parse(JSON.stringify(job.saved)) : null;
+  if (!saved) return false;
+  const oldLoc = saved.loc != null ? String(saved.loc) : (job.loc != null ? String(job.loc) : null);
+  if (oldLoc && document.getElementById('location-' + oldLoc)){
+    delete saved.loc;
+  }
+  const locId = restoreLocation(saved);
+  const el = document.getElementById('location-' + locId);
+  if (el && oldLoc && String(locId) !== String(oldLoc) && typeof psRemapClusterRefs === 'function'){
+    const locMap = {}; locMap[oldLoc] = String(locId);
+    psRemapClusterRefs(el, locMap);
+  }
+  if (el) psInsertSheet(el, job.beforeLoc, job.area);
+  psRecalcAllSheets();
+  if (typeof refreshAllAmber === 'function') refreshAllAmber();
   if (typeof scheduleSave === 'function') scheduleSave();
+  if (el && typeof setCurrentLocation === 'function') setCurrentLocation(el);
   if (typeof v2Refresh === 'function') v2Refresh();
-  const first = document.querySelector('.location');
-  if (first && typeof setCurrentLocation === 'function') setCurrentLocation(first);
-  if (typeof v2Refresh === 'function') v2Refresh();
-  if (first) psFocusRow(first.getAttribute('data-loc'));
+  if (el) psFocusRow(el.getAttribute('data-loc'));
   return true;
 }
 
@@ -10799,7 +10926,11 @@ function psDeleteConfirm(locEl){
   const name = psNameOf(locEl);
   const last = psSheetList().length <= 1;
   const focusLoc = last ? null : psNeighborLoc(locEl);
-  PS_UNDO = psSnapshot();
+  const next = locEl.nextElementSibling;
+  const beforeLoc = (next && next.classList && next.classList.contains('location')) ? next.getAttribute('data-loc') : null;
+  const area = typeof psAreaOf === 'function' ? psAreaOf(locEl) : '';
+  const saved = (typeof serializeLocation === 'function') ? serializeLocation(locEl) : null;
+  PS_UNDO = { saved, loc, name, beforeLoc, area };
   psDlgClose(document.getElementById('ps-del-overlay'), { restore: false });
   locEl.remove();
   let focusEl = focusLoc ? psLocEl(focusLoc) : null;
@@ -10808,6 +10939,8 @@ function psDeleteConfirm(locEl){
     const all = psSheetList();
     focusEl = all[all.length - 1] || null;
   }
+  psRecalcAllSheets();
+  if (typeof refreshAllAmber === 'function') refreshAllAmber();
   if (typeof scheduleSave === 'function') scheduleSave();
   if (focusEl && typeof setCurrentLocation === 'function') setCurrentLocation(focusEl);
   if (typeof v2Refresh === 'function') v2Refresh();
@@ -10858,16 +10991,42 @@ function psRenameStart(locEl){
   inp.type = 'text'; inp.className = 'sb-rename'; inp.value = cur; inp.setAttribute('data-sb-rename', '1'); inp.setAttribute('aria-label', 'Power supply name');
   nameEl.replaceWith(inp);
   inp.focus(); inp.select();
-  const commit = () => {
-    if (!window.__psRenaming) return;
-    window.__psRenaming = false;
+  let finishing = false;
+  const commit = async () => {
+    if (finishing || !window.__psRenaming) return;
+    finishing = true;
     const v = inp.value.trim();
+    const clash = !!(v && Array.from(document.querySelectorAll('.location')).some(l => l !== locEl && ((l.querySelector('.ps-name') || {}).value || '').trim().toLowerCase() === v.toLowerCase()));
+    if (clash){
+      let ok = false;
+      if (typeof showPromptModal === 'function'){
+        ok = await showPromptModal({
+          title: 'Name already used',
+          desc: 'A power supply named <b>' + v2Esc(v) + '</b> already exists. Use this name anyway?',
+          buttons: [
+            { label: 'Cancel', value: false },
+            { label: 'Use this name', value: true, primary: true }
+          ]
+        });
+      } else {
+        ok = window.confirm('A power supply named "' + v + '" already exists. Use this name anyway?');
+      }
+      if (!ok){
+        window.__psRenaming = false;
+        if (typeof v2Refresh === 'function') v2Refresh();
+        psFocusRow(loc);
+        return;
+      }
+    }
+    window.__psRenaming = false;
     const field = locEl.querySelector('.ps-name');
     if (field) field.value = v;
+    if (typeof recalcLocation === 'function') recalcLocation(loc);
     if (typeof scheduleSave === 'function') scheduleSave();
     if (typeof v2Refresh === 'function') v2Refresh();
+    psFocusRow(loc);
   };
-  const cancel = () => { window.__psRenaming = false; if (typeof v2Refresh === 'function') v2Refresh(); };
+  const cancel = () => { window.__psRenaming = false; finishing = true; if (typeof v2Refresh === 'function') v2Refresh(); };
   inp.addEventListener('keydown', ev => {
     if (ev.key === 'Enter'){ ev.preventDefault(); commit(); }
     if (ev.key === 'Escape'){ ev.preventDefault(); cancel(); }
@@ -10950,18 +11109,24 @@ function psCopyAllSettings(srcEl, destEl){
 function psDuplicate(srcEl){
   if (!srcEl) return;
   const name = (typeof mlSuggestPsName === 'function') ? mlSuggestPsName() : 'PS-1';
-  const area = psAreaOf(srcEl);
-  if (typeof addLocation === 'function') addLocation();
-  const all = psSheetList();
-  const destEl = all[all.length - 1];
+  const srcLoc = srcEl.getAttribute('data-loc');
+  const saved = (typeof serializeLocation === 'function') ? JSON.parse(JSON.stringify(serializeLocation(srcEl))) : null;
+  if (!saved) return;
+  const oldLoc = saved.loc != null ? String(saved.loc) : String(srcLoc);
+  delete saved.loc;
+  delete saved.plSheetId;
+  saved.psName = name;
+  (saved.modules || []).forEach(m => { delete m.plKey; });
+  const destLoc = restoreLocation(saved);
+  const destEl = document.getElementById('location-' + destLoc);
   if (!destEl) return;
-  destEl.querySelector('.ps-name').value = name;
-  destEl.querySelector('.ps-location').value = area;
-  psCopyAllSettings(srcEl, destEl);
-  psCopyModules(srcEl, destEl);
+  const locMap = {}; locMap[oldLoc] = String(destLoc);
+  if (typeof psRemapClusterRefs === 'function') psRemapClusterRefs(destEl, locMap);
+  destEl.querySelectorAll('.circuit-source').forEach(el => {
+    if (el.dataset.userEdited !== '1') el.value = '';
+  });
   srcEl.after(destEl);
-  const destLoc = destEl.getAttribute('data-loc');
-  if (typeof recalcLocation === 'function') recalcLocation(destLoc);
+  psRecalcAllSheets();
   if (typeof refreshAllAmber === 'function') refreshAllAmber();
   if (typeof scheduleSave === 'function') scheduleSave();
   if (typeof setCurrentLocation === 'function') setCurrentLocation(destEl);
@@ -11179,6 +11344,10 @@ function wireV2Shell(){
   document.getElementById('proj-settings').addEventListener('click', e => { const b = e.target.closest('[data-goto]'); if (b){ const el = document.getElementById('location-' + b.dataset.goto); if (el){ setCurrentLocation(el); v2Refresh(); } } });
   document.getElementById('sb-list').addEventListener('click', psOnSidebarClick);
   document.getElementById('sb-list').addEventListener('keydown', psOnSidebarKey);
+  document.getElementById('sb-list').addEventListener('focusin', e => {
+    const it = e.target.closest && e.target.closest('.sb-item');
+    if (it) window.__psFocusLoc = it.getAttribute('data-loc');
+  });
   document.getElementById('sb-list').addEventListener('dragstart', psOnDragStart);
   document.getElementById('sb-list').addEventListener('dragover', psOnDragOver);
   document.getElementById('sb-list').addEventListener('drop', psOnDrop);
@@ -13074,7 +13243,9 @@ function mlpStableCalcState(st){
   (st.locations || []).forEach((l, li) => (l.modules || []).forEach((m, mi) => { const k = /^mod-(\d+)-(\d+)$/.exec(m.rowId || ''); if (k){ map[k[1] + '-' + k[2]] = (li + 1) + '-' + (mi + 1); locMap[k[1]] = String(li + 1); } }));
   const fix = v => typeof v !== 'string' ? v : v.replace(/mod-(\d+)-(\d+)/g, (x, a, b) => map[a + '-' + b] ? 'mod-' + map[a + '-' + b] : x).replace(/^r:(\d+):/, (x, a) => locMap[a] ? 'r:' + locMap[a] + ':' : x);
   const walk = o => { if (Array.isArray(o)) return o.map(walk); if (o && typeof o === 'object'){ Object.keys(o).forEach(k => { o[k] = walk(o[k]); }); return o; } return fix(o); };
-  return walk(st);
+  const out = walk(st);
+  (out.locations || []).forEach(l => { if (l && typeof l === 'object') delete l.loc; });
+  return out;
 }
 function mlpProjectInfo(){
   const v = id => (document.getElementById(id) || {}).value || '';
@@ -13353,7 +13524,25 @@ function mlRecalcHook(locEl, mode, setupAux, unassignedAuxRows){
       if (!String(tr.querySelector('.circuit-source').value).trim() && mode === 'builtin' && parseInt(auxSel.value, 10) >= 1) out.flags.push(`ASD-160 ${label}: circuit source missing (e.g., "PS-1 AUX-3").`);
       if (d.networked){ const a = parseInt(d.address, 10);
         if (!(a >= 1 && a <= 127) || String(a) !== d.address) out.flags.push(`ASD-160 ${label}: networked units need a DIP address 1–127.`);
-        else { const used = Array.from(locEl.querySelectorAll('[data-role="module"] .module-address')).map(x => parseInt(x.value, 10)); if (used.includes(a) || asdAddrs[a]) out.flags.push(`ASD-160 ${label}: address ${a} is already used on this SenseNET network.`); asdAddrs[a] = 1; } }
+        else { const used = Array.from(locEl.querySelectorAll('[data-role="module"] .module-address')).map(x => parseInt(x.value, 10));
+          let taken = used.includes(a) || asdAddrs[a];
+          if (!taken){
+            const net = String((typeof sheetSenseNet === 'function' ? sheetSenseNet(locEl) : locEl.dataset.senseNet) || 1);
+            document.querySelectorAll('.location').forEach(other => {
+              if (other === locEl) return;
+              if ((typeof addrSchemeOf === 'function' ? addrSchemeOf(other) : 'networked') !== 'networked') return;
+              const onet = String((typeof sheetSenseNet === 'function' ? sheetSenseNet(other) : other.dataset.senseNet) || 1);
+              if (onet !== net) return;
+              other.querySelectorAll('[data-role="module"] .module-address').forEach(x => { if (parseInt(x.value, 10) === a) taken = true; });
+              const orows = typeof mlRows === 'function' ? mlRows(other) : [];
+              orows.forEach(otr => {
+                if (otr.dataset.kind !== 'asd160') return;
+                const od = typeof asdRowData === 'function' ? asdRowData(otr) : {};
+                if (od.networked && parseInt(od.address, 10) === a) taken = true;
+              });
+            });
+          }
+          if (taken) out.flags.push(`ASD-160 ${label}: address ${a} is already used on this SenseNET network.`); asdAddrs[a] = 1; } }
       const ev = asdEval(tr, locEl), notes = [];
       if (ev){
         if (!d.af && d.af !== 0 || tr.dataset.afSrc === 'derived per Brent rule' || tr.dataset.afSrc === '.pl'){ tr.querySelector('.ml-af').value = String(ev.af.af); tr.dataset.afSrc = ev.af.src; }

@@ -16,7 +16,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 ### What's new in 00.04.000
 
-Harmonized with Battery Calculator 02.03.000. Delete, rename, duplicate, and reorder power supplies from the left sidebar (Direction C). Header Remove ⌫ uses the same confirm and Undo toast. The last remaining supply can be deleted; a blank supply is created automatically and Sheet badges are not renumbered. Duplicate copies settings and all units and is named with the next free PS-N. Dragging into a different Area/Group asks for confirm and updates Location.
+Harmonized with Battery Calculator 02.03.000. Delete, rename, duplicate, and reorder power supplies from the left sidebar (Direction C). Header Remove ⌫ uses the same confirm and Undo toast. The last remaining supply can be deleted; a blank supply is created automatically and Sheet badges are not renumbered. Duplicate copies settings and all units and is named with the next free PS-N. Dragging into a different Area/Group asks for confirm and updates Location. QA follow-up: Import Merge remints ids; .mlproj.json omits loc; Undo restores only the deleted sheet; Duplicate uses serialize/restore; ASD-160 addresses are checked across the SenseNET; orphaned cluster refs are flagged.
 
 ### What's new in 00.03.003
 
