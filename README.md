@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/wwbd-readme-banner-dark.png">
+  <img src=".github/wwbd-readme-banner-light.png" alt="WWBD by BRENTRONIX" width="588">
+</picture>
+
 # MASD Engineering Toolbox
 
 ![MASD Engineering Toolbox PWA in its dark theme: empty new project with power-supply sidebar, sheet settings and Live Results panel](docs/screenshot.png)
