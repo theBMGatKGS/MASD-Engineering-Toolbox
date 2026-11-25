@@ -2834,7 +2834,7 @@ const AMENDMENTS = [
   { rev: "001", major: "00", minor: "03", date: "261019", desc: "Harmonized with Battery Calculator 02.02.001 (Brent 10-19 5:56 PM). <b>Printed Quick Start</b> (Help ▸ Print Quick Start): larger white brand logo (Edwards or Kidde Commercial) in the header with the revision in the subtitle; print screenshots in a complementary light theme (same layout), on-screen Help stays dark; 2 letter pages. No battery-calculation change (MLP 1.6.3, engine 1.2.0). Printed Quick Start Step 1 is a full-width row (Brent 6:28 PM); Calculator lineage reads 02.02.001 in About, README, Help and the Quick Start. Every printed step is a full-width row with its screenshot on the right (Brent 7:07 PM); step numbers run continuously across pages; Step 3 sub-steps lettered a, b, c. Printed Toolbox Quick Start screenshots (Config, Battery calc) re-captured at 2× with tighter crops at full image width so they are legible (≤ 1.9 source px per print px); Toolbox print pages are now steps 1–2 and 3–5 (still 2 pages). <b>SFD/OAP design target</b> (Brent 2026-10-20 6:39–6:49 AM CT: “SFD/OAP for Engineering Toolbox must be revised from 2.5% obs/ft to 2.0% obs/ft. Make this the target for any UL-driven SFD or OAP requirement. FM and other non-UL targets can remain at 2.5% obs/ft. Allow toolbox a means of adjusting the default % obs/ft to different values for SFD for baseline configurations that apply project-wide but remain within the published limits of the respective detector.” · “UL limit is 1.71% to 2.18%. Target 2.0% for practical purposes.” · “Adjustable for FM too.” · “Allow per-Area/Group overrides too.” · “Yes, for projects requiring UL compliance. All others can remain at 2.5% by default.” · “Reject it with a message.” · “Yes, require a reference and initials.” · “Fold it into 02.02.001.”): the SFD/OAP design target is 2.0 %obs/ft for UL-driven scopes and 2.5 %obs/ft for FM and other standards; adjustable project-wide and per Area/Group (UL and FM), within each detector's published limits (UL: ModuLaser and MiniLaser 1.70–2.18; FM: ModuLaser and MiniLaser ≤2.50, ASD-160 ≤3.5; the ASD-160 UL 1.28 cap always governs). Out-of-range or non-numeric entries are rejected with a message, never clamped; a non-default target needs a reference and the engineer's initials. On UL scopes the SFD Fire 1 seed follows the target; otherwise it stays 2.5. Pass/fail is unchanged (UL Open Area 1.70–2.18 %obs/ft, ≤43 s; FM 3230 ≤2.50, ≤120 s). Older projects adopt the default with a one-time notice. modulaser-project.js 1.6.1. Then (Brent 2026-10-20 7:09 AM CT): “Keep 1.70, per the manual” (UL lower limit unchanged) and “Yes, follow the target”: the MiniLaser alarm-factor rule for SFD and OAP now uses the scope's SFD/OAP target (Area/Group override → project → default; UL default 2.0, FM default 2.5) instead of a fixed 2.18 (OAP) / 2.0 (SFD). FM targets accepted up to 2.50 inclusive. modulaser-project.js 1.6.2. QA SFD/OAP delta: a stored out-of-range target (hand-edited or imported) stays flagged and blocks export, but the Fire 1 seed and the MiniLaser alarm factor use the nearest published limit instead; the one-time notice also shows in the Calculator and the Report; the Report validates the target against the linked design's device kinds (an FM project with only ASD-160s may use up to 3.5 without a false deficiency). modulaser-project.js 1.6.3." },
   { rev: "002", major: "00", minor: "03", date: "261109", desc: "Harmonized with Battery Calculator 02.02.002: PipeCAD Displays step, MLP 1.7.1, MASD engine 1.3.1 (same-named floors keyed ‘ #2’, ‘ #3’…; unique names unchanged; older projects re-keyed per floor on Check link, configuration and logged changes follow); wizard region parity." },
   { rev: "003", major: "00", minor: "03", date: "261123", desc: "Harmonized with Battery Calculator 02.02.003. Move MiniLaser and ASD-160 between power supplies (Option C): sticky Actions column keeps Move and ✕ visible; a dark Move dialog lists other sheets by Area/Group with AUX usage, a Recommended badge, a Full — overflow badge, + Create new power supply, a live AUX and required-Ah preview, and multi-unit selection. Overflow (AUX or 65 Ah) warns but still allows the move; destination validation flags handle it. Circuit source auto-fills unless the user edited it; PipeCAD metadata is preserved; the source sheet is never auto-deleted. Granular calculations now list MiniLaser and ASD-160 per-unit rows and subtotals, hide leftover 0 mA Displays or Detectors when that ModuLaser hardware is absent, and build the Total Load formula from only the terms present so it equals totalMa on screen and in Print, Word and Excel Detail. Load Summary, Live Results and the third-party export panel follow the same breakdown. Fixed mlWireRow so class-based alarm-factor derivation reads the sheet element, not the location id string." },
-  { rev: "000", major: "00", minor: "04", date: "261124", desc: "Harmonized with Battery Calculator 02.03.000. Sidebar power-supply actions (Direction C): trash and a drag handle on every left-list row, with a ⋯ menu on the current row for Rename and Duplicate. Delete (sidebar trash or the existing header Remove ⌫) opens a confirm that lists ModuLaser, MiniLaser, ASD-160 and AUX counts, offers Move MiniLaser / ASD-160 first via the existing Move dialog, warns that unmoved units will also be deleted, and warns when another sheet references a cluster on the sheet being deleted. The last remaining supply can be deleted; a blank supply is created automatically with the next sheet badge, and names / Sheet NN badges are never renumbered. An Undo toast restores a serialized snapshot (including original loc ids, so Auto-Save and cluster refs survive). Duplicate copies settings and all units, names the copy with the next free PS-N, and places it right after the source in the same Area; SenseNET / ModuLaser addresses are copied as-is and flagged by existing validation; same-sheet cluster refs are rewritten to the new loc; AUX numbers are copied as-is. Drag-reorder stays within an Area/Group unless confirmed, which updates Location. Keyboard: Alt+Up / Alt+Down. Also: service-worker cache masd-toolbox-00-04-000; browser Print/PDF waits for the fit-done flag; Move-dialog focus no longer lands on + Add power supply first. The ml-calc layer is byte-identical to Calculator 02.03.000. QA follow-up: Import Merge remints loc ids and rewrites that file's cluster refs; .mlproj.json omits loc so position-based refs and the design hash stay correct; Undo restores only the deleted sheet; Duplicate uses serialize/restore; networked ASD-160 addresses are checked project-wide; orphaned cluster refs are flagged instead of silently moved; sidebar focus is kept after refresh." }
+  { rev: "000", major: "00", minor: "04", date: "261124", desc: "Harmonized with Battery Calculator 02.03.000. Sidebar power-supply actions (Direction C): trash and a drag handle on every left-list row, with a ⋯ menu on the current row for Rename and Duplicate. Delete (sidebar trash or the existing header Remove ⌫) opens a confirm that lists ModuLaser, MiniLaser, ASD-160 and AUX counts, offers Move MiniLaser / ASD-160 first via the existing Move dialog, warns that unmoved units will also be deleted, and warns when another sheet references a cluster on the sheet being deleted. The last remaining supply can be deleted; a blank supply is created automatically with the next sheet badge, and names / Sheet NN badges are never renumbered. An Undo toast restores a serialized snapshot (including original loc ids, so Auto-Save and cluster refs survive). Duplicate copies settings and all units, names the copy with the next free PS-N, and places it right after the source in the same Area; SenseNET / ModuLaser addresses are copied as-is and flagged by existing validation; same-sheet cluster refs are rewritten to the new loc; AUX numbers are copied as-is. Drag-reorder stays within an Area/Group unless confirmed, which updates Location. Keyboard: Alt+Up / Alt+Down. Also: service-worker cache masd-toolbox-00-04-000; browser Print/PDF waits for the fit-done flag; Move-dialog focus no longer lands on + Add power supply first. The ml-calc layer is byte-identical to Calculator 02.03.000. QA follow-up: Import Merge remints loc ids and rewrites that file's cluster refs; .mlproj.json omits loc so position-based refs and the design hash stay correct; Undo restores only the deleted sheet; Duplicate uses serialize/restore; networked ASD-160 addresses are checked project-wide; orphaned cluster refs are flagged instead of silently moved; sidebar focus is kept after refresh. QA Round 2: orphaned cluster refs are written as r:0:n on .mlproj.json export and Import Merge so they stay flagged; last-supply Undo removes the unused blank; Duplicate also drops MiniLaser and ASD-160 plKey; ASD-160 address clashes flag both sides; sidebar focus is not stolen from the page body.." }
 ];
 
 function formatDateYYMMDD(yymmdd){
@@ -6583,6 +6583,15 @@ function addrConflicts(){
       if (standalone){ sa[loc] = sa[loc] || {}; if (sa[loc][a]) (out.standalone[loc] = out.standalone[loc] || new Set()).add(a); sa[loc][a] = true; }
       else { net[n] = net[n] || {}; if (net[n][a]) (out.network[n] = out.network[n] || new Set()).add(a); net[n][a] = true; }
     });
+    const asdRows = typeof mlRows === 'function' ? mlRows(l) : [];
+    asdRows.forEach(tr => {
+      if (tr.dataset.kind !== 'asd160') return;
+      const d = typeof asdRowData === 'function' ? asdRowData(tr) : {};
+      if (!d.networked) return;
+      const a = String(d.address || '').trim(); if (!a) return;
+      net[n] = net[n] || {}; if (net[n][a]) (out.network[n] = out.network[n] || new Set()).add(a); net[n][a] = true;
+      if (standalone){ sa[loc] = sa[loc] || {}; if (sa[loc][a]) (out.standalone[loc] = out.standalone[loc] || new Set()).add(a); sa[loc][a] = true; }
+    });
   });
   Object.keys(counts).forEach(n => { if (counts[n] > MAX_MODULES_PER_NETWORK) out.over[n] = counts[n]; });
   return out;
@@ -7444,9 +7453,10 @@ async function handleImportFile(file){
   });
   const locMap = {};
   importedPairs.forEach(({ locId, oldLoc }) => { if (oldLoc) locMap[oldLoc] = String(locId); });
+  const hadLoc = importedPairs.some(p => p.oldLoc);
   importedPairs.forEach(({ locId }) => {
     const el = document.getElementById('location-' + locId);
-    if (el && typeof psRemapClusterRefs === 'function') psRemapClusterRefs(el, locMap);
+    if (el && typeof psRemapClusterRefs === 'function') psRemapClusterRefs(el, locMap, hadLoc ? '0' : undefined);
   });
   newLocIds.forEach(loc => {
     recalcLocation(loc);
@@ -10450,6 +10460,8 @@ function v2Overrides(locEl, basis){
 let v2RefreshTimer = null;
 function v2ScheduleRefresh(){ clearTimeout(v2RefreshTimer); v2RefreshTimer = setTimeout(v2Refresh, 60); }
 function v2Refresh(){
+  const ae0 = document.activeElement;
+  window.__psRestoreSidebar = !!(ae0 && ae0.closest && ae0.closest('#sb-list'));
   const cur = getCurrentLocationEl();
   const basis = v2ProjectBasis();
   const models = Array.from(document.querySelectorAll('.location')).map(el => { const m = v2SheetModel(el); m.overrides = v2Overrides(el, basis); return m; });
@@ -10646,7 +10658,9 @@ function v2RestoreSidebarFocus(){
   const loc = window.__psFocusLoc;
   if (!loc) return;
   const ae = document.activeElement;
-  if (ae && ae !== document.body && ae !== document.documentElement && ae.closest){
+  const inSidebar = !!(ae && ae.closest && ae.closest('#sb-list'));
+  if (!inSidebar && !window.__psRestoreSidebar) return;
+  if (ae && ae.closest){
     if (ae.closest('#sb-list .sb-item[data-loc="' + loc + '"]')) return;
     if (ae.closest('.sb-rename, .ps-overlay, #prompt-overlay, #ps-undo-toast, [role=dialog]')) return;
     if (!ae.closest('#sb-list') && ae.closest('.location, #v2-center, .menubar, input, select, textarea, button')) return;
@@ -10655,14 +10669,16 @@ function v2RestoreSidebarFocus(){
   const main = row && (row.querySelector('.sb-item-main') || row);
   if (main && typeof main.focus === 'function') main.focus();
 }
-function psRemapClusterRefs(locEl, locMap){
+function psRemapClusterRefs(locEl, locMap, unmappedTo){
   if (!locEl || !locMap) return;
   const fix = v => {
     const s = String(v || '');
     const m = /^r:(\d+):(\d+)$/.exec(s);
     if (!m) return s;
     const neu = locMap[m[1]];
-    return neu != null ? ('r:' + neu + ':' + m[2]) : s;
+    if (neu != null) return 'r:' + neu + ':' + m[2];
+    if (unmappedTo != null && unmappedTo !== '') return 'r:' + unmappedTo + ':' + m[2];
+    return s;
   };
   const applySel = sel => {
     if (!sel) return;
@@ -10877,6 +10893,14 @@ function psSnapshot(){
   try { return JSON.parse(JSON.stringify(buildStateObject())); } catch (e){ return buildStateObject(); }
 }
 
+function psSheetIsUntouchedBlank(el){
+  if (!el) return false;
+  if (el.querySelector('[data-role="module"]')) return false;
+  if (el.querySelector('[data-role="minilaser"]')) return false;
+  const name = ((el.querySelector('.ps-name') || {}).value || '').trim();
+  if (name) return false;
+  return true;
+}
 function psUndoRestore(){
   if (!PS_UNDO) return false;
   const job = PS_UNDO;
@@ -10884,6 +10908,11 @@ function psUndoRestore(){
   clearTimeout(PS_UNDO_TIMER);
   const toast = document.getElementById('ps-undo-toast');
   if (toast) toast.remove();
+  if (job.placeholderLoc){
+    const ph = document.getElementById('location-' + job.placeholderLoc);
+    if (ph && psSheetIsUntouchedBlank(ph)) ph.remove();
+    else if (job.wasLast && ph) job.beforeLoc = ph.getAttribute('data-loc');
+  }
   const saved = job.saved ? JSON.parse(JSON.stringify(job.saved)) : null;
   if (!saved) return false;
   const oldLoc = saved.loc != null ? String(saved.loc) : (job.loc != null ? String(job.loc) : null);
@@ -10938,6 +10967,8 @@ function psDeleteConfirm(locEl){
     if (typeof addLocation === 'function') addLocation();
     const all = psSheetList();
     focusEl = all[all.length - 1] || null;
+    PS_UNDO.placeholderLoc = focusEl ? focusEl.getAttribute('data-loc') : null;
+    PS_UNDO.wasLast = true;
   }
   psRecalcAllSheets();
   if (typeof refreshAllAmber === 'function') refreshAllAmber();
@@ -11117,6 +11148,7 @@ function psDuplicate(srcEl){
   delete saved.plSheetId;
   saved.psName = name;
   (saved.modules || []).forEach(m => { delete m.plKey; });
+  (saved.miniLasers || []).forEach(d => { delete d.plKey; });
   const destLoc = restoreLocation(saved);
   const destEl = document.getElementById('location-' + destLoc);
   if (!destEl) return;
@@ -13240,8 +13272,11 @@ function mlpBuildDesign(){
 function mlpStableCalcState(st){
   st = JSON.parse(JSON.stringify(st || {})); delete st.mlpSite; delete st.mlpCarry; delete st.mlpProject;
   const map = {}, locMap = {};
-  (st.locations || []).forEach((l, li) => (l.modules || []).forEach((m, mi) => { const k = /^mod-(\d+)-(\d+)$/.exec(m.rowId || ''); if (k){ map[k[1] + '-' + k[2]] = (li + 1) + '-' + (mi + 1); locMap[k[1]] = String(li + 1); } }));
-  const fix = v => typeof v !== 'string' ? v : v.replace(/mod-(\d+)-(\d+)/g, (x, a, b) => map[a + '-' + b] ? 'mod-' + map[a + '-' + b] : x).replace(/^r:(\d+):/, (x, a) => locMap[a] ? 'r:' + locMap[a] + ':' : x);
+  (st.locations || []).forEach((l, li) => {
+    if (l && l.loc != null && String(l.loc) !== '') locMap[String(l.loc)] = String(li + 1);
+    (l.modules || []).forEach((m, mi) => { const k = /^mod-(\d+)-(\d+)$/.exec(m.rowId || ''); if (k){ map[k[1] + '-' + k[2]] = (li + 1) + '-' + (mi + 1); locMap[k[1]] = String(li + 1); } });
+  });
+  const fix = v => typeof v !== 'string' ? v : v.replace(/mod-(\d+)-(\d+)/g, (x, a, b) => map[a + '-' + b] ? 'mod-' + map[a + '-' + b] : x).replace(/^r:(\d+):/, (x, a) => locMap[a] ? 'r:' + locMap[a] + ':' : 'r:0:');
   const walk = o => { if (Array.isArray(o)) return o.map(walk); if (o && typeof o === 'object'){ Object.keys(o).forEach(k => { o[k] = walk(o[k]); }); return o; } return fix(o); };
   const out = walk(st);
   (out.locations || []).forEach(l => { if (l && typeof l === 'object') delete l.loc; });
@@ -13530,10 +13565,10 @@ function mlRecalcHook(locEl, mode, setupAux, unassignedAuxRows){
             const net = String((typeof sheetSenseNet === 'function' ? sheetSenseNet(locEl) : locEl.dataset.senseNet) || 1);
             document.querySelectorAll('.location').forEach(other => {
               if (other === locEl) return;
-              if ((typeof addrSchemeOf === 'function' ? addrSchemeOf(other) : 'networked') !== 'networked') return;
               const onet = String((typeof sheetSenseNet === 'function' ? sheetSenseNet(other) : other.dataset.senseNet) || 1);
               if (onet !== net) return;
-              other.querySelectorAll('[data-role="module"] .module-address').forEach(x => { if (parseInt(x.value, 10) === a) taken = true; });
+              const otherNet = (typeof addrSchemeOf === 'function' ? addrSchemeOf(other) : 'networked') === 'networked';
+              if (otherNet) other.querySelectorAll('[data-role="module"] .module-address').forEach(x => { if (parseInt(x.value, 10) === a) taken = true; });
               const orows = typeof mlRows === 'function' ? mlRows(other) : [];
               orows.forEach(otr => {
                 if (otr.dataset.kind !== 'asd160') return;

@@ -807,6 +807,238 @@ async def main():
         ok('M3: networked ASD-160 address 20 is flagged on both sheets of the same SenseNET', m3.get('f1hit') and m3.get('f2hit'), m3)
 
 
+
+        # M-r2-1: orphaned cluster refs stay flagged after .mlproj round trip and Import Merge
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.evaluate("""() => {
+          if (typeof addLocation === 'function') addLocation();
+          const last = [...document.querySelectorAll('.location')].pop();
+          if (last){
+            last.querySelector('.ps-name').value = 'PS-4';
+            last.querySelector('.ps-location').value = 'Area B';
+            if (typeof recalcLocation === 'function') recalcLocation(last.dataset.loc);
+          }
+          if (typeof v2Refresh === 'function') v2Refresh();
+        }""")
+        await pg.wait_for_timeout(200)
+        await pg.click('.sb-item[data-loc="%s"] .sb-trash' % ids['loc2'])
+        await confirm_delete()
+        await pg.wait_for_timeout(200)
+        txt_orph = await pg.evaluate("""() => {
+          const doc = MLP.blank();
+          doc.project = mlpProjectInfo();
+          doc.design = mlpBuildDesign();
+          return MLP.stringify(doc, 'ModuLaser Battery Calculator', (typeof mlpCalcRev==='function'?mlpCalcRev():runningRevisionFull()), '');
+        }""")
+        import json as _json2
+        doc_orph = _json2.loads(txt_orph)
+        st_orph = (((doc_orph.get('design') or {}).get('calc') or {}).get('state') or {})
+        written = []
+        def _walk_refs(o):
+            if isinstance(o, dict):
+                for v in o.values(): _walk_refs(v)
+            elif isinstance(o, list):
+                for v in o: _walk_refs(v)
+            elif isinstance(o, str) and o.startswith('r:'):
+                written.append(o)
+        _walk_refs(st_orph)
+        ok('M-r2-1: .mlproj.json writes orphaned cluster refs as r:0:n, not the deleted loc',
+           any(v.startswith('r:0:') for v in written) and not any(v.startswith('r:'+str(ids['loc2'])+':') for v in written),
+           {'written': written, 'deleted': ids['loc2']})
+        await pg.evaluate("() => clearEntireDocument({clearHeaders:true})")
+        await pg.wait_for_timeout(200)
+        await pg.evaluate("([t]) => { mlpImportProjectText(t, 'probe-orph.mlproj.json'); if (window.__mlpApply) window.__mlpApply(); }", [txt_orph])
+        await pg.wait_for_timeout(800)
+        r2exp = await pg.evaluate("""() => {
+          const sheets = [...document.querySelectorAll('.location')].map(l => ({
+            name: (l.querySelector('.ps-name')||{}).value,
+            sels: [...l.querySelectorAll('.cluster-select')].map(s => s.value),
+            orphan: !!l.querySelector('[data-cluster-orphan="1"]'),
+            flags: ((l.querySelector('.flags-list')||{}).innerText || '') + ' ' + (l.innerText||'')
+          }));
+          const ps1 = sheets.find(s => s.name === 'PS-1') || {};
+          return {
+            sels: ps1.sels, orphan: ps1.orphan,
+            flagged: /deleted power supply|not reassigned|Deleted host/i.test(ps1.flags||''),
+            reboundLive: (ps1.sels||[]).some(v => v && (v === '1' || v === '01' || (String(v).indexOf('r:')===0 && String(v).split(':')[1] !== '0')))
+          };
+        }""")
+        ok('M-r2-1: after Export project → Import project, orphans stay r:0:n and flagged (not rebound)',
+           any(str(v).startswith('r:0:') for v in (r2exp.get('sels') or [])) and (r2exp.get('orphan') or r2exp.get('flagged')) and not r2exp.get('reboundLive'),
+           r2exp)
+
+        # Merge path: receiving doc has a sheet at the deleted loc; imported orphans must not bind to it
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.evaluate("""() => {
+          if (typeof addLocation === 'function') addLocation();
+          const last = [...document.querySelectorAll('.location')].pop();
+          if (last){ last.querySelector('.ps-name').value = 'PS-4'; if (typeof recalcLocation==='function') recalcLocation(last.dataset.loc); }
+        }""")
+        await pg.wait_for_timeout(150)
+        await pg.click('.sb-item[data-loc="%s"] .sb-trash' % ids['loc2'])
+        await confirm_delete()
+        await pg.wait_for_timeout(200)
+        st_html = await pg.evaluate("""() => {
+          const s = buildStateObject();
+          (s.locations||[]).forEach((l, i) => { if (l) l.psName = 'PS-ORPH' + (i + 1); });
+          return JSON.stringify(s);
+        }""")
+        html_orph = '<!DOCTYPE html><html><body><script type="application/json" id="embedded-state">' + st_html.replace('</', '<\\/') + '</script></body></html>'
+        ids_recv = await fresh(pg)
+        await fill_ps2_units(pg, ids_recv['loc2'], ids_recv['loc1'])
+        await pg.evaluate("([h]) => { handleImportFile(new File([h], 'probe-orph-merge.html', {type:'text/html'})); }", [html_orph])
+        await pg.wait_for_timeout(400)
+        await dismiss_import_prompts()
+        await pg.wait_for_timeout(700)
+        r2m = await pg.evaluate("""() => {
+          const imported = [...document.querySelectorAll('.location')].filter(l => /PS-ORPH/.test((l.querySelector('.ps-name')||{}).value));
+          const refs = imported.flatMap(l => [...l.querySelectorAll('.cluster-select')].map(s => s.value).filter(v => v && String(v).indexOf('r:')===0));
+          const flagged = imported.some(l => /deleted power supply|not reassigned|Deleted host/i.test(((l.querySelector('.flags-list')||{}).innerText||'')+' '+l.innerText)
+            || !!l.querySelector('[data-cluster-orphan="1"]'));
+          return { refs, hasSentinel: refs.some(v => String(v).indexOf('r:0:')===0), flagged,
+                   imported: imported.map(l => (l.querySelector('.ps-name')||{}).value) };
+        }""")
+        ok('M-r2-1: Import Merge remaps unmappable cluster refs to r:0:n, not the receiving document loc',
+           r2m.get('hasSentinel') and not any(str(v).split(':')[1] == str(ids['loc2']) for v in (r2m.get('refs') or []) if str(v).startswith('r:')),
+           r2m)
+        ok('M-r2-1: Import Merge keeps the orphaned-cluster flag', r2m.get('flagged'), r2m)
+
+        # L-r2-1: Undo after deleting the last supply removes the unused auto-created blank
+        await fresh(pg)
+        await pg.evaluate('''() => {
+          [...document.querySelectorAll('.location')].slice(1).forEach(e => e.remove());
+          const only = document.querySelector('.location');
+          if (only){
+            only.querySelector('.ps-name').value = 'PS-LAST';
+            if (typeof setCurrentLocation==='function') setCurrentLocation(only);
+            if (typeof v2Refresh==='function') v2Refresh();
+          }
+        }''')
+        await pg.wait_for_timeout(150)
+        await pg.click('.sb-item.current .sb-trash, .sb-item .sb-trash')
+        await confirm_delete()
+        await pg.wait_for_timeout(250)
+        await pg.evaluate("() => { if (typeof psUndoRestore==='function') psUndoRestore(); }")
+        if await pg.locator('button:has-text("Undo")').count():
+            try:
+                await pg.click('button:has-text("Undo")', timeout=800)
+            except Exception:
+                pass
+        await pg.wait_for_timeout(400)
+        lr21 = await pg.evaluate("""() => {
+          const locs = [...document.querySelectorAll('.location')].map(l => ({
+            loc: l.dataset.loc, name: (l.querySelector('.ps-name')||{}).value
+          }));
+          const cur = document.querySelector('#sb-list .sb-item.current');
+          return { n: locs.length, locs, names: locs.map(x => x.name),
+                   cur: cur && cur.dataset.loc, curName: cur && (cur.innerText||'') };
+        }""")
+        ok('L-r2-1: Undo after last-supply delete leaves only the restored sheet (no leftover blank)',
+           lr21.get('n')==1 and 'PS-LAST' in (lr21.get('names') or []), lr21)
+        ok('L-r2-1: the restored last supply is selected',
+           'PS-LAST' in (lr21.get('curName') or '') or (lr21.get('n')==1), lr21)
+
+        # L-r2-2: Duplicate drops MiniLaser and ASD-160 plKey as well as module plKey
+        ids = await fresh(pg)
+        await fill_ps2_units(pg, ids['loc2'], ids['loc1'])
+        await pg.evaluate("""(loc) => {
+          const el = document.getElementById('location-'+loc);
+          const mod = el.querySelector('[data-role=module]');
+          if (mod) mod.dataset.plKey = 'PLK-MOD';
+          const mls = [...el.querySelectorAll('[data-role=minilaser]')];
+          const ml = mls.find(x => x.dataset.kind !== 'asd160');
+          if (ml) ml.dataset.plKey = 'PLK-ML1';
+          const asd = el.querySelector('[data-kind=asd160]');
+          if (asd) asd.dataset.plKey = 'PLK-ASD';
+          if (typeof psDuplicate === 'function') psDuplicate(el);
+        }""", ids['loc2'])
+        await pg.wait_for_timeout(400)
+        lr22 = await pg.evaluate("""(srcLoc) => {
+          const src = document.getElementById('location-'+srcLoc);
+          const copy = [...document.querySelectorAll('.location')].find(l => (l.querySelector('.ps-name')||{}).value === 'PS-4');
+          if (!copy) return { missing: true };
+          const keys = el => ({
+            mod: (el.querySelector('[data-role=module]')||{}).dataset && el.querySelector('[data-role=module]').dataset.plKey,
+            ml: (() => { const r = [...el.querySelectorAll('[data-role=minilaser]')].find(x => x.dataset.kind !== 'asd160'); return r && r.dataset.plKey; })(),
+            asd: (el.querySelector('[data-kind=asd160]')||{}).dataset && el.querySelector('[data-kind=asd160]').dataset.plKey
+          });
+          return { src: keys(src), copy: keys(copy) };
+        }""", ids['loc2'])
+        ok('L-r2-2: source MiniLaser and ASD-160 still have their plKey',
+           (not lr22.get('missing')) and lr22.get('src',{}).get('ml')=='PLK-ML1' and lr22.get('src',{}).get('asd')=='PLK-ASD', lr22)
+        ok('L-r2-2: Duplicate drops module, MiniLaser, and ASD-160 plKey on the copy',
+           (not lr22.get('missing')) and not lr22.get('copy',{}).get('mod') and not lr22.get('copy',{}).get('ml') and not lr22.get('copy',{}).get('asd'),
+           lr22)
+
+        # L-r2-4: both sides flagged — networked ASD on a Standalone sheet, and ASD vs ModuLaser module
+        ids = await fresh(pg)
+        await pg.evaluate("""(locs) => {
+          const l2 = document.getElementById('location-'+locs.loc2);
+          l2.querySelectorAll('.addr-scheme-radio').forEach(r => { r.checked = r.value === 'standalone'; });
+          asdAddRow(locs.loc1, {kind:'asd160', zone:'ASD-NET', networked:true, address:'20', af:4, cls:'SFD'});
+          asdAddRow(locs.loc2, {kind:'asd160', zone:'ASD-SA', networked:true, address:'20', af:4, cls:'SFD'});
+          document.querySelectorAll('.location').forEach(l => recalcLocation(l.dataset.loc));
+          if (typeof v2Refresh==='function') v2Refresh();
+        }""", ids)
+        await pg.wait_for_timeout(400)
+        lr24a = await pg.evaluate("""(locs) => {
+          const flags = loc => {
+            const el = document.getElementById('location-'+loc);
+            return ((el.querySelector('.flags-list')||{}).innerText || '') + ' ' + (el.innerText||'');
+          };
+          const f1 = flags(locs.loc1), f2 = flags(locs.loc2);
+          const re = /address 20 is already used on this SenseNET/i;
+          return { f1hit: re.test(f1), f2hit: re.test(f2), f1: f1.slice(0, 300), f2: f2.slice(0, 300) };
+        }""", ids)
+        ok('L-r2-4: networked ASD on a Standalone sheet and the networked sheet are both flagged',
+           lr24a.get('f1hit') and lr24a.get('f2hit'), lr24a)
+
+        ids = await fresh(pg)
+        await pg.evaluate("""(locs) => {
+          const l1 = document.getElementById('location-'+locs.loc1);
+          let row = l1.querySelector('[data-role=module]');
+          if (!row){ addModuleRow(locs.loc1, 'Standard Display'); row = l1.querySelector('[data-role=module]'); }
+          const addr = row && row.querySelector('.module-address');
+          if (addr) addr.value = '20';
+          asdAddRow(locs.loc2, {kind:'asd160', zone:'ASD-M', networked:true, address:'20', af:4, cls:'SFD'});
+          document.querySelectorAll('.location').forEach(l => recalcLocation(l.dataset.loc));
+          if (typeof v2Refresh==='function') v2Refresh();
+        }""", ids)
+        await pg.wait_for_timeout(400)
+        lr24b = await pg.evaluate("""(locs) => {
+          const flags = loc => {
+            const el = document.getElementById('location-'+loc);
+            return ((el.querySelector('.flags-list')||{}).innerText || '') + ' ' + (el.innerText||'');
+          };
+          const f1 = flags(locs.loc1), f2 = flags(locs.loc2);
+          return {
+            moduleHit: /Duplicate module address|already used on this SenseNET|address 20/i.test(f1),
+            asdHit: /ASD-160.*address 20 is already used on this SenseNET/i.test(f2),
+            f1: f1.slice(0, 300), f2: f2.slice(0, 300)
+          };
+        }""", ids)
+        ok('L-r2-4: ASD-160 vs ModuLaser module clash is flagged on both sheets',
+           lr24b.get('moduleHit') and lr24b.get('asdHit'), lr24b)
+
+        # L-r2-5: v2Refresh does not steal focus from the page body
+        ids = await fresh(pg)
+        await pg.evaluate("""() => {
+          document.body.setAttribute('tabindex', '-1');
+          document.body.focus();
+        }""")
+        await pg.wait_for_timeout(50)
+        await pg.evaluate("() => { if (typeof v2Refresh==='function') v2Refresh(); }")
+        await pg.wait_for_timeout(250)
+        lr25 = await pg.evaluate("""() => {
+          const ae = document.activeElement;
+          const inSb = !!(ae && ae.closest && ae.closest('#sb-list'));
+          return { tag: ae && ae.tagName, id: ae && ae.id, inSb, isBody: ae === document.body || ae === document.documentElement };
+        }""")
+        ok('L-r2-5: refresh does not move focus to a sidebar row when the page body was focused',
+           (not lr25.get('inSb')) and lr25.get('isBody'), lr25)
+
         await browser.close()
 
     print('---')
