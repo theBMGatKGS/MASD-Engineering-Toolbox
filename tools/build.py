@@ -27,7 +27,7 @@ s = re.sub(r'<link rel="preconnect" href="https://fonts\.(googleapis|gstatic)\.c
 sub1(r'<link href="https://fonts\.googleapis\.com/[^>]*>', lambda m: '<style id="plex-fonts">' + fonts + '</style>')
 assert 'fonts.googleapis' not in s and 'cdn.' not in s.lower().split('<!--engine-begin-->')[0]
 sub1(r'<h1>ModuLaser Battery Calculator</h1>', '<h1>MASD Engineering Toolbox</h1>')
-sub1(r'<div class="brand-mark">ML</div>', '<div class="brand-mark">TB</div>')
+sub1(r'<div class="brand-mark">BC</div>', '<div class="brand-mark">ET</div>')
 sub1(r'(<span class="help-about-k">Application</span><span class="help-about-v">)ModuLaser Battery Calculator', r'\1MASD Engineering Toolbox')
 sub1(r'(id="about-engine-value">)[^<]*', r'\1MASD engine')
 s = s.replace('<div class="help-about-row"><span class="help-about-k">Authored by</span>', '<div class="help-about-row"><span class="help-about-k">Calculator lineage</span><span class="help-about-v mono-inline">Battery Calculator 02.00.002 (absorbed)</span></div><div class="help-about-row"><span class="help-about-k">Project file</span><span class="help-about-v mono-inline">modulaser-project 1.1.0 (.mlproj.json)</span></div><div class="help-about-row"><span class="help-about-k">Authored by</span>', 1)
