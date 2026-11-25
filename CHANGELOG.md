@@ -6,6 +6,10 @@ document owner; the revision counter increments per distinct change. Generated f
 
 ## 00.04 — 2026-11-24
 
+### 00.04.002 — 2026-11-25
+- Harmonized with Battery Calculator **02.03.002**.
+- **Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal).** Stronger contrast, a seam down the split, and the dark disc kept on light art, in the About lockup, app icons (64 px and up), and print horizontal-light files.  Pills, 16/32 px marks, and one-color files are unchanged.  Print / Export now embeds that light lockup; the previous color `band-bx` data URI was still the 24 Nov v4 raster.  Service-worker cache `masd-toolbox-00-04-002`.  Lineage map: `00.04.002` → `02.03.002`.  The `ml-calc` layer is byte-identical to Calculator 02.03.002.
+
 ### 00.04.001 — 2026-11-25
 - Harmonized with Battery Calculator **02.03.001**.
 - **Auto-Save reload keeps MiniLaser and ASD-160 rows (QA P1).** Auto-Save and Save As already stored those rows, but a reload ran restore before the MiniLaser hook was installed, so every MiniLaser and ASD-160 row was dropped and required Ah fell, with no warning.  After the hook loads, the rows are restored from the same source (the state applied at boot, else embedded state, else Auto-Save), matching `restoreMlpExtras` and `brRestore`.  A saved payload that never had those rows is left as-is.  Service-worker cache `masd-toolbox-00-04-001`.  Lineage map: `00.04.001` → `02.03.001`.  The `ml-calc` layer is byte-identical to Calculator 02.03.001.

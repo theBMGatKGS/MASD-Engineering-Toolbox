@@ -5,6 +5,10 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.04.002 — Final BRENTRONIX portrait pack (2026-11-25)
+
+Harmonized with Battery Calculator 02.03.002.  The 25 Nov 2026 navy/teal portrait has stronger contrast, a seam down the split, and the dark disc kept on light art.  About, app icons (64 px and up), and print horizontal-light files are updated.  Pills, 16/32 px marks, and one-color art are unchanged.  Print / Export now embeds the new light lockup (the previous color band-bx data URI was still the 24 Nov v4 raster).  Service-worker cache is `masd-toolbox-00-04-002`.
+
 ## v00.04.001 — Auto-Save reload keeps MiniLaser and ASD-160 rows (2026-11-25)
 
 Harmonized with Battery Calculator 02.03.001.  With Auto-Save on, a page reload kept modules and settings but cleared every MiniLaser and ASD-160 row, and required Ah fell, with no warning (QA P1).  Those rows were already stored; they are now restored after the MiniLaser hook loads, from the same source as other post-boot restores.  A saved payload that never had those rows is left as-is.  Service-worker cache is `masd-toolbox-00-04-001`.

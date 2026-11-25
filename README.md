@@ -14,6 +14,10 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 > Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.02.001**
 
+### What's new in 00.04.002
+
+Harmonized with Battery Calculator 02.03.002.  Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal): stronger contrast, a seam down the split, and the dark disc kept on light art.  Print / Export now embeds that light lockup.  Pills, 16/32 px marks, and one-color print art are unchanged.  Service-worker cache `masd-toolbox-00-04-002`.
+
 ### What's new in 00.04.001
 
 Harmonized with Battery Calculator 02.03.001.  Auto-Save reload keeps MiniLaser and ASD-160 rows (QA P1).  Required Ah no longer drops after a reload.  A saved payload that never had those rows is left as-is.  Service-worker cache `masd-toolbox-00-04-001`.

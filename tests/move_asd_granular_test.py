@@ -198,8 +198,8 @@ async def main():
     ids = await fresh(pg)
     loc1, loc2 = ids['loc1'], ids['loc2']
     v = await pg.evaluate('[runningRevisionFull(), typeof mlMoveOpen, typeof mlRecalcHook]')
-    ok('revision is 02.03.001 or 00.04.001 and Move is loaded',
-       v[0] in ('02.03.001_261125', '00.04.001_261125') and v[1] == 'function' and v[2] == 'function', v)
+    ok('revision is 02.03.002 or 00.04.002 and Move is loaded',
+       v[0] in ('02.03.002_261125', '00.04.002_261125') and v[1] == 'function' and v[2] == 'function', v)
 
     # ---- sticky Actions + single MiniLaser move, metadata, auto circuit source ----
     extra = {'plKey':'PL-KEY-1','holes':4,'lengthFt':80,'bends90':1,'tees':0,'afSrc':'table','pre':{'shape':'I'},'derivation':{'src':'placeholder'}}

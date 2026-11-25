@@ -272,11 +272,11 @@ def test_sw_versions():
         dm = re.search(r"CACHE_VERSION = '([^']+)'", d)
         pm = re.search(r"CACHE_VERSION = '([^']+)'", p)
         ok('PP-L1 docs/sw.js and pwa/sw.js CACHE_VERSION match', dm and pm and dm.group(1) == pm.group(1), (dm.group(1) if dm else None, pm.group(1) if pm else None))
-        ok('PP-L1 Calculator CACHE_VERSION is modulaser-calc-v58', dm and dm.group(1) == 'modulaser-calc-v58', dm.group(1) if dm else None)
+        ok('PP-L1 Calculator CACHE_VERSION is modulaser-calc-v59', dm and dm.group(1) == 'modulaser-calc-v59', dm.group(1) if dm else None)
     elif tb.exists():
         t = tb.read_text()
         tm = re.search(r"CACHE_VERSION = '([^']+)'", t)
-        ok('Toolbox CACHE_VERSION is masd-toolbox-00-04-001', tm and tm.group(1) == 'masd-toolbox-00-04-001', tm.group(1) if tm else None)
+        ok('Toolbox CACHE_VERSION is masd-toolbox-00-04-002', tm and tm.group(1) == 'masd-toolbox-00-04-002', tm.group(1) if tm else None)
     else:
         ok('service worker file present', False, ROOT)
 
@@ -291,8 +291,8 @@ async def main():
         await fill_ps2_units(pg, loc2, loc1)
 
         rev = await pg.evaluate("typeof runningRevisionFull==='function'?runningRevisionFull():(typeof mlpCalcRev==='function'?mlpCalcRev():'')")
-        ok('revision is 02.03.001_261125 or Toolbox 00.04.001_261125',
-           '02.03.001_261125' in str(rev) or '00.04.001_261125' in str(rev), rev)
+        ok('revision is 02.03.002_261125 or Toolbox 00.04.002_261125',
+           '02.03.002_261125' in str(rev) or '00.04.002_261125' in str(rev), rev)
 
         chrome = await pg.evaluate('''() => {
           const rows = [...document.querySelectorAll('#sb-list .sb-item')];
