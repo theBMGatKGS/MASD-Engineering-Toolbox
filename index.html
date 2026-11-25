@@ -3020,8 +3020,6 @@ window.__mlRestoreDone = false;
   };
   document.addEventListener('DOMContentLoaded', enable);
   window.addEventListener('load', enable);
-  // After this turn, later synchronous scripts (including restoreMiniLasers) have run or thrown.
-  setTimeout(enable, 0);
 })();
 function scheduleSave(){
   if (!window.__mlRestoreDone) return;

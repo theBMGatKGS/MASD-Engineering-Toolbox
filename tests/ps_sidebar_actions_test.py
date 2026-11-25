@@ -341,6 +341,58 @@ async def run_ir11_boot_error_autosave_test(pg):
     ok('I-r1-1: the simulated earlier boot error was raised',
        any('I-r1-1 simulated earlier boot error' in e for e in errors), errors[:5])
 
+
+async def run_ld21_no_save_before_restore_while_loading(pg):
+    """L-d2-1: no save is scheduled before restore while document.readyState is loading."""
+    src = Path(DEFAULT_APP)
+    html = src.read_text()
+    matches = re.findall(r'\(function mlArmSaveEnableFallback\(\)\{.*?\}\)\(\);', html, re.S)
+    if len(matches) != 1:
+        ok('L-d2-1 setup: mlArmSaveEnableFallback IIFE is present once', False, len(matches))
+        return
+    fb = matches[0]
+    ok('L-d2-1: fallback keeps the DOMContentLoaded arm',
+       "addEventListener('DOMContentLoaded'" in fb, fb)
+    ok('L-d2-1: fallback keeps the load arm',
+       "addEventListener('load'" in fb, fb)
+    ok('L-d2-1: fallback has no setTimeout(0) arm',
+       'setTimeout' not in fb, fb)
+
+    sched_needle = "function scheduleSave(){\n  if (!window.__mlRestoreDone) return;\n  clearTimeout(saveTimer);"
+    sched_repl = (
+        "function scheduleSave(){\n"
+        "  if (!window.__mlRestoreDone) return;\n"
+        "  (window.__mlSchedLog = window.__mlSchedLog || []).push({"
+        "rs: document.readyState, restoreStarted: !!window.__mlRestoreStarted});\n"
+        "  clearTimeout(saveTimer);"
+    )
+    restore_needle = "(function restoreMiniLasers(){\n  try {"
+    restore_repl = "(function restoreMiniLasers(){\n  window.__mlRestoreStarted = true;\n  window.__mlRestoreStartedRs = document.readyState;\n  try {"
+    if html.count(sched_needle) != 1 or html.count(restore_needle) != 1:
+        ok('L-d2-1 setup: scheduleSave and restoreMiniLasers sites are unique',
+           False, {'sched': html.count(sched_needle), 'restore': html.count(restore_needle)})
+        return
+    instrumented = html.replace(sched_needle, sched_repl, 1).replace(restore_needle, restore_repl, 1)
+    tmp = Path(tempfile.mkdtemp(prefix='ml-ld21-')) / src.name
+    tmp.write_text(instrumented)
+    await pg.goto('file://' + str(tmp))
+    await pg.wait_for_timeout(800)
+    snap = await pg.evaluate("""() => ({
+      log: window.__mlSchedLog || [],
+      restoreStarted: !!window.__mlRestoreStarted,
+      restoreStartedRs: window.__mlRestoreStartedRs || null,
+      done: !!window.__mlRestoreDone,
+      readyState: document.readyState
+    })""")
+    early = [e for e in (snap.get('log') or [])
+             if e.get('rs') == 'loading' and not e.get('restoreStarted')]
+    ok('L-d2-1: restoreMiniLasers ran and set __mlRestoreDone',
+       snap.get('restoreStarted') and snap.get('done'), snap)
+    ok('L-d2-1: no save is scheduled before restore while readyState is loading',
+       not early, {'early': early, 'snap': snap})
+    ok('L-d2-1: instrumentation saw a post-restore scheduleSave',
+       any(e.get('restoreStarted') for e in (snap.get('log') or [])), snap)
+
 def test_sw_versions():
     calc = Path(ROOT)
     # Calculator repo has docs/sw.js + pwa/sw.js; Toolbox has sw.js
@@ -1596,6 +1648,7 @@ async def main():
 
         await run_autosave_reload_tests(pg)
         await run_ir11_boot_error_autosave_test(pg)
+        await run_ld21_no_save_before_restore_while_loading(pg)
 
         await browser.close()
 
