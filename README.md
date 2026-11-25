@@ -14,6 +14,10 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 > Calculation engine: **MASD engine 1.2.0** · Project file: **modulaser-project 1.6.0 (`.mlproj.json`)** ·
 > Calculator lineage: **Battery Calculator 02.02.001**
 
+### What's new in 00.04.001
+
+Harmonized with Battery Calculator 02.03.001.  Auto-Save reload keeps MiniLaser and ASD-160 rows (QA P1).  Required Ah no longer drops after a reload.  A saved payload that never had those rows is left as-is.  Service-worker cache `masd-toolbox-00-04-001`.
+
 ### What's new in 00.04.000
 
 Harmonized with Battery Calculator 02.03.000. Delete, rename, duplicate, and reorder power supplies from the left sidebar (Direction C). Header Remove ⌫ uses the same confirm and Undo toast. The last remaining supply can be deleted; a blank supply is created automatically and Sheet badges are not renumbered. Duplicate copies settings and all units and is named with the next free PS-N. Dragging into a different Area/Group asks for confirm and updates Location. QA follow-up: Import Merge remints ids; .mlproj.json omits loc; Undo restores only the deleted sheet; Duplicate uses serialize/restore; ASD-160 addresses are checked across the SenseNET; orphaned cluster refs are flagged. QA Round 2: orphaned cluster refs stay flagged after .mlproj and Import Merge (`r:0:n`); last-supply Undo removes the unused blank; Duplicate drops MiniLaser/ASD plKey; ASD-160 clashes flag both sides; sidebar focus is not stolen from the page body.

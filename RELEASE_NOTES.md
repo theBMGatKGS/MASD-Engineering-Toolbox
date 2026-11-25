@@ -5,6 +5,10 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ---
 
+## v00.04.001 — Auto-Save reload keeps MiniLaser and ASD-160 rows (2026-11-25)
+
+Harmonized with Battery Calculator 02.03.001.  With Auto-Save on, a page reload kept modules and settings but cleared every MiniLaser and ASD-160 row, and required Ah fell, with no warning (QA P1).  Those rows were already stored; they are now restored after the MiniLaser hook loads, from the same source as other post-boot restores.  A saved payload that never had those rows is left as-is.  Service-worker cache is `masd-toolbox-00-04-001`.
+
 ## v00.04.000 — Sidebar delete, rename, duplicate, and reorder (2026-11-24)
 
 Harmonized with Battery Calculator 02.03.000. Delete, rename, duplicate, and reorder power supplies from the left sidebar (Direction C: trash and a drag handle on every row, ⋯ on the current row for Rename and Duplicate). Header Remove ⌫ uses the same confirm and Undo toast. The last remaining supply can be deleted; a blank supply is created automatically and Sheet badges are not renumbered. Duplicate copies settings and all units and is named with the next free PS-N. Dragging into a different Area/Group asks for confirm and updates Location.

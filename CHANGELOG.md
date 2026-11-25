@@ -4,6 +4,12 @@ All notable changes to the MASD Engineering Toolbox. Format `MM.mm.rrr` (date `Y
 document owner; the revision counter increments per distinct change. Generated from the in-app Revision Log
 (`AMENDMENTS` in `index.html`), which is the source of truth. Per-release summaries: [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
+## 00.04 — 2026-11-24
+
+### 00.04.001 — 2026-11-25
+- Harmonized with Battery Calculator **02.03.001**.
+- **Auto-Save reload keeps MiniLaser and ASD-160 rows (QA P1).** Auto-Save and Save As already stored those rows, but a reload ran restore before the MiniLaser hook was installed, so every MiniLaser and ASD-160 row was dropped and required Ah fell, with no warning.  After the hook loads, the rows are restored from the same source (the state applied at boot, else embedded state, else Auto-Save), matching `restoreMlpExtras` and `brRestore`.  A saved payload that never had those rows is left as-is.  Service-worker cache `masd-toolbox-00-04-001`.  Lineage map: `00.04.001` → `02.03.001`.  The `ml-calc` layer is byte-identical to Calculator 02.03.001.
+
 ## 00.03 — 2026-11-23
 
 ### 00.04.000 — 2026-11-24

@@ -1,4 +1,4 @@
-"""02.03.000 / 00.04.000 — Move MiniLaser & ASD-160 between power supplies, plus granular calc / display cleanup.
+"""02.03.001 / 00.04.001 — Move MiniLaser & ASD-160 between power supplies, plus granular calc / display cleanup.
 Placeholder data only (PS-1 / PS-2 / Area A / ML 1). No real project or fixture names.
 Run: python3 tests/move_asd_granular_test.py
 APP=file:///.../index.html to point at another copy (Toolbox)."""
@@ -198,8 +198,8 @@ async def main():
     ids = await fresh(pg)
     loc1, loc2 = ids['loc1'], ids['loc2']
     v = await pg.evaluate('[runningRevisionFull(), typeof mlMoveOpen, typeof mlRecalcHook]')
-    ok('revision is 02.03.000 or 00.04.000 and Move is loaded',
-       v[0] in ('02.03.000_261124', '00.04.000_261124') and v[1] == 'function' and v[2] == 'function', v)
+    ok('revision is 02.03.001 or 00.04.001 and Move is loaded',
+       v[0] in ('02.03.001_261125', '00.04.001_261125') and v[1] == 'function' and v[2] == 'function', v)
 
     # ---- sticky Actions + single MiniLaser move, metadata, auto circuit source ----
     extra = {'plKey':'PL-KEY-1','holes':4,'lengthFt':80,'bends90':1,'tees':0,'afSrc':'table','pre':{'shape':'I'},'derivation':{'src':'placeholder'}}

@@ -1,4 +1,4 @@
-"""02.03.000 / 00.04.000 — Sidebar delete, rename, duplicate, and reorder (Direction C).
+"""02.03.001 / 00.04.001 — Sidebar delete, rename, duplicate, and reorder (Direction C).
 Placeholder data only (PS-1 / PS-2 / PS-3, Area A / Area B, ML 1). No real project or fixture names.
 Run: python3 tests/ps_sidebar_actions_test.py
 APP=file:///.../index.html to point at another copy (Toolbox)."""
@@ -97,6 +97,170 @@ async def fill_ps2_units(pg, loc2, loc1=None):
       if (typeof v2Refresh === 'function') v2Refresh();
     }''', {'loc2': loc2, 'loc1': loc1})
 
+SNAP_AUTOSAVE = r"""() => {
+  const snap = (el) => {
+    const mls = [...el.querySelectorAll('[data-role="minilaser"]')];
+    const asd = [...el.querySelectorAll('[data-kind="asd160"]')];
+    const mlOnly = mls.filter(r => r.getAttribute('data-kind') !== 'asd160');
+    const zones = (rows, sel) => rows.map(r => ((r.querySelector(sel) || {}).value || '').trim());
+    return {
+      name: (el.querySelector('.ps-name') || {}).value,
+      area: (el.querySelector('.ps-location') || {}).value,
+      loc: el.dataset.loc,
+      modules: el.querySelectorAll('[data-role="module"]').length,
+      ml: mlOnly.length,
+      asd: asd.length,
+      ah: ((el.querySelector('.required-ah') || {}).textContent || '').trim(),
+      standby: (el.querySelector('.standby-hours') || {}).value,
+      alarm: (el.querySelector('.alarm-minutes') || {}).value,
+      mlZones: zones(mlOnly, '.ml-zone'),
+      asdZones: zones(asd, '.ml-zone, .asd-zone, .zone-name')
+    };
+  };
+  const locs = [...document.querySelectorAll('.location')];
+  let stored = null, key = null;
+  try { key = (typeof SAVE_KEY === 'string') ? SAVE_KEY : null; } catch (e) {}
+  try { stored = key ? JSON.parse(localStorage.getItem(key) || 'null') : null; } catch (e) { stored = {err: String(e)}; }
+  const storedLocs = stored && stored.locations && stored.locations.map(l => ({
+    name: l.psName, loc: String(l.loc), mods: (l.modules || []).length,
+    mls: (l.miniLasers || []).length,
+    kinds: (l.miniLasers || []).map(d => d.kind || 'ml'),
+    zones: (l.miniLasers || []).map(d => d.zone)
+  }));
+  return { n: locs.length, sheets: locs.map(snap), key, storedLocs,
+    nMlStored: storedLocs ? storedLocs.reduce((a, l) => a + l.mls, 0) : 0 };
+}"""
+
+async def boot_p1_fixture(pg, with_minilasers=True):
+    """Two placeholder supplies. PS-2 may include MiniLaser + ASD-160 rows. Auto-Save is turned on and saved."""
+    await pg.goto(APP)
+    await pg.evaluate('localStorage.clear()')
+    await pg.reload()
+    await pg.wait_for_timeout(700)
+    return await pg.evaluate('''(withMl) => {
+      if (typeof clearEntireDocument === 'function') clearEntireDocument({clearHeaders:false});
+      const pre = [...document.querySelectorAll('.location')];
+      addLocation();
+      const l1 = [...document.querySelectorAll('.location')].pop();
+      pre.forEach(e => e.remove());
+      const apply = (l, name, area) => {
+        l.querySelector('.ps-name').value = name;
+        l.querySelector('.ps-location').value = area;
+        const db = l.querySelector('.design-basis-select');
+        if (db){ db.value = 'NFPA 72 Standard'; applyDesignBasis(l.dataset.loc); }
+        const t = l.querySelector('.temperature-select'); if (t) t.value = '77';
+        const sh = l.querySelector('.standby-hours'); if (sh) sh.value = '24';
+        const am = l.querySelector('.alarm-minutes'); if (am) am.value = '5';
+      };
+      apply(l1, 'PS-1', 'Area A');
+      addLocation();
+      const l2 = [...document.querySelectorAll('.location')].pop();
+      apply(l2, 'PS-2', 'Area A');
+      addModuleRow(l1.dataset.loc, 'Detector');
+      const r1 = l1.querySelector('[data-role=module]');
+      if (r1){
+        r1.querySelector('.zone-name').value = 'Det 1';
+        const a = r1.querySelector('.module-address'); if (a) a.value = '1';
+        const f = r1.querySelector('.fanspeed-select'); if (f) f.value = '4';
+      }
+      addModuleRow(l2.dataset.loc, 'Standard Display');
+      const r2 = l2.querySelector('[data-role=module]');
+      if (r2){
+        r2.querySelector('.zone-name').value = 'Disp 2';
+        const a = r2.querySelector('.module-address'); if (a) a.value = '10';
+      }
+      if (withMl){
+        mlAddRow(l2.dataset.loc, {setup:'manual', zone:'ML 1', fan:4, af:4, method:'DIP'});
+        mlAddRow(l2.dataset.loc, {setup:'manual', zone:'ML 2', fan:4, af:4, method:'DIP'});
+        asdAddRow(l2.dataset.loc, {kind:'asd160', zone:'ASD 1', networked:false, address:'', af:4, cls:'SFD'});
+      }
+      recalcLocation(l1.dataset.loc); recalcLocation(l2.dataset.loc);
+      if (typeof v2Refresh === 'function') v2Refresh();
+      setAutosaveActivated(true);
+      setAutosaveEnabled(true);
+      performSave();
+      return { loc1: l1.dataset.loc, loc2: l2.dataset.loc };
+    }''', with_minilasers)
+
+def _p1_sheet(snap, name):
+    return next((s for s in snap['sheets'] if s.get('name') == name), None)
+
+async def run_autosave_reload_tests(pg):
+    """P1: MiniLaser and ASD-160 rows must survive an Auto-Save reload, with Ah and settings intact."""
+    await boot_p1_fixture(pg, True)
+    await pg.wait_for_timeout(200)
+    before = await pg.evaluate(SNAP_AUTOSAVE)
+    raw_good = await pg.evaluate('() => localStorage.getItem(SAVE_KEY)')
+    ps1b, ps2b = _p1_sheet(before, 'PS-1'), _p1_sheet(before, 'PS-2')
+    ok('P1 setup: PS-2 has 2 MiniLasers and 1 ASD-160 in the document and in SAVE_KEY',
+       ps2b and ps2b['ml'] == 2 and ps2b['asd'] == 1 and before.get('nMlStored') == 3
+       and ps2b['mlZones'] == ['ML 1', 'ML 2'], before)
+    ok('P1 setup: PS-1 is modules only',
+       ps1b and ps1b['modules'] == 1 and ps1b['ml'] == 0 and ps1b['asd'] == 0, ps1b)
+    ah1, ah2 = ps1b['ah'] if ps1b else '', ps2b['ah'] if ps2b else ''
+
+    await pg.reload()
+    await pg.wait_for_timeout(1000)
+    after = await pg.evaluate(SNAP_AUTOSAVE)
+    ps1a, ps2a = _p1_sheet(after, 'PS-1'), _p1_sheet(after, 'PS-2')
+    ok('P1 reload: MiniLaser and ASD-160 rows on PS-2 are kept (zones ML 1, ML 2, ASD 1)',
+       ps2a and ps2a['ml'] == 2 and ps2a['asd'] == 1
+       and ps2a.get('mlZones') == ['ML 1', 'ML 2'] and 'ASD 1' in (ps2a.get('asdZones') or []), after)
+    ok('P1 reload: PS-1 still has its module and no MiniLaser / ASD-160 rows',
+       ps1a and ps1a['modules'] == 1 and ps1a['ml'] == 0 and ps1a['asd'] == 0, ps1a)
+    ok('P1 reload: names, Area, loc ids, standby, and alarm are unchanged',
+       ps1a and ps2a and ps1a['name'] == 'PS-1' and ps2a['name'] == 'PS-2'
+       and ps1a['area'] == 'Area A' and ps2a['area'] == 'Area A'
+       and ps1a['loc'] == ps1b['loc'] and ps2a['loc'] == ps2b['loc']
+       and ps1a['standby'] == '24' and ps2a['standby'] == '24'
+       and ps1a['alarm'] == '5' and ps2a['alarm'] == '5',
+       {'before': [ps1b, ps2b], 'after': [ps1a, ps2a]})
+    ok('P1 reload: required Ah is unchanged on both supplies',
+       ps1a and ps2a and ps1a['ah'] == ah1 and ps2a['ah'] == ah2 and ah2 != ah1,
+       {'ah1': ah1, 'ah2': ah2, 'after': [ps1a and ps1a['ah'], ps2a and ps2a['ah']]})
+
+    await pg.wait_for_timeout(600)
+    later = await pg.evaluate(SNAP_AUTOSAVE)
+    ok('P1 reload: Auto-Save still stores the three MiniLaser / ASD-160 rows after the save timer',
+       later.get('nMlStored') == 3, later.get('storedLocs'))
+
+    # B: a crafted older payload that still contains miniLasers, loaded into a fresh document via SAVE_KEY only
+    await pg.evaluate('localStorage.clear()')
+    await pg.evaluate('(raw) => localStorage.setItem(SAVE_KEY, raw)', raw_good)
+    await pg.reload()
+    await pg.wait_for_timeout(1000)
+    crafted = await pg.evaluate(SNAP_AUTOSAVE)
+    ps2c = _p1_sheet(crafted, 'PS-2')
+    ok('P1 old good autosave: MiniLaser and ASD-160 rows restore from SAVE_KEY alone',
+       ps2c and ps2c['ml'] == 2 and ps2c['asd'] == 1 and ps2c['ah'] == ah2, crafted)
+
+    # C: a payload with no miniLasers (legacy or already overwritten) stays modules-only, no throw
+    await boot_p1_fixture(pg, False)
+    await pg.wait_for_timeout(200)
+    bare = await pg.evaluate(SNAP_AUTOSAVE)
+    ps2bare = _p1_sheet(bare, 'PS-2')
+    bare_ah = ps2bare['ah'] if ps2bare else ''
+    raw_bare = await pg.evaluate('''() => {
+      const st = JSON.parse(localStorage.getItem(SAVE_KEY));
+      (st.locations || []).forEach(l => { if ('miniLasers' in l) delete l.miniLasers; });
+      localStorage.setItem(SAVE_KEY, JSON.stringify(st));
+      return localStorage.getItem(SAVE_KEY);
+    }''')
+    await pg.evaluate('localStorage.clear()')
+    await pg.evaluate('(raw) => localStorage.setItem(SAVE_KEY, raw)', raw_bare)
+    errors = []
+    pg.on('pageerror', lambda e: errors.append(str(e)))
+    await pg.reload()
+    await pg.wait_for_timeout(1000)
+    missing = await pg.evaluate(SNAP_AUTOSAVE)
+    ps2m = _p1_sheet(missing, 'PS-2')
+    ps1m = _p1_sheet(missing, 'PS-1')
+    ok('P1 old empty autosave: modules and settings restore, MiniLaser / ASD-160 stay at 0, Ah is the modules-only value, no page error',
+       ps1m and ps2m and ps2m['modules'] == 1 and ps2m['ml'] == 0 and ps2m['asd'] == 0
+       and ps2m['ah'] == bare_ah and ps2m['name'] == 'PS-2' and ps2m['standby'] == '24'
+       and not errors,
+       {'missing': missing, 'bare_ah': bare_ah, 'errors': errors})
+
 def test_sw_versions():
     calc = Path(ROOT)
     # Calculator repo has docs/sw.js + pwa/sw.js; Toolbox has sw.js
@@ -108,11 +272,11 @@ def test_sw_versions():
         dm = re.search(r"CACHE_VERSION = '([^']+)'", d)
         pm = re.search(r"CACHE_VERSION = '([^']+)'", p)
         ok('PP-L1 docs/sw.js and pwa/sw.js CACHE_VERSION match', dm and pm and dm.group(1) == pm.group(1), (dm.group(1) if dm else None, pm.group(1) if pm else None))
-        ok('PP-L1 Calculator CACHE_VERSION is modulaser-calc-v57', dm and dm.group(1) == 'modulaser-calc-v57', dm.group(1) if dm else None)
+        ok('PP-L1 Calculator CACHE_VERSION is modulaser-calc-v58', dm and dm.group(1) == 'modulaser-calc-v58', dm.group(1) if dm else None)
     elif tb.exists():
         t = tb.read_text()
         tm = re.search(r"CACHE_VERSION = '([^']+)'", t)
-        ok('Toolbox CACHE_VERSION is masd-toolbox-00-04-000', tm and tm.group(1) == 'masd-toolbox-00-04-000', tm.group(1) if tm else None)
+        ok('Toolbox CACHE_VERSION is masd-toolbox-00-04-001', tm and tm.group(1) == 'masd-toolbox-00-04-001', tm.group(1) if tm else None)
     else:
         ok('service worker file present', False, ROOT)
 
@@ -127,8 +291,8 @@ async def main():
         await fill_ps2_units(pg, loc2, loc1)
 
         rev = await pg.evaluate("typeof runningRevisionFull==='function'?runningRevisionFull():(typeof mlpCalcRev==='function'?mlpCalcRev():'')")
-        ok('revision is 02.03.000_261124 or Toolbox 00.04.000_261124',
-           '02.03.000_261124' in str(rev) or '00.04.000_261124' in str(rev), rev)
+        ok('revision is 02.03.001_261125 or Toolbox 00.04.001_261125',
+           '02.03.001_261125' in str(rev) or '00.04.001_261125' in str(rev), rev)
 
         chrome = await pg.evaluate('''() => {
           const rows = [...document.querySelectorAll('#sb-list .sb-item')];
@@ -1038,6 +1202,8 @@ async def main():
         }""")
         ok('L-r2-5: refresh does not move focus to a sidebar row when the page body was focused',
            (not lr25.get('inSb')) and lr25.get('isBody'), lr25)
+
+        await run_autosave_reload_tests(pg)
 
         await browser.close()
 
