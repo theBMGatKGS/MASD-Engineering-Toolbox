@@ -283,6 +283,64 @@ async def run_autosave_reload_tests(pg):
        and not errors,
        {'missing': missing, 'bare_ah': bare_ah, 'errors': errors})
 
+
+async def run_ir11_boot_error_autosave_test(pg):
+    """I-r1-1: a throw before restoreMiniLasers must not leave Auto-Save stuck off."""
+    src = Path(DEFAULT_APP)
+    html = src.read_text()
+    needle = '(function restoreMiniLasers(){'
+    if html.count(needle) != 1:
+        ok('I-r1-1 setup: restoreMiniLasers IIFE is present once in the app HTML', False, html.count(needle))
+        return
+    poisoned = html.replace(needle, "(function(){ throw new Error('I-r1-1 simulated earlier boot error'); })();\n" + needle, 1)
+    tmp = Path(tempfile.mkdtemp(prefix='ml-ir11-')) / src.name
+    tmp.write_text(poisoned)
+    errors = []
+    handler = lambda e: errors.append(str(e))
+    pg.on('pageerror', handler)
+    try:
+        await pg.goto('file://' + str(tmp))
+        await pg.wait_for_timeout(800)
+        snap = await pg.evaluate("""() => {
+          const done = !!window.__mlRestoreDone;
+          try { setAutosaveActivated(true); setAutosaveEnabled(true); } catch (e) {}
+          if (typeof performSave === 'function') performSave();
+          let parsed = null;
+          try { parsed = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
+          return {
+            done,
+            wrote: !!(parsed && Array.isArray(parsed.locations) && parsed.locations.length),
+            nLoc: parsed && parsed.locations ? parsed.locations.length : 0,
+            key: (typeof SAVE_KEY === 'string') ? SAVE_KEY : null
+          };
+        }""")
+        await pg.evaluate("""() => {
+          const el = document.querySelector('.location');
+          const sh = el && el.querySelector('.standby-hours');
+          if (sh){ sh.value = '36'; sh.dispatchEvent(new Event('change', {bubbles:true})); }
+          if (typeof scheduleSave === 'function') scheduleSave();
+        }""")
+        await pg.wait_for_timeout(600)
+        later = await pg.evaluate("""() => {
+          let parsed = null;
+          try { parsed = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
+          const standbys = ((parsed && parsed.locations) || []).map(l => l.standbyHours);
+          return { done: !!window.__mlRestoreDone, standbys };
+        }""")
+    finally:
+        try:
+            pg.remove_listener('pageerror', handler)
+        except Exception:
+            pass
+    ok('I-r1-1: a throw before restoreMiniLasers still sets __mlRestoreDone so Auto-Save is not stuck off',
+       snap.get('done') and later.get('done'), {'snap': snap, 'later': later, 'errors': errors[:3]})
+    ok('I-r1-1: performSave still writes a payload after the earlier boot error',
+       snap.get('wrote') and snap.get('nLoc') >= 1, snap)
+    ok('I-r1-1: scheduleSave still persists an edit after the earlier boot error',
+       '36' in [str(s) for s in (later.get('standbys') or [])], later)
+    ok('I-r1-1: the simulated earlier boot error was raised',
+       any('I-r1-1 simulated earlier boot error' in e for e in errors), errors[:5])
+
 def test_sw_versions():
     calc = Path(ROOT)
     # Calculator repo has docs/sw.js + pwa/sw.js; Toolbox has sw.js
@@ -1176,10 +1234,14 @@ async def main():
           };
           const f1 = flags(locs.loc1), f2 = flags(locs.loc2);
           const re = /address 20 is already used on this SenseNET/i;
-          return { f1hit: re.test(f1), f2hit: re.test(f2), f1: f1.slice(0, 300), f2: f2.slice(0, 300) };
+          const rec = /Use different addresses as a matter of best practice/;
+          return { f1hit: re.test(f1), f2hit: re.test(f2), rec1: rec.test(f1), rec2: rec.test(f2),
+                   f1: f1.slice(0, 400), f2: f2.slice(0, 400) };
         }""", ids)
         ok('L-r2-4: networked ASD on a Standalone sheet and the networked sheet are both flagged',
            lr24a.get('f1hit') and lr24a.get('f2hit'), lr24a)
+        ok('I-r3-4: both of those address-clash flags recommend using different addresses as best practice',
+           lr24a.get('rec1') and lr24a.get('rec2'), lr24a)
 
         ids = await fresh(pg)
         await pg.evaluate("""(locs) => {
@@ -1199,14 +1261,54 @@ async def main():
             return ((el.querySelector('.flags-list')||{}).innerText || '') + ' ' + (el.innerText||'');
           };
           const f1 = flags(locs.loc1), f2 = flags(locs.loc2);
+          const rec = /Use different addresses as a matter of best practice/;
           return {
             moduleHit: /Duplicate module address|already used on this SenseNET|address 20/i.test(f1),
             asdHit: /ASD-160.*address 20 is already used on this SenseNET/i.test(f2),
-            f1: f1.slice(0, 300), f2: f2.slice(0, 300)
+            rec1: rec.test(f1), rec2: rec.test(f2),
+            f1: f1.slice(0, 400), f2: f2.slice(0, 400)
           };
         }""", ids)
         ok('L-r2-4: ASD-160 vs ModuLaser module clash is flagged on both sheets',
            lr24b.get('moduleHit') and lr24b.get('asdHit'), lr24b)
+        ok('I-r3-4: the module and ASD-160 flags both recommend using different addresses as best practice',
+           lr24b.get('rec1') and lr24b.get('rec2'), lr24b)
+
+        # I-r3-4: same Standalone sheet — a module and a networked ASD-160 at the same address flag both sides
+        ids = await fresh(pg)
+        await pg.evaluate("""(locs) => {
+          const l2 = document.getElementById('location-'+locs.loc2);
+          l2.querySelectorAll('.addr-scheme-radio').forEach(r => { r.checked = r.value === 'standalone'; });
+          if (typeof onAddrSchemeChange === 'function') onAddrSchemeChange(locs.loc2);
+          let row = l2.querySelector('[data-role=module]');
+          if (!row){ addModuleRow(locs.loc2, 'Standard Display'); row = l2.querySelector('[data-role=module]'); }
+          const addr = row && row.querySelector('.module-address');
+          if (addr){
+            const v = '5';
+            if (![...addr.options].some(o => o.value === v)){
+              const o = document.createElement('option'); o.value = v; o.textContent = v; addr.appendChild(o);
+            }
+            addr.value = v; addr.dataset.desiredValue = v;
+          }
+          asdAddRow(locs.loc2, {kind:'asd160', zone:'ASD-SA', networked:true, address:'5', af:4, cls:'SFD'});
+          document.querySelectorAll('.location').forEach(l => recalcLocation(l.dataset.loc));
+          if (typeof v2Refresh==='function') v2Refresh();
+        }""", ids)
+        await pg.wait_for_timeout(400)
+        ir34 = await pg.evaluate("""(locs) => {
+          const el = document.getElementById('location-'+locs.loc2);
+          const f = ((el.querySelector('.flags-list')||{}).innerText || '') + ' ' + (el.innerText||'');
+          return {
+            moduleHit: /Duplicate module address/i.test(f),
+            asdHit: /ASD-160.*address 5 is already used on this SenseNET/i.test(f),
+            rec: /Use different addresses as a matter of best practice/.test(f),
+            f: f.slice(0, 500)
+          };
+        }""", ids)
+        ok('I-r3-4: on a Standalone sheet, a module and a networked ASD-160 at the same address are both flagged',
+           ir34.get('moduleHit') and ir34.get('asdHit'), ir34)
+        ok('I-r3-4: that same-sheet clash recommends using different addresses as best practice',
+           ir34.get('rec'), ir34)
 
         # L-r2-5: v2Refresh does not steal focus from the page body
         ids = await fresh(pg)
@@ -1493,6 +1595,7 @@ async def main():
 
 
         await run_autosave_reload_tests(pg)
+        await run_ir11_boot_error_autosave_test(pg)
 
         await browser.close()
 
