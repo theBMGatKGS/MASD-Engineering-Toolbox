@@ -8,7 +8,7 @@ document owner; the revision counter increments per distinct change. Generated f
 
 ### 00.04.002 — 2026-11-25
 - Harmonized with Battery Calculator **02.03.002**.
-- **Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal).** Stronger contrast, a seam down the split, and the dark disc kept on light art, in the About lockup, app icons (64 px and up), and print horizontal-light files.  Pills, 16/32 px marks, and one-color files are unchanged.  Print / Export now embeds that light lockup; the previous color `band-bx` data URI was still the 24 Nov v4 raster.  Service-worker cache `masd-toolbox-00-04-002`.  Lineage map: `00.04.002` → `02.03.002`.  The `ml-calc` layer is byte-identical to Calculator 02.03.002.
+- **Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal), and the white/light-blue set on dark and navy headers (25 Nov, 10:10 AM CT).** `tbReportHtml` and other color `band-bx` lockups on the `#102645` header now embed the whiteblue compact horizontal (`print-horizontal-whiteblue-dark-h75.png`) with no white chip.  The black menustrip pill and the Help / About lockup on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  Light-background and print-on-white art are unchanged.  Service-worker cache remains `masd-toolbox-00-04-002`.  Lineage map: `00.04.002` → `02.03.002`.  The `ml-calc` layer is byte-identical to Calculator 02.03.002.
 
 ### 00.04.001 — 2026-11-25
 - Harmonized with Battery Calculator **02.03.001**.

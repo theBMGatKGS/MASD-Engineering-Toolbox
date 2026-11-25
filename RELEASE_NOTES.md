@@ -7,7 +7,7 @@ Release-by-release summaries, newest first. Releases are tagged `vMM.mm.rrr`; it
 
 ## v00.04.002 — Final BRENTRONIX portrait pack (2026-11-25)
 
-Harmonized with Battery Calculator 02.03.002.  The 25 Nov 2026 navy/teal portrait has stronger contrast, a seam down the split, and the dark disc kept on light art.  About, app icons (64 px and up), and print horizontal-light files are updated.  Pills, 16/32 px marks, and one-color art are unchanged.  Print / Export now embeds the new light lockup (the previous color band-bx data URI was still the 24 Nov v4 raster).  Service-worker cache is `masd-toolbox-00-04-002`.
+Harmonized with Battery Calculator 02.03.002.  The 25 Nov 2026 navy/teal portrait has stronger contrast, a seam down the split, and the dark disc kept on light art.  About, app icons (64 px and up), and print horizontal-light files are updated.  Pills, 16/32 px marks, and one-color art are unchanged.  `tbReportHtml` and other color lockups on the `#102645` header now embed the whiteblue compact horizontal with no white chip.  The menustrip pill and Help / About on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  Service-worker cache remains `masd-toolbox-00-04-002`.
 
 ## v00.04.001 — Auto-Save reload keeps MiniLaser and ASD-160 rows (2026-11-25)
 

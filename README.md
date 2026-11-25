@@ -16,7 +16,7 @@ the field-change approval loop with the **ModuLaser MASD Field (Commissioning) R
 
 ### What's new in 00.04.002
 
-Harmonized with Battery Calculator 02.03.002.  Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal): stronger contrast, a seam down the split, and the dark disc kept on light art.  Print / Export now embeds that light lockup.  Pills, 16/32 px marks, and one-color print art are unchanged.  Service-worker cache `masd-toolbox-00-04-002`.
+Harmonized with Battery Calculator 02.03.002.  Final BRENTRONIX portrait pack (25 Nov 2026, navy/teal), and the white/light-blue set on dark and navy headers (25 Nov, 10:10 AM CT).  `tbReportHtml` and other color lockups on the `#102645` header now embed the whiteblue compact horizontal with no white chip.  The menustrip pill and Help / About on the dark panel use the whiteblue art; Help print on white keeps the navy/teal full lockup.  App icons and marks stay navy/teal.  Service-worker cache remains `masd-toolbox-00-04-002`.
 
 ### What's new in 00.04.001
 
